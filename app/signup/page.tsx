@@ -77,6 +77,7 @@ const SignupPage = () => {
 
   // Get auth functions from context
   const { signInWithGoogle } = useAuth();
+  const [merchantrel, setMerchantRel] = useState<string | null>(null);
 
   // Clean up recaptcha on unmount
   useEffect(() => {
@@ -88,6 +89,14 @@ const SignupPage = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const merchantrel = localStorage.getItem("merchantRel");
+    console.log(
+      "this is the saved merchant resl on the localstorage",
+      merchantrel
+    );
+    setMerchantRel(merchantrel);
+  }, []);
   // Handle form input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -97,6 +106,22 @@ const SignupPage = () => {
     });
   };
 
+  const updateMerchantRel = async (userId: string, merchantid: string) => {
+    try {
+      const response = await fetch(
+        `/api/updatemerchantrel?userid=${userId}&merchantid=${merchantid}`,
+
+        { method: "POST" }
+      );
+      const { message } = await response.json();
+      if (message) {
+        toast.message(message);
+      }
+      localStorage.removeItem("merchantRel");
+    } catch (error) {
+      console.log("error while saving the merchant rel");
+    }
+  };
   // Handle email signup
   const handleEmailSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -145,7 +170,10 @@ const SignupPage = () => {
       toggleAzenda(true);
       setVerficationSent(true);
       setEmailUserData(userCredential.user);
-
+      if (merchantrel) {
+        await updateMerchantRel(userCredential.user.uid, merchantrel);
+      }
+      await fetch(`/api/token`, { method: "POST" });
       toast.success("Verification email sent! Please check your inbox.", {
         duration: 10000,
       });
@@ -292,7 +320,10 @@ const SignupPage = () => {
       });
       const result = await response;
       if (result.user) {
-        toggleAzenda(true);
+        if (merchantrel) {
+          await updateMerchantRel(result.user.uid, merchantrel);
+        }
+        await fetch(`/api/token`, { method: "POST" });
         router.push("/verificationdashboard");
       }
       console.log("Phone number verified successfully", result.user);
@@ -330,7 +361,10 @@ const SignupPage = () => {
       console.log("Google sign up successful", result.user);
       // Navigate to verification dashboard after successful Google signup
       if (result) {
-        toggleAzenda(true);
+        if (merchantrel) {
+          await updateMerchantRel(result.user.uid, merchantrel);
+        }
+        await fetch(`/api/token`, { method: "POST" });
         router.push("/verificationdashboard");
       }
     } catch (error: any) {
