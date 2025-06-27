@@ -664,7 +664,6 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col">
-      <Navbar />
 
       {/* Background gradients */}
       <div className="absolute top-0 left-0 w-[500px] h-[300px] bg-gradient-to-br from-[#00ffb4]/40 to-transparent rotate-12 blur-[120px] rounded-[30%] pointer-events-none z-0" />
@@ -1195,7 +1194,6 @@ const LoginPage = () => {
         </div>
       </div>
 
-      <Footer />
     </div>
   );
 };
