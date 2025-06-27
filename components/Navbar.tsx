@@ -33,14 +33,13 @@ const Navbar = () => {
   const data = async () => {
     try {
       const data = await getUserInfo();
-      const isConsumer =
-        typeof data === "object" &&
-        data !== null &&
-        "role" in data &&
-        (data as any).role === "consumer"
-          ? true
-          : false;
-      setIsConsumer(isConsumer);
+      const { role } = data as { role: string };
+      if (role === "consumer") {
+        setIsConsumer(true);
+      }
+      if (role === "merchant") {
+        setIsConsumer(false);
+      }
     } catch (error) {
       console.log("error while extracting the data", (error as Error).message);
     }
