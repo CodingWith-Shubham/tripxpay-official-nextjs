@@ -75,3 +75,65 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+export const getAllBlogs = async (options = {}) => {
+  try {
+      const {
+          page = 1,
+          limit: pageLimit = 9,
+          category = null
+      } = options;
+
+      const dbRef = ref(database);
+      const snapshot = await get(child(dbRef, "blogs"));
+
+      if (!snapshot.exists()) {
+          console.log("No blogs found.");
+          return {
+              blogs: [],
+              total: 0,
+              currentPage: page,
+              totalPages: 0,
+              hasNextPage: false,
+              hasPrevPage: false,
+              hasMore: false
+          };
+      }
+
+      const data = snapshot.val();
+      let blogs = Object.entries(data).map(([id, blog]) => ({
+          id,
+          ...blog
+      }));
+
+      // Sort by creationDate (latest first)
+      blogs.sort((a, b) => new Date(b.creationDate) - new Date(a.creationDate));
+
+      // Filter by category if specified
+      if (category && category !== "all") {
+          blogs = blogs.filter(blog => blog.category === category);
+      }
+
+      // Calculate pagination
+      const total = blogs.length;
+      const totalPages = Math.ceil(total / pageLimit);
+      const startIndex = (page - 1) * pageLimit;
+      const endIndex = startIndex + pageLimit;
+
+      // Get paginated results
+      const paginatedBlogs = blogs.slice(startIndex, endIndex);
+
+      return {
+          blogs: paginatedBlogs,
+          total,
+          currentPage: page,
+          totalPages,
+          hasNextPage: page < totalPages,
+          hasPrevPage: page > 1,
+          hasMore: page < totalPages // For compatibility with your component
+      };
+
+  } catch (error) {
+      console.error("Error fetching blogs:", error);
+      throw new Error("Failed to fetch blogs");
+  }
+};

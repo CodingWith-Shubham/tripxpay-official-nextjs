@@ -5,6 +5,8 @@ import TestimonialsSection from "@/components/TestimonialsSection";
 import CTASection from "@/components/CTASection";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 function HomePage() {
     const router = useRouter();

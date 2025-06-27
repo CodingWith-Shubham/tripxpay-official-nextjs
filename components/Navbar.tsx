@@ -81,7 +81,7 @@ const Navbar = () => {
   const navItems = [
     { text: "HOME", path: "/" },
     { text: "ABOUT", path: "/about" },
-    { text: "BLOGS", path: "/blogs" },
+    { text: "BLOGS", path: "/BlogsPage" },
     { text: "HELP & SUPPORT", path: "/help-support" },
     { text: "PLAN MY TRIP", path: "/planmytrip" },
     {
