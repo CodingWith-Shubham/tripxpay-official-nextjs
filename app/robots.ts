@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: "/verified",
     },
-    sitemap: "tripxpay-official.vercel.app/sitemap.xml",
+    sitemap: "https://tripxpay.in/sitemap.xml",
   };
 }
