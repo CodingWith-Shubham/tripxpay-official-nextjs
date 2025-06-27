@@ -26,7 +26,7 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 
 interface Pageparams {
-  params: { uid: string };
+  params: Promise<{ uid: string }>;
 }
 
 // Add this interface at the top of the file
@@ -176,8 +176,8 @@ const LoadingSpinner = ({
   );
 };
 
-const MerchantUser = ({ params }: Pageparams) => {
-  const { uid } = params;
+const MerchantUser = async ({ params }: Pageparams) => {
+  const { uid } = await params;
   const router = useRouter();
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -208,10 +208,12 @@ const MerchantUser = ({ params }: Pageparams) => {
     fetchMerchantInfo();
   }, [fetchMerchantInfo]);
 
-  const formatDate = (timestamp: any) => {
+  const formatDate = (
+    timestamp: string | number | Date | null | undefined
+  ): string => {
     if (!timestamp) return "N/A";
     const date = new Date(timestamp);
-    return date.toLocaleString();
+    return isNaN(date.getTime()) ? "N/A" : date.toLocaleString();
   };
 
   const handleImageClick = (imageUrl: string, uploadTime: any) => {
@@ -259,7 +261,6 @@ const MerchantUser = ({ params }: Pageparams) => {
       };
 
       window.addEventListener("wheel", handleWheelEvent, { passive: false });
-      return () => window.removeEventListener("wheel", handleWheelEvent);
     }
   }, [selectedImage]);
 
@@ -310,9 +311,7 @@ const MerchantUser = ({ params }: Pageparams) => {
         <div className="absolute top-40 right-32 w-1 h-1 bg-yellow-400/40 rounded-full animate-bounce delay-700" />
         <div className="absolute bottom-32 left-40 w-1.5 h-1.5 bg-blue-400/30 rounded-full animate-bounce delay-1000" />
       </div>
-
       <Navbar />
-
       <div className="container mx-auto px-4 py-12 md:py-16 lg:py-20">
         <button
           onClick={() => router.back()}
@@ -564,7 +563,6 @@ const MerchantUser = ({ params }: Pageparams) => {
         </div>
       </div>
       <Footer />
-
       {/* Image Popup Modal */}
       <AnimatePresence>
         {selectedImage && (

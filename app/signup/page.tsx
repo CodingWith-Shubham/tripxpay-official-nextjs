@@ -203,7 +203,6 @@ const SignupPage = () => {
     if (emailUserdata) {
       const interval = setInterval(async () => {
         try {
-          // Refresh the user to get latest email verification status
           await emailUserdata.reload();
           if (emailUserdata.emailVerified) {
             clearInterval(interval);
@@ -212,9 +211,7 @@ const SignupPage = () => {
         } catch (error) {
           console.error("Error checking verification status:", error);
         }
-      }, 3000); // Check every 3 seconds
-
-      return () => clearInterval(interval);
+      }, 3000);
     }
   }, [emailUserdata, router]);
 

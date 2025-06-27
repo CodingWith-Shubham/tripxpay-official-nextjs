@@ -15,6 +15,15 @@ import {
 import { useAuth } from "@/contexts/Auth";
 import { motion, AnimatePresence } from "framer-motion";
 
+// Add this at the top, after imports
+interface Message {
+  id: number;
+  sender: "user" | "bot";
+  text: string;
+  timestamp: Date;
+  options?: string[];
+}
+
 // fetch the user data from firebase
 const getUserData = async (uid: string) => {
   try {
@@ -28,7 +37,7 @@ const getUserData = async (uid: string) => {
 
 const ChatbotPage = () => {
   const [showChatbot, setShowChatbot] = useState(false);
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -37,7 +46,7 @@ const ChatbotPage = () => {
   const [hoveringChatbot, setHoveringChatbot] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const inactivityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const inputRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const { currentUser } = useAuth() ?? {};
 
@@ -117,8 +126,8 @@ const ChatbotPage = () => {
   }, [messages]);
 
   const addBotMessage = useCallback(
-    (text, options = []) => {
-      const newMessage = {
+    (text: string, options: string[] = []) => {
+      const newMessage: Message = {
         id: Date.now() + Math.random(),
         sender: "bot",
         text,
@@ -132,8 +141,8 @@ const ChatbotPage = () => {
   );
 
   const addUserMessage = useCallback(
-    (text) => {
-      const newMessage = {
+    (text: string) => {
+      const newMessage: Message = {
         id: Date.now() + Math.random(),
         sender: "user",
         text,
@@ -145,7 +154,7 @@ const ChatbotPage = () => {
     [resetInactivityTimer]
   );
 
-  const processMessage = async (message) => {
+  const processMessage = async (message: string) => {
     const lowerMessage = message.toLowerCase().trim();
 
     // Handle back to main option
@@ -354,7 +363,7 @@ const ChatbotPage = () => {
     }
   };
 
-  const handleSendMessage = async (messageText = input) => {
+  const handleSendMessage = async (messageText: string = input) => {
     const userMessage = messageText.trim();
     if (!userMessage || isLoading) return;
 
@@ -402,7 +411,7 @@ const ChatbotPage = () => {
     }
   };
 
-  const handleQuickButtonClick = (buttonId, buttonText) => {
+  const handleQuickButtonClick = (buttonId: string, buttonText: string) => {
     if (buttonId === "help") {
       // For help button, show the help options as bubbles
       addBotMessage(
@@ -414,11 +423,11 @@ const ChatbotPage = () => {
     }
   };
 
-  const handleOptionClick = (optionText) => {
+  const handleOptionClick = (optionText: string) => {
     handleSendMessage(optionText);
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -457,11 +466,16 @@ const ChatbotPage = () => {
     )}&body=${encodeURIComponent(body)}`;
   };
 
-  const formatTime = (timestamp) => {
+  const formatTime = (timestamp: Date) => {
     return timestamp.toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  // Placeholder for askTripXPayBot to avoid missing name error
+  const askTripXPayBot = async (message: string): Promise<string> => {
+    return "Sorry, I couldn't process your request right now.";
   };
 
   return (

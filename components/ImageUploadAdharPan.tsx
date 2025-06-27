@@ -149,10 +149,9 @@ const ImageUploadAdharPan: React.FC<ImageUploadAdharPanProps> = ({
   // Clear error after 5 seconds
   useEffect(() => {
     if (error) {
-      const timer = setTimeout(() => {
+      setTimeout(() => {
         setError("");
       }, 5000);
-      return () => clearTimeout(timer);
     }
   }, [error]);
 

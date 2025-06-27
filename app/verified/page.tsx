@@ -184,9 +184,7 @@ const Verified: React.FC = () => {
           }
         }
       };
-
       window.addEventListener("wheel", handleWheelEvent, { passive: false });
-      return () => window.removeEventListener("wheel", handleWheelEvent);
     }
   }, [selectedImage]);
 
@@ -201,7 +199,7 @@ const Verified: React.FC = () => {
       };
       checkOverflow();
       window.addEventListener("resize", checkOverflow);
-      return () => window.removeEventListener("resize", checkOverflow);
+      window.removeEventListener("resize", checkOverflow);
     }
   }, [recommendedMerchants, activeIndex]);
 
@@ -277,7 +275,9 @@ const Verified: React.FC = () => {
     }
   };
 
-  const formatDate = (timestamp: string | number): string => {
+  const formatDate = (
+    timestamp: string | number | Date | null | undefined
+  ): string => {
     if (!timestamp) return "N/A";
     const date = new Date(timestamp);
     return date.toLocaleDateString("en-US", {

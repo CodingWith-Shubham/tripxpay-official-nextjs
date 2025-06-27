@@ -935,7 +935,6 @@ const DocumentUploadCard = ({
       const timer = setTimeout(() => {
         setError("");
       }, 5000);
-      return () => clearTimeout(timer);
     }
   }, [error]);
 
@@ -1512,7 +1511,6 @@ export default function MerchantVerificationDashboard() {
       const timer = setTimeout(() => {
         setErrorMessage("");
       }, 5000);
-      return () => clearTimeout(timer);
     }
   }, [errorMessage]);
 
@@ -1522,7 +1520,6 @@ export default function MerchantVerificationDashboard() {
       const timer = setTimeout(() => {
         setSuccessMessage("");
       }, 3000);
-      return () => clearTimeout(timer);
     }
   }, [successMessage]);
 

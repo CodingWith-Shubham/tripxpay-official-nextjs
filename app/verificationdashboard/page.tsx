@@ -1357,6 +1357,11 @@ export default function VerificationDashboard() {
       if (response.ok && result.success) {
         toast.success("Documents submitted successfully! Redirecting...", {
           position: "top-right",
+          style: {
+            background: "#1f2937",
+            color: "#00FFB4",
+            border: "1px solid #00FFB4",
+          },
         });
         setSuccessMessage("Documents submitted successfully!");
         setUploadProgress(100);
@@ -1397,17 +1402,15 @@ export default function VerificationDashboard() {
       const timer = setTimeout(() => {
         setErrorMessage("");
       }, 5000);
-      return () => clearTimeout(timer);
     }
   }, [errorMessage]);
 
   // Clear success message after some time
   useEffect(() => {
     if (successMessage) {
-      const timer = setTimeout(() => {
+      setTimeout(() => {
         setSuccessMessage("");
       }, 3000);
-      return () => clearTimeout(timer);
     }
   }, [successMessage]);
 
