@@ -50,6 +50,17 @@ const setSessionCookie = async (user: User) => {
   }
 };
 
+const setConsumer = async () => {
+  try {
+    const response = await fetch(`/api/token`, { method: "POST" });
+    const { message } = await response.json();
+    if (message) {
+      toast.message(message);
+    }
+  } catch (error) {
+    console.log("error while saving the token", (error as Error).message);
+  }
+};
 const LoginPage = () => {
   // Form state
   const [formData, setFormData] = useState<FormData>({
@@ -407,10 +418,11 @@ const LoginPage = () => {
           }
         }
 
-        // Redirect based on user status
         if (data.success) {
+          await setConsumer();
           router.push("/verified");
         } else {
+          await setConsumer();
           router.push(
             `/verificationdashboard?phoneNumber=${formData.phoneNumber}`
           );
@@ -494,13 +506,16 @@ const LoginPage = () => {
       const data = await response.json();
 
       if (data.success) {
+        await setConsumer();
         router.push("/verified");
       } else {
+        await setConsumer();
         router.push("/verificationdashboard");
       }
     } catch (error: any) {
       console.error("Failed to check user status:", error);
       setError(error.message || "Failed to check user status");
+      await setConsumer();
       router.push("/verificationdashboard");
     }
   };
