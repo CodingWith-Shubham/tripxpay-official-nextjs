@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/Auth";
+import Head from "next/head";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -72,6 +73,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <Head>
+        <meta
+          name="google-site-verification"
+          content="WMI1nilSZQof83ds5QfachzCEgEMi4_WH9Sjx_ZrPmI"
+        />
+      </Head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <AuthProvider>{children}</AuthProvider>
         <Toaster
