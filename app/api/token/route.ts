@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
     const tokenPayload = {
       role: "consumer",
     };
-
+    
     // Set cookie
     (await cookies()).set("tripxPay__token", JSON.stringify(tokenPayload), {
       httpOnly: true,
