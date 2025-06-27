@@ -6,12 +6,14 @@ import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { getUserInfo } from "@/action/tokeninfo";
+import { toast } from "sonner";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
   const [isConsumer, setIsConsumer] = useState(false);
+  const [showMerchantLogin, setShowMerchantLogin] = useState(false);
   const auth = useAuth();
   const currentUser = auth?.currentUser;
   const logout = auth?.logout;
@@ -33,17 +35,28 @@ const Navbar = () => {
   const data = async () => {
     try {
       const data = await getUserInfo();
-      const { role } = data as { role: string };
-      if (role === "consumer") {
-        setIsConsumer(true);
-      }
-      if (role === "merchant") {
-        setIsConsumer(false);
+      if (data && data.role) {
+        if (data.role === "consumer") {
+          setIsConsumer(true);
+          setShowMerchantLogin(false);
+        } else if (data.role === "merchant") {
+          setIsConsumer(false);
+          setShowMerchantLogin(false);
+        } else {
+          // If role is not consumer or merchant, show merchant login option
+          setShowMerchantLogin(true);
+        }
+      } else {
+        // No token or no role found, show merchant login option
+        setShowMerchantLogin(true);
       }
     } catch (error) {
       console.log("error while extracting the data", (error as Error).message);
+      // On error, show merchant login option
+      setShowMerchantLogin(true);
     }
   };
+
   useEffect(() => {
     data();
   }, [currentUser]);
@@ -51,6 +64,11 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       if (logout) await logout();
+      const response = await fetch(`/api/logout`, { method: "POST" });
+      const { message } = await response.json();
+      if (message) {
+        toast.message(message);
+      }
       router.push("/");
     } catch (error) {
       console.error("Logout failed:", (error as Error).message);
@@ -71,11 +89,17 @@ const Navbar = () => {
       path: isConsumer ? "/verified" : "/merchantdashboard",
       auth: true,
     },
+    // Conditionally add merchant login item
+    ...(showMerchantLogin && !currentUser
+      ? [
+          {
+            text: "MERCHANT",
+            path: "/merchant-login",
+            auth: false,
+          },
+        ]
+      : []),
   ];
-
-  if (!isConsumer) {
-    navItems.push({ text: "MERCHANT", path: "/merchant-login", auth: false });
-  }
 
   const dropdownItemAnimation = (i: number) => ({
     opacity: 1,
