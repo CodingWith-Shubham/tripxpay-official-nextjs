@@ -20,7 +20,10 @@ const MerchantSignUpPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      toast.error("Fill the fields first", { position: "top-right" });
+      toast.error("Fill the fields first", {
+        position: "top-right",
+        style: { backgroundColor: "#172533", border: "#FBAE04", color: "#fff" },
+      });
       return;
     }
     try {
@@ -32,6 +35,11 @@ const MerchantSignUpPage = () => {
       if (signInMerchant) {
         toast.success("Account created! Redirecting...", {
           position: "top-right",
+          style: {
+            backgroundColor: "#172533",
+            border: "#FBAE04",
+            color: "#fff",
+          },
         });
         router.replace("/merchantverificationdashboard");
       }
@@ -44,9 +52,9 @@ const MerchantSignUpPage = () => {
             duration: 10000,
             position: "top-right",
             style: {
-              background: "#1f2937",
+              backgroundColor: "#172533",
+              border: "#FBAE04",
               color: "#fff",
-              border: "1px solid #00FFB4",
             },
           }
         );
@@ -60,6 +68,11 @@ const MerchantSignUpPage = () => {
         setError("An error occurred. Please try again.");
         toast.error("Signup failed. Please try again.", {
           position: "top-right",
+          style: {
+            backgroundColor: "#172533",
+            border: "#FBAE04",
+            color: "#fff",
+          },
         });
       }
     }

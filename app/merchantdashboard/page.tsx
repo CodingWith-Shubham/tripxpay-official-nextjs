@@ -174,7 +174,7 @@ const MerchantDashboard = () => {
             setHasMore(false);
           }
         } else {
-          if (reset) {   
+          if (reset) {
             setCustomers([]);
           }
           setHasMore(false);
@@ -241,7 +241,10 @@ const MerchantDashboard = () => {
       });
     } catch (error) {
       console.log("error while coppy the merchant link", error);
-      toast.error("unable to copy", { position: "top-right" });
+      toast.error("unable to copy", {
+        position: "top-right",
+        style: { backgroundColor: "#172533", border: "#FBAE04", color: "#fff" },
+      });
     }
   };
 
@@ -300,7 +303,7 @@ const MerchantDashboard = () => {
           if (requests.length < invitesPerPage) {
             setHasMoreInvites(false);
           }
-        } else {  
+        } else {
           if (reset) {
             setConnectionRequests([]);
           }
@@ -341,12 +344,18 @@ const MerchantDashboard = () => {
         }
       );
 
-      toast.success("Request approved!", { position: "top-right" });
+      toast.success("Request approved!", {
+        position: "top-right",
+        style: { backgroundColor: "#172533", border: "#FBAE04", color: "#fff" },
+      });
       fetchConnectionRequests();
       fetchMerchantRelUser();
     } catch (error) {
       console.error("Error approving request:", error);
-      toast.error("Failed to approve request", { position: "top-right" });
+      toast.error("Failed to approve request", {
+        position: "top-right",
+        style: { backgroundColor: "#172533", border: "#FBAE04", color: "#fff" },
+      });
     }
   };
 
@@ -363,7 +372,10 @@ const MerchantDashboard = () => {
       fetchConnectionRequests();
     } catch (error) {
       console.error("Error rejecting request:", error);
-      toast.error("Failed to reject request", { position: "top-right" });
+      toast.error("Failed to reject request", {
+        position: "top-right",
+        style: { backgroundColor: "#172533", border: "#FBAE04", color: "#fff" },
+      });
     }
   };
 

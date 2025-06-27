@@ -32,7 +32,13 @@ export default function RootLayout({
       </Head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <AuthProvider>{children}</AuthProvider>
-        <Toaster />
+        <Toaster
+          style={{
+            backgroundColor: "#172533",
+            border: "#FBAE04",
+            color: "#fff",
+          }}
+        />
       </body>
     </html>
   );

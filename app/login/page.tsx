@@ -55,7 +55,10 @@ const setConsumer = async () => {
     const response = await fetch(`/api/token`, { method: "POST" });
     const { message } = await response.json();
     if (message) {
-      toast.message(message);
+      toast.message(message, {
+        style: { backgroundColor: "#172533", border: "#FBAE04", color: "#fff" },
+        position: "top-right",
+      });
     }
   } catch (error) {
     console.log("error while saving the token", (error as Error).message);
@@ -183,6 +186,11 @@ const LoginPage = () => {
           error: "Failed to sign in with email",
           success: "Successfully signed in with email",
           position: "top-right",
+          style: {
+            backgroundColor: "#172533",
+            border: "#FBAE04",
+            color: "#fff",
+          },
         });
 
         const response = await result;
@@ -229,6 +237,11 @@ const LoginPage = () => {
           error: "Failed to sign in with Google",
           success: "Successfully signed in with Google",
           position: "top-right",
+          style: {
+            backgroundColor: "#172533",
+            border: "#FBAE04",
+            color: "#fff",
+          },
         });
 
         const result = await googleSignInPromise;
@@ -314,6 +327,11 @@ const LoginPage = () => {
           success: "OTP sent successfully!",
           error: "Failed to send OTP",
           position: "top-right",
+          style: {
+            backgroundColor: "#172533",
+            border: "#FBAE04",
+            color: "#fff",
+          },
         });
 
         // Store the confirmation result properly
@@ -385,6 +403,11 @@ const LoginPage = () => {
           error: "Failed to check your status",
           success: "Successfully checked the status",
           position: "top-right",
+          style: {
+            backgroundColor: "#172533",
+            border: "#FBAE04",
+            color: "#fff",
+          },
         });
 
         const response = await checkExistence;
@@ -405,13 +428,24 @@ const LoginPage = () => {
               error: "Failed to update merchant relationship",
               success: "Merchant relationship updated successfully",
               position: "top-right",
+              style: {
+                backgroundColor: "#172533",
+                border: "#FBAE04",
+                color: "#fff",
+              },
             });
 
             await updateResult;
             localStorage.removeItem("merchantRel");
           } catch (error: any) {
             console.error("Failed to update merchantRel:", error);
-            toast.error("Failed to update merchant relationship");
+            toast.error("Failed to update merchant relationship", {
+              style: {
+                backgroundColor: "#172533",
+                border: "#FBAE04",
+                color: "#fff",
+              },
+            });
             // Continue with navigation even if merchantRel update fails
           } finally {
             setInviteLoading(false);
@@ -468,8 +502,9 @@ const LoginPage = () => {
       toast.promise(result, {
         loading: "Updating merchant relationship...",
         error: "Failed to update merchant relationship",
-        success: "Merchant relationship updated successfully",
+        success: "Merchant realation updated successfully",
         position: "top-right",
+        style: { backgroundColor: "#172533", border: "#FBAE04", color: "#fff" },
       });
 
       const response = await result;
@@ -484,7 +519,9 @@ const LoginPage = () => {
       localStorage.removeItem("merchantRel");
     } catch (error: any) {
       console.error("Failed to update merchantRel:", error);
-      toast.error(error.message || "Failed to update merchant relationship");
+      toast.error(error.message || "Failed to update merchant relationship", {
+        style: { backgroundColor: "#172533", border: "#FBAE04", color: "#fff" },
+      });
     } finally {
       setInviteLoading(false);
     }
@@ -500,6 +537,7 @@ const LoginPage = () => {
         error: "Failed to check your status",
         success: "Status verified",
         position: "top-right",
+        style: { backgroundColor: "#172533", border: "#FBAE04", color: "#fff" },
       });
 
       const response = await result;
@@ -541,6 +579,11 @@ const LoginPage = () => {
           error: "Failed to send reset email",
           success: "Password reset email sent! Check your inbox.",
           position: "top-right",
+          style: {
+            backgroundColor: "#172533",
+            border: "#FBAE04",
+            color: "#fff",
+          },
         });
 
         const response = await result;
@@ -567,6 +610,11 @@ const LoginPage = () => {
             error: "failed to verify",
             success: "successfully verified your email",
             position: "top-right",
+            style: {
+              backgroundColor: "#172533",
+              border: "#FBAE04",
+              color: "#fff",
+            },
           });
           const isVeerified = await verifying;
 
@@ -1104,6 +1152,11 @@ const LoginPage = () => {
                             success:
                               "Merchant relationship updated successfully",
                             position: "top-right",
+                            style: {
+                              backgroundColor: "#172533",
+                              border: "#FBAE04",
+                              color: "#fff",
+                            },
                           });
 
                           const updateResponse = await updateResult;

@@ -33,6 +33,7 @@ const MerchantLoginPage = () => {
         error: "Failed to sign in",
         success: "Successfully logged in",
         position: "top-right",
+        style: { backgroundColor: "#172533", border: "#FBAE04", color: "#fff" },
       });
       const signInMerchant = await response;
       const existence = fetch(
@@ -44,6 +45,7 @@ const MerchantLoginPage = () => {
         error: "Failed to get the status",
         success: "Status checked successfully",
         position: "top-right",
+        style: { backgroundColor: "#172533", border: "#FBAE04", color: "#fff" },
       });
       const data = await (await existence).json();
       const isExist = data?.success;

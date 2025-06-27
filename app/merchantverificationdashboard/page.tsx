@@ -1254,9 +1254,9 @@ export default function MerchantVerificationDashboard() {
         toast.success("Verification already submitted", {
           position: "top-right",
           style: {
-            background: "#1f2937",
+            backgroundColor: "#172533",
+            border: "#FBAE04",
             color: "#fff",
-            border: "1px solid #00FFB4",
           },
         });
         router.replace("/merchantdashboard");
@@ -1277,6 +1277,11 @@ export default function MerchantVerificationDashboard() {
         console.error("No preview data provided");
         toast.error("Failed to process image. Please try again.", {
           position: "top-right",
+          style: {
+            backgroundColor: "#172533",
+            border: "#FBAE04",
+            color: "#fff",
+          },
         });
         return;
       }
@@ -1298,9 +1303,9 @@ export default function MerchantVerificationDashboard() {
           {
             position: "top-right",
             style: {
-              background: "#1f2937",
-              color: "#00FFB4",
-              border: "1px solid #00FFB4",
+              backgroundColor: "#172533",
+              border: "#FBAE04",
+              color: "#fff",
             },
           }
         );
@@ -1430,6 +1435,7 @@ export default function MerchantVerificationDashboard() {
         loading: "uploading...",
         success: "uploaded!",
         error: "failed to upload",
+        style: { backgroundColor: "#172533", border: "#FBAE04", color: "#fff" },
       });
 
       const response = await (await upload).json();
