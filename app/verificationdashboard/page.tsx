@@ -1321,7 +1321,7 @@ export default function VerificationDashboard() {
         faceImage: faceAuth.image,
         emailVerified: currentUser?.emailVerified,
         address,
-        profilePicture ,
+        profilePicture,
         phoneNumber,
         profession,
         fatherName,
@@ -1499,7 +1499,7 @@ export default function VerificationDashboard() {
                 Secure Verification
               </span>
             </motion.div>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
               Complete Your{" "}
               <span className="text-gradient-green-to-yellow bg-gradient-to-r from-[#00FFB4] to-[#FFD700] bg-clip-text text-transparent">
                 Verification
