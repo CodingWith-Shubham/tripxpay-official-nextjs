@@ -64,7 +64,7 @@ const setConsumer = async () => {
     console.log("error while saving the token", (error as Error).message);
   }
 };
-const LoginPage = () => {
+const LoginPageContent = () => {
   // Form state
   const [formData, setFormData] = useState<FormData>({
     email: "",
@@ -1202,6 +1202,14 @@ const LoginPage = () => {
         <Footer />
       </div>
     </Suspense>
+  );
+};
+
+const LoginPage = () => {
+  return (
+    <Suspense
+      fallback={<div className="animate-bounce">Loading...</div>}
+    ></Suspense>
   );
 };
 
