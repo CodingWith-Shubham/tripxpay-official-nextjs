@@ -1,6 +1,4 @@
 "use client";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 
 const AboutPage = () => {
@@ -14,7 +12,6 @@ const AboutPage = () => {
       <div className="absolute inset-0 bg-[radial-gradient(#1f2937_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
 
       <div className="relative z-10">
-        <Navbar />
 
         <PageHeader
           title="About TripxPay"
@@ -130,8 +127,6 @@ const AboutPage = () => {
             </div>
           </div>
         </div>
-
-        <Footer />
       </div>
 
       <style jsx global>{`
