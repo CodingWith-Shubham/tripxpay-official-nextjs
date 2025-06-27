@@ -19,6 +19,17 @@ const MerchantLoginPage = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const serMerchant = async () => {
+    try {
+      const merchant = await fetch(`/api/tokenmerchant`, { method: "POST" });
+      const { message } = await merchant.json();
+      if (message) {
+        toast.error(message);
+      }
+    } catch (error) {
+      console.log("failed to set the mercahnt ", error);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,8 +62,10 @@ const MerchantLoginPage = () => {
       const isExist = data?.success;
 
       if (isExist) {
+        await serMerchant();
         router.replace("/merchantdashboard");
       } else {
+        await serMerchant();
         router.replace("/merchantverificationdashboard");
       }
     } catch (errorSignIn: any) {

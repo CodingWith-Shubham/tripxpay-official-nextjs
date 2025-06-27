@@ -17,6 +17,18 @@ const MerchantSignUpPage = () => {
   const [error, setError] = useState("");
   const router = useRouter();
 
+  const serMerchant = async () => {
+    try {
+      const merchant = await fetch(`/api/tokenmerchant`, { method: "POST" });
+      const { message } = await merchant.json();
+      if (message) {
+        toast.error(message);
+      }
+    } catch (error) {
+      console.log("failed to set the mercahnt ", error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
@@ -41,6 +53,7 @@ const MerchantSignUpPage = () => {
             color: "#fff",
           },
         });
+        await serMerchant();
         router.replace("/merchantverificationdashboard");
       }
     } catch (errorSignIn: any) {
@@ -63,6 +76,7 @@ const MerchantSignUpPage = () => {
         toast.success("Redirecting to the merchant signup", {
           position: "top-right",
         });
+        await serMerchant();
         router.replace("/merchantsignup");
       } else {
         setError("An error occurred. Please try again.");
