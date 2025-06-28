@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 
 type FAQ = {
@@ -162,8 +160,6 @@ const HelpSupportPage = () => {
       <div className="absolute inset-0 bg-[radial-gradient(#1f2937_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
 
       <div className="relative z-10">
-        <Navbar />
-
         <PageHeader
           title="Help & Support"
           description="Find answers to common questions or contact our support team for assistance."
@@ -317,8 +313,6 @@ const HelpSupportPage = () => {
             </div>
           </div>
         </div>
-
-        <Footer />
       </div>
     </div>
   );

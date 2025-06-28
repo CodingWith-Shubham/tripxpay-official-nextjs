@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/Auth";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
+import Logo from "@/components/Logo"
 import { getUserInfo } from "@/action/tokeninfo";
 import { toast } from "sonner";
 
@@ -125,7 +125,7 @@ const Navbar = () => {
         <div className="w-full py-3 sm:py-4 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 flex justify-between items-center">
           <div className="flex-shrink-0">
             <Link href="/" className="flex items-center">
-              <Image alt="tripx pay" src="/logo.svg" width={40} height={40} />
+              <Logo/>
             </Link>
           </div>
 

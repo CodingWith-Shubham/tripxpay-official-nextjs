@@ -23,10 +23,8 @@ import {
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
-import { getUserInfo } from "../api/documents-upload-aditya/page";
+import { getUserInfo , deleteUserInfo} from "../../api/documents-upload-aditya/page";
 import { useRouter } from "next/navigation";
-import Navbar from "@/components/Navbar";
-import { deleteUserInfo } from "../api/documents-upload-aditya/page";
 import VerifiedPageSkeletonScreen from "@/components/VerifiedPageSkeletonScreen";
 import PaymentBtn from "@/components/PaymentBtn";
 import { ref, onValue } from "firebase/database";
@@ -35,8 +33,7 @@ import {
   fetchMerchantById,
   getRecommendedMerchants,
   sendConnectionRequest,
-} from "../api/fetchMerchantById/page";
-import Footer from "@/components/Footer";
+} from "../../api/fetchMerchantById/page";
 
 // TypeScript interfaces
 interface UserData {

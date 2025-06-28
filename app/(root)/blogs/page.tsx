@@ -1,8 +1,6 @@
 "use client"
 import { useState, useEffect, useCallback } from "react"
-import { getAllBlogs } from "../Blogs"
-import Navbar from "@/components/Navbar"
-import Footer from "@/components/Footer"
+import { getAllBlogs } from "../../Blogs"
 import PageHeader from "@/components/PageHeader"
 import { RefreshCw, ChevronLeft, ChevronRight } from "lucide-react"
 import Blog from "@/components/Blog"
@@ -118,7 +116,6 @@ const UploadBlogsPage = () => {
 
   return (
       <div className="min-h-screen bg-gray-950 text-white flex flex-col">
-        <Navbar />
 
         {/*page header*/}
         <PageHeader
@@ -259,8 +256,6 @@ const UploadBlogsPage = () => {
             )}
           </div>
         </div>
-
-        <Footer />
       </div>
   )
 }
