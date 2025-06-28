@@ -1,4 +1,4 @@
-"use client";
+"use client"
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/Auth";
 import {
@@ -21,38 +21,55 @@ import {
   ArrowDownRight,
   Wallet,
 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import { getUserInfo } from "../api/documents-upload-aditya/page";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
+import { deleteUserInfo } from "../api/documents-upload-aditya/page";
 import VerifiedPageSkeletonScreen from "@/components/VerifiedPageSkeletonScreen";
 import PaymentBtn from "@/components/PaymentBtn";
 import { ref, onValue } from "firebase/database";
 import { database } from "@/lib/firebase";
+import {
+  fetchMerchantById,
+  getRecommendedMerchants,
+  sendConnectionRequest,
+} from "../api/fetchMerchantById/page";
 import Footer from "@/components/Footer";
-import TypewriterEffect from "@/components/TypewriterEffect";
 
 // TypeScript interfaces
 interface UserData {
   uid: string;
   displayName: string;
   email: string;
-  phoneNumber: string;
   photoUrl?: string;
-  status: "pending" | "approved" | "rejected";
+  phoneNumber?: string;
+  address?: string;
+  profession?: string;
+  fatherName?: string;
+  isEmailVerified: boolean;
   isVerified: boolean;
   creditedAmount: number;
+  submittedAt: any;
+  status: "pending" | "approved" | "rejected";
   merchantRel?: string;
   documents?: {
-    aadhaar?: {
-      downloadURL: string;
-    };
     pan?: {
       downloadURL: string;
+      type: string;
+      uploadedAt: any;
+    };
+    aadhaar?: {
+      downloadURL: string;
+      type: string;
+      uploadedAt: any;
     };
   };
   faceAuth?: {
     downloadURL: string;
+    uploaded: boolean;
+    uploadedAt: any;
   };
 }
 
@@ -62,52 +79,46 @@ interface MerchantData {
   displayName: string;
   photoUrl?: string;
   address?: string;
-  phoneNumber: string;
+  phoneNumber?: string;
 }
 
 interface Transaction {
   id: string;
   type: "credit_push" | "credit_pull";
   description?: string;
-  timestamp: string;
+  timestamp: string | number;
   paidAmount?: number;
   creditedAmount?: number;
   amount?: number;
-  date?: string;
 }
 
 interface ExpandedSections {
   [key: string]: boolean;
 }
 
-const Verified: React.FC = () => {
+const Verified = () => {
   const router = useRouter();
   const { currentUser, logout } = useAuth();
   const [userData, setUserData] = useState<UserData[]>([]);
   const [merchantData, setMerchantData] = useState<MerchantData | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [expandedSections, setExpandedSections] = useState<ExpandedSections>(
-    {}
-  );
-  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [expandedSections, setExpandedSections] = useState<ExpandedSections>({});
+  const [isDeleting, setIsDeleting] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [scale, setScale] = useState<number>(1);
-  const [recommendedMerchants, setRecommendedMerchants] = useState<
-    MerchantData[]
-  >([]);
-  const [showRecommendations, setShowRecommendations] =
-    useState<boolean>(false);
-  const [isHovered, setIsHovered] = useState<boolean>(false);
-  const [activeIndex, setActiveIndex] = useState<number>(0);
+  const [scale, setScale] = useState(1);
+  const [recommendedMerchants, setRecommendedMerchants] = useState<MerchantData[]>([]);
+  const [showRecommendations, setShowRecommendations] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const [hasUserBackendProfile, setHasUserBackendProfile] =
-    useState<boolean>(false);
+  const [hasUserBackendProfile, setHasUserBackendProfile] = useState(false);
   const addressRef = useRef<HTMLSpanElement>(null);
-  const [isAddressOverflowing, setIsAddressOverflowing] =
-    useState<boolean>(false);
+  const [isAddressOverflowing, setIsAddressOverflowing] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const transactionsPerPage = 5;
   const userId = currentUser?.uid;
 
   // Carousel settings
@@ -115,7 +126,7 @@ const Verified: React.FC = () => {
   const mobilePauseDuration = 5000; // 5 seconds pause on mobile
 
   // Start the carousel
-  const startCarousel = (): void => {
+  const startCarousel = () => {
     if (recommendedMerchants.length <= 1) return;
 
     if (intervalRef.current) {
@@ -129,7 +140,7 @@ const Verified: React.FC = () => {
   };
 
   // Stop the carousel
-  const stopCarousel = (): void => {
+  const stopCarousel = () => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
@@ -137,7 +148,7 @@ const Verified: React.FC = () => {
   };
 
   // Handle mobile touch
-  const handleTouchStart = (): void => {
+  const handleTouchStart = () => {
     stopCarousel();
     setTimeout(startCarousel, mobilePauseDuration);
   };
@@ -148,6 +159,13 @@ const Verified: React.FC = () => {
     }
     return () => stopCarousel();
   }, [showRecommendations, recommendedMerchants]);
+
+  useEffect(() => {
+    if (!currentUser?.uid) {
+      router.push("/login");
+      return;
+    }
+  }, [currentUser, router]);
 
   useEffect(() => {
     if (currentUser?.uid) {
@@ -161,7 +179,7 @@ const Verified: React.FC = () => {
   }, [currentUser]);
 
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent): void => {
+    const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         handleCloseImage();
       }
@@ -173,7 +191,7 @@ const Verified: React.FC = () => {
 
   useEffect(() => {
     if (selectedImage) {
-      const handleWheelEvent = (e: WheelEvent): void => {
+      const handleWheelEvent = (e: WheelEvent) => {
         if (e.ctrlKey) {
           e.preventDefault();
           const delta = e.deltaY;
@@ -184,13 +202,15 @@ const Verified: React.FC = () => {
           }
         }
       };
+
       window.addEventListener("wheel", handleWheelEvent, { passive: false });
+      return () => window.removeEventListener("wheel", handleWheelEvent);
     }
   }, [selectedImage]);
 
   useEffect(() => {
     if (addressRef.current) {
-      const checkOverflow = (): void => {
+      const checkOverflow = () => {
         if (addressRef.current) {
           setIsAddressOverflowing(
             addressRef.current.scrollWidth > addressRef.current.clientWidth
@@ -199,7 +219,7 @@ const Verified: React.FC = () => {
       };
       checkOverflow();
       window.addEventListener("resize", checkOverflow);
-      window.removeEventListener("resize", checkOverflow);
+      return () => window.removeEventListener("resize", checkOverflow);
     }
   }, [recommendedMerchants, activeIndex]);
 
@@ -211,23 +231,17 @@ const Verified: React.FC = () => {
     const unsubscribe = onValue(transactionsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        const parsedTransactions: Transaction[] = Object.entries(data).map(
-          ([key, value]: [string, any]) => ({
-            id: key,
-            ...value,
-          })
-        );
+        const parsedTransactions: Transaction[] = Object.entries(data).map(([key, value]: [string, any]) => ({
+          id: key,
+          ...value,
+        }));
 
-        // Sort by date (assuming `date` is in a format like "2025-06-12")
+        // Sort by timestamp in descending order
         parsedTransactions.sort(
-          (a, b) =>
-            new Date(b.date || b.timestamp).getTime() -
-            new Date(a.date || a.timestamp).getTime()
+          (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         );
 
-        setTransactions(
-          Array.isArray(parsedTransactions) ? parsedTransactions : []
-        );
+        setTransactions(parsedTransactions);
       } else {
         setTransactions([]);
       }
@@ -236,9 +250,7 @@ const Verified: React.FC = () => {
     return () => unsubscribe(); // cleanup listener
   }, [userId]);
 
-  const getVerificationStatus = (
-    user: UserData
-  ): "unknown" | "pending" | "verified" | "rejected" => {
+  const getVerificationStatus = (user: UserData): string => {
     if (!user) return "unknown";
     if (user.status === "pending" && user.isVerified === false)
       return "pending";
@@ -249,16 +261,16 @@ const Verified: React.FC = () => {
     return "unknown";
   };
 
-  const getStatusIcon = (status: string): React.ReactNode => {
+  const getStatusIcon = (status: string) => {
     switch (status) {
       case "verified":
-        return <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />;
+        return <Check className="w-6 h-6 text-green-500" />;
       case "rejected":
-        return <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />;
+        return <XCircle className="w-6 h-6 text-red-500" />;
       case "pending":
-        return <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500" />;
+        return <Clock className="w-6 h-6 text-yellow-500" />;
       default:
-        return <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />;
+        return <AlertCircle className="w-6 h-6 text-gray-500" />;
     }
   };
 
@@ -275,9 +287,7 @@ const Verified: React.FC = () => {
     }
   };
 
-  const formatDate = (
-    timestamp: string | number | Date | null | undefined
-  ): string => {
+  const formatDate = (timestamp: string | number): string => {
     if (!timestamp) return "N/A";
     const date = new Date(timestamp);
     return date.toLocaleDateString("en-US", {
@@ -287,7 +297,7 @@ const Verified: React.FC = () => {
     });
   };
 
-  const toggleSection = (section: string): void => {
+  const toggleSection = (section: string) => {
     setExpandedSections((prev) => ({
       ...prev,
       [section]: !prev[section],
@@ -301,14 +311,10 @@ const Verified: React.FC = () => {
 
   useEffect(() => {
     if (userProfile?.merchantRel) {
-      const fetchMerchant = async (): Promise<void> => {
+      const fetchMerchant = async () => {
         try {
-          const response = await fetch(
-            `/api/fetchbymerchantdata?merchantid=${userProfile.merchantRel}`,
-            { method: "POST" }
-          );
-          const { data } = await response.json();
-          setMerchantData(data);
+          const merchant = await fetchMerchantById(userProfile.merchantRel);
+          setMerchantData(merchant);
         } catch (error) {
           console.error("Error fetching merchant data:", error);
         }
@@ -319,33 +325,23 @@ const Verified: React.FC = () => {
 
   useEffect(() => {
     if (!userProfile?.merchantRel && hasUserBackendProfile) {
-      const fetchRecommendations = async (): Promise<void> => {
-        const response = await fetch(`/api/merchantrecommendation?limit=${5}`, {
-          method: "POST",
-        });
-        const { merchants } = await response.json();
-        console.log({ merchants });
-
-        setRecommendedMerchants(Array.isArray(merchants) ? merchants : []);
+      const fetchRecommendations = async () => {
+        const merchants = await getRecommendedMerchants();
+        setRecommendedMerchants(merchants);
         setShowRecommendations(true);
       };
       fetchRecommendations();
     }
   }, [userProfile, hasUserBackendProfile]);
 
-  const handleLogoutAndDeleteData = async (): Promise<void> => {
+  const handleLogoutAndDeleteData = async () => {
     try {
       setIsDeleting(true);
 
       if (currentUser?.uid) {
-        const response = await fetch(
-          `/api/deleteuserinfo?uid=${currentUser.uid}`,
-          { method: "POST" }
-        );
+        const result = await deleteUserInfo(currentUser.uid);
 
-        const result = await response.json();
-
-        if (result.success) {
+        if (result?.success) {
           localStorage.removeItem(`verification_status_${currentUser.uid}`);
           localStorage.removeItem("doc_pan");
           localStorage.removeItem("doc_aadhaar");
@@ -353,22 +349,22 @@ const Verified: React.FC = () => {
           await logout();
           console.log("User data and localStorage items deleted successfully");
         } else {
-          console.error("Failed to delete user data:", result.error);
+          console.error("Failed to delete user data:", result?.error);
         }
       }
 
       setTimeout(() => {
-        router.replace("/");
+        router.push("/");
       }, 1500);
     } catch (error) {
       console.error("Logout failed:", (error as Error).message);
-      router.replace("/");
+      router.push("/");
     } finally {
       setIsDeleting(false);
     }
   };
 
-  const fetchUserDetails = async (): Promise<void> => {
+  const fetchUserDetails = async () => {
     if (!currentUser?.uid) {
       console.error("currentUser or UID is not available.");
       setError("Authentication required.");
@@ -381,13 +377,10 @@ const Verified: React.FC = () => {
       setError(null);
       setHasUserBackendProfile(false);
 
-      const result = await fetch(`/api/getuserdata?uid=${currentUser?.uid}`, {
-        method: "POST",
-      });
-      const { data } = await result.json();
+      const response = await getUserInfo(currentUser.uid);
 
-      if (data && Object.keys(data).length > 0) {
-        setUserData([data as UserData]);
+      if (response && Object.keys(response).length > 0) {
+        setUserData([response as UserData]);
         setHasUserBackendProfile(true);
       } else {
         setUserData([]);
@@ -406,7 +399,7 @@ const Verified: React.FC = () => {
     }
   };
 
-  const handleReapply = (): void => {
+  const handleReapply = () => {
     if (currentUser?.uid) {
       localStorage.removeItem(`verification_data_${currentUser.uid}`);
       localStorage.removeItem(`verification_status_${currentUser.uid}`);
@@ -421,28 +414,28 @@ const Verified: React.FC = () => {
       position: "top-right",
     });
 
-    router.replace("/verificationdashboard");
+    router.push("/verificationdashboard");
   };
 
-  const handleImageClick = (imageUrl: string): void => {
+  const handleImageClick = (imageUrl: string) => {
     setSelectedImage(imageUrl);
     setScale(1);
   };
 
-  const handleCloseImage = (): void => {
+  const handleCloseImage = () => {
     setSelectedImage(null);
     setScale(1);
   };
 
-  const handleZoomIn = (): void => {
+  const handleZoomIn = () => {
     setScale((prev) => Math.min(prev + 0.25, 3));
   };
 
-  const handleZoomOut = (): void => {
+  const handleZoomOut = () => {
     setScale((prev) => Math.max(prev - 0.25, 0.5));
   };
 
-  const handleWheel = (e: React.WheelEvent): void => {
+  const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     const delta = e.deltaY;
     if (delta < 0) {
@@ -452,33 +445,30 @@ const Verified: React.FC = () => {
     }
   };
 
-  const handleConnectionRequest = async (merchantId: string): Promise<void> => {
+  const handleConnectionRequest = async (merchantId: string) => {
     try {
       setLoading(true);
-      const responseconnection = fetch(`/api/sendrequest`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const responseconnection = sendConnectionRequest(
+        merchantId,
+        currentUser?.uid || "",
+        {
+          displayName: userProfile?.displayName || "",
+          email: userProfile?.email || "",
+          phoneNumber: userProfile?.phoneNumber || "",
+        }
+      );
+
+      toast.promise(
+        responseconnection,
+        {
+          loading: "sending connection request",
+          error: "connection request failed",
+          success: "connection request sent!",
         },
-        body: JSON.stringify({
-          merchantId,
-          userId: currentUser!.uid,
-          userdata: {
-            displayName: userProfile!.displayName,
-            email: userProfile!.email,
-            phoneNumber: userProfile!.phoneNumber,
-          },
-        }),
-      });
-      toast.promise(responseconnection, {
-        loading: "sending connection request",
-        error: "connection request failed",
-        success: "connection request sent!",
-        position: "top-right",
-      });
-      const response = await responseconnection;
-      const success = await response.json();
-      if (success.success) {
+        { position: "top-right" }
+      );
+      const success = await responseconnection;
+      if (success) {
         setShowRecommendations(false);
       } else {
         toast.error("Failed to send request", { position: "top-right" });
@@ -520,6 +510,23 @@ const Verified: React.FC = () => {
     );
   }
 
+  // Pagination logic for transactions
+  const indexOfLastTransaction = currentPage * transactionsPerPage;
+  const indexOfFirstTransaction = indexOfLastTransaction - transactionsPerPage;
+  const currentTransactions = transactions.slice(
+    indexOfFirstTransaction,
+    indexOfLastTransaction
+  );
+  const totalPages = Math.ceil(transactions.length / transactionsPerPage);
+
+  const handlePrevPage = () => {
+    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages));
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 overflow-hidden">
       <Navbar />
@@ -529,53 +536,48 @@ const Verified: React.FC = () => {
         <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-gray-500/20 rounded-full filter blur-3xl" />
       </div>
 
-      <main className="relative z-10 py-6 sm:py-8 md:py-12 lg:py-20 px-4 sm:px-6 lg:px-8">
+      <main className="relative z-10 py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           <motion.h1
-            className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-white mb-6 md:mb-8"
+            className="text-4xl font-bold text-center text-white mb-8"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <TypewriterEffect
-              texts={["Welcome", userProfile?.displayName || "User"]}
-              className="inline-block"
-            />
+            Dashboard
           </motion.h1>
-
           {merchantData && (
             <motion.div
-              className="bg-gray-900/50 border border-gray-800 mb-4 sm:mb-5 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 shadow-2xl"
+              className="bg-gray-900/50 border border-gray-800 mb-5 backdrop-blur-sm rounded-2xl p-6 shadow-2xl"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
             >
-              <h3 className="text-base sm:text-lg md:text-xl ml-20 font-semibold text-[#FAB609] mb-3 md:mb-4">
+              <h3 className="text-xl font-semibold text-[#FAB609] mb-4">
                 Merchant Information
               </h3>
-              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 md:gap-6">
-                <div className="relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-2 border-[#5EEAD4] flex-shrink-0">
+              <div className="flex items-start gap-6">
+                <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-[#5EEAD4]">
                   <img
                     src={merchantData.photoUrl || "/logo.svg"}
                     alt={merchantData.companyName || "Merchant"}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = "/default-merchant.png";
+                      const target = e.target as HTMLImageElement;
+                      target.onerror = null;
+                      target.src = "/default-merchant.png";
                     }}
                   />
                 </div>
-                <div className="flex-1 text-center sm:text-left">
-                  <h4 className="text-sm sm:text-base md:text-lg font-bold text-white">
+                <div className="flex-1">
+                  <h4 className="text-lg font-bold text-white">
                     {merchantData.companyName}
                   </h4>
-                  <p className="text-gray-400 text-xs sm:text-sm md:text-base">
-                    {merchantData.displayName}
-                  </p>
-                  <div className="mt-2 text-xs sm:text-sm text-gray-400">
+                  <p className="text-gray-400">{merchantData.displayName}</p>
+                  <div className="mt-2 text-sm text-gray-400">
                     <p>Merchant ID: {merchantData.id}</p>
                     {merchantData.address && (
-                      <p className="mt-1 break-words">{merchantData.address}</p>
+                      <p className="mt-1">{merchantData.address}</p>
                     )}
                   </div>
                 </div>
@@ -586,14 +588,14 @@ const Verified: React.FC = () => {
           {/* Merchant Recommendations Carousel */}
           {showRecommendations && (
             <motion.div
-              className="bg-gray-900/50 border mb-4 sm:mb-5 border-gray-800 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 shadow-2xl"
+              className="bg-gray-900/50 border mb-5 border-gray-800 backdrop-blur-sm rounded-2xl p-6 shadow-2xl"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
             >
-              <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
-                <User className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-[#00ffb4]" />
-                <h3 className="text-base sm:text-lg md:text-xl font-semibold text-white">
+              <div className="flex items-center gap-4 mb-6">
+                <User className="w-6 h-6 text-[#00ffb4]" />
+                <h3 className="text-xl font-semibold text-white">
                   Recommended Merchants
                 </h3>
               </div>
@@ -611,11 +613,11 @@ const Verified: React.FC = () => {
                 onTouchStart={handleTouchStart}
                 ref={carouselRef}
               >
-                <div className="relative h-64 sm:h-72 md:h-80 w-full">
-                  {(recommendedMerchants || []).map((merchant, index) => (
+                <div className="relative h-72 md:h-72 w-full">
+                  {recommendedMerchants.map((merchant, index) => (
                     <motion.div
                       key={merchant.id}
-                      className={`absolute inset-0 w-full h-full p-1 sm:p-2 ${
+                      className={`absolute inset-0 w-full h-full p-2 ${
                         index === activeIndex ? "z-10" : "z-0"
                       }`}
                       initial={{ opacity: 0, x: index === 0 ? 0 : 300 }}
@@ -631,9 +633,9 @@ const Verified: React.FC = () => {
                       }}
                       transition={{ duration: 0.5, ease: "easeInOut" }}
                     >
-                      <div className="bg-gray-800/80 backdrop-blur-lg overflow-hidden rounded-lg border border-gray-700 h-full w-full p-3 sm:p-4 md:p-6 flex flex-col items-center justify-between">
-                        <div className="flex flex-col items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                          <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full bg-gray-700 overflow-hidden flex-shrink-0">
+                      <div className="bg-gray-800/80 backdrop-blur-lg overflow-hidden rounded-lg border border-gray-700 h-full w-full p-4 flex flex-col items-center justify-center">
+                        <div className="flex flex-col items-center gap-3 mb-3">
+                          <div className="w-20 h-20 rounded-full bg-gray-700 overflow-hidden">
                             <img
                               src={merchant.photoUrl || "/logo.svg"}
                               alt={merchant.companyName}
@@ -641,47 +643,37 @@ const Verified: React.FC = () => {
                             />
                           </div>
                           <div className="text-center">
-                            <h4 className="font-bold text-sm sm:text-base md:text-lg lg:text-xl text-white line-clamp-1">
+                            <h4 className="font-bold text-xl text-white">
                               {merchant.companyName}
                             </h4>
-                            <p className="text-xs sm:text-sm text-gray-400 line-clamp-1">
+                            <p className="text-sm text-gray-400">
                               {merchant.displayName}
                             </p>
                           </div>
                         </div>
 
-                        <div className="mb-3 sm:mb-4 flex-1 flex flex-col items-center justify-center w-full">
-                          <div className="text-xs sm:text-sm text-gray-300 text-center w-full">
-                            <div className="mb-2 w-full">
-                              <span className="font-medium text-gray-200">
-                                Address:
-                              </span>
-                              <div className="overflow-hidden mt-1">
-                                <span
-                                  ref={addressRef}
-                                  className={`block text-xs sm:text-sm break-words ${
-                                    isAddressOverflowing ? "marquee-rtl" : ""
-                                  }`}
-                                >
-                                  {merchant.address}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="w-full">
-                              <span className="font-medium text-gray-200">
-                                Phone:
-                              </span>
-                              <span className="ml-1 text-xs sm:text-sm break-all">
-                                {merchant.phoneNumber}
+                        <div className="mb-4 flex-1 flex flex-col items-center">
+                          <p className="text-base text-gray-300 text-center">
+                            <div className="overflow-hidden">
+                              <span
+                                ref={addressRef}
+                                className={`block ${
+                                  isAddressOverflowing ? "marquee-rtl" : ""
+                                }`}
+                              >
+                                Address: {merchant.address}
                               </span>
                             </div>
-                          </div>
+                            <span className="block">
+                              Phone: {merchant.phoneNumber}
+                            </span>
+                          </p>
                         </div>
 
                         <button
                           onClick={() => handleConnectionRequest(merchant.id)}
                           disabled={loading}
-                          className="w-full px-3 sm:px-4 py-0.5 bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 rounded-lg border border-teal-500/20 transition-colors text-xs sm:text-sm md:text-base font-medium"
+                          className="mt-auto px-4 py-2 bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 rounded-lg border border-teal-500/20 transition-colors w-full"
                         >
                           {loading ? "Sending..." : "Request Connection"}
                         </button>
@@ -691,8 +683,8 @@ const Verified: React.FC = () => {
                 </div>
 
                 {/* Navigation dots */}
-                <div className="flex justify-center mt-3 sm:mt-4 space-x-1 sm:space-x-2">
-                  {(recommendedMerchants || []).map((_, index) => (
+                <div className="flex justify-center mt-4 space-x-2">
+                  {recommendedMerchants.map((_, index) => (
                     <button
                       key={index}
                       onClick={() => {
@@ -700,9 +692,9 @@ const Verified: React.FC = () => {
                         stopCarousel();
                         setTimeout(startCarousel, mobilePauseDuration);
                       }}
-                      className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all ${
+                      className={`w-2 h-2 rounded-full transition-all ${
                         index === activeIndex
-                          ? "bg-teal-500 w-3 sm:w-4"
+                          ? "bg-teal-500 w-4"
                           : "bg-gray-600"
                       }`}
                       aria-label={`Go to slide ${index + 1}`}
@@ -718,13 +710,13 @@ const Verified: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="space-y-4 sm:space-y-5 md:space-y-6"
+              className="space-y-6"
             >
               {/* User Profile Section */}
-              <div className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 shadow-2xl">
-                <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5 md:gap-6 mb-4 sm:mb-5 md:mb-6">
+              <div className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-2xl">
+                <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 mb-4 sm:mb-6">
                   <motion.div
-                    className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-4 border-[#5EEAD4] shadow-lg flex-shrink-0"
+                    className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-[#5EEAD4] shadow-lg"
                     whileHover={{ scale: 1.05 }}
                     transition={{ type: "spring", stiffness: 300 }}
                   >
@@ -733,30 +725,29 @@ const Verified: React.FC = () => {
                       alt={userProfile.displayName || "User"}
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        e.currentTarget.onerror = null;
-                        e.currentTarget.src = "/logo.svg";
+                        const target = e.target as HTMLImageElement;
+                        target.onerror = null;
+                        target.src = "/logo.svg";
                       }}
                     />
                   </motion.div>
 
                   <div className="flex-1 text-center sm:text-left">
-                    <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-[#FAB609] mb-1 sm:mb-2">
+                    <h2 className="text-xl sm:text-2xl font-bold text-[#FAB609] mb-1 sm:mb-2">
                       {userProfile.displayName}
                     </h2>
-                    <div className="flex items-center justify-center sm:justify-start gap-2 text-xs sm:text-sm md:text-base text-gray-400 mb-2 sm:mb-3">
-                      <Mail className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                      <span className="break-all">
-                        {userProfile.email || "N/A"}
-                      </span>
+                    <div className="flex items-center justify-center sm:justify-start gap-2 text-sm sm:text-base text-gray-400 mb-2 sm:mb-3">
+                      <Mail className="w-4 h-4" />
+                      <span>{userProfile.email || "N/A"}</span>
                     </div>
                     <div className="flex items-center justify-center sm:justify-start gap-2 text-xs sm:text-sm text-gray-400">
-                      <User className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                      <span className="break-all">UID: {userProfile.uid}</span>
+                      <User className="w-4 h-4" />
+                      <span>UID: {userProfile.uid}</span>
                     </div>
                   </div>
 
                   <motion.div
-                    className={`inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full border-2 flex-shrink-0 ${
+                    className={`inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1 sm:py-2 rounded-full border-2 ${
                       currentStatus === "verified"
                         ? "bg-green-700/20 border-green-500 text-green-400"
                         : currentStatus === "rejected"
@@ -772,7 +763,7 @@ const Verified: React.FC = () => {
                         {currentStatus.charAt(0).toUpperCase() +
                           currentStatus.slice(1)}
                       </div>
-                      <div className="text-[10px] sm:text-xs opacity-80 hidden sm:block">
+                      <div className="text-[10px] sm:text-xs opacity-80">
                         {getStatusText(currentStatus)}
                       </div>
                     </div>
@@ -783,18 +774,18 @@ const Verified: React.FC = () => {
               {/* Conditional rendering based on verification status */}
               {currentStatus !== "verified" ? (
                 <motion.div
-                  className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 shadow-2xl mt-4"
+                  className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-2xl mt-4"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.4 }}
                 >
                   <button
                     onClick={() => toggleSection("documents")}
-                    className="w-full flex items-center justify-between text-left hover:bg-gray-800/50 p-2 sm:p-3 md:p-4 rounded-lg transition-all duration-200"
+                    className="w-full flex items-center justify-between text-left hover:bg-gray-800/50 p-3 sm:p-4 rounded-lg transition-all duration-200"
                   >
-                    <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
-                      <FileText className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-[#00ffb4]" />
-                      <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-white">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-[#00ffb4]" />
+                      <h3 className="text-lg sm:text-xl font-semibold text-white">
                         Document Verification
                       </h3>
                     </div>
@@ -802,7 +793,7 @@ const Verified: React.FC = () => {
                       animate={{ rotate: expandedSections.documents ? 90 : 0 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-gray-400" />
+                      <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400" />
                     </motion.div>
                   </button>
 
@@ -813,40 +804,40 @@ const Verified: React.FC = () => {
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
                         transition={{ duration: 0.3 }}
-                        className="mt-2 sm:mt-3 space-y-2 sm:space-y-3 md:space-y-4"
+                        className="mt-3 sm:mt-4 space-y-3 sm:space-y-4"
                       >
                         {/* Aadhaar Card */}
                         <motion.div
-                          className="bg-gray-800/50 border border-gray-700 p-2 sm:p-3 md:p-4 rounded-xl"
+                          className="bg-gray-800/50 border border-gray-700 p-3 sm:p-4 rounded-xl"
                           whileHover={{ scale: 1.02 }}
                           transition={{ type: "spring", stiffness: 300 }}
                         >
                           <div className="flex items-center justify-between mb-2 sm:mb-3">
-                            <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
+                            <div className="flex items-center gap-2 sm:gap-3">
                               <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
-                              <span className="text-white text-xs sm:text-sm md:text-base font-medium">
+                              <span className="text-white text-sm sm:text-base font-medium">
                                 Aadhaar Card
                               </span>
                             </div>
                             <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
                           </div>
-                          <div className="mt-1 sm:mt-2 md:mt-3 flex flex-col items-center">
+                          <div className="mt-2 sm:mt-3 flex flex-col items-center">
                             <motion.div
                               whileHover={{ scale: 1.02 }}
                               className="cursor-pointer"
-                              onClick={() =>
-                                handleImageClick(
-                                  userProfile.documents?.aadhaar?.downloadURL ||
-                                    ""
-                                )
-                              }
+                              onClick={() => {
+                                const url = userProfile.documents?.aadhaar?.downloadURL;
+                                if (url) {
+                                  handleImageClick(url);
+                                }
+                              }}
                             >
                               <img
                                 src={
                                   userProfile.documents?.aadhaar?.downloadURL
                                 }
                                 alt="Aadhaar Document"
-                                className="w-full max-w-xs h-32 sm:h-40 md:h-48 object-contain rounded-lg border border-gray-600 hover:border-[#00ffb4] transition-colors"
+                                className="w-full max-w-xs sm:max-w-md h-40 sm:h-48 object-contain rounded-lg border border-gray-600 hover:border-[#00ffb4] transition-colors"
                               />
                             </motion.div>
                           </div>
@@ -854,14 +845,14 @@ const Verified: React.FC = () => {
 
                         {/* PAN Card */}
                         <motion.div
-                          className="bg-gray-800/50 border border-gray-700 p-2 sm:p-3 md:p-4 rounded-xl"
+                          className="bg-gray-800/50 border border-gray-700 p-3 sm:p-4 rounded-xl"
                           whileHover={{ scale: 1.02 }}
                           transition={{ type: "spring", stiffness: 300 }}
                         >
                           <div className="flex items-center justify-between mb-2 sm:mb-3">
-                            <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
+                            <div className="flex items-center gap-2 sm:gap-3">
                               <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
-                              <span className="text-white text-xs sm:text-sm md:text-base font-medium">
+                              <span className="text-white text-sm sm:text-base font-medium">
                                 PAN Card
                               </span>
                             </div>
@@ -871,20 +862,21 @@ const Verified: React.FC = () => {
                               <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
                             )}
                           </div>
-                          <div className="mt-1 sm:mt-2 md:mt-3 flex flex-col items-center">
+                          <div className="mt-2 sm:mt-3 flex flex-col items-center">
                             <motion.div
                               whileHover={{ scale: 1.02 }}
                               className="cursor-pointer"
-                              onClick={() =>
-                                handleImageClick(
-                                  userProfile.documents?.pan?.downloadURL || ""
-                                )
-                              }
+                              onClick={() => {
+                                const url = userProfile.documents?.pan?.downloadURL;
+                                if (url) {
+                                  handleImageClick(url);
+                                }
+                              }}
                             >
                               <img
                                 src={userProfile.documents?.pan?.downloadURL}
                                 alt="PAN Document"
-                                className="w-full max-w-xs h-32 sm:h-40 md:h-48 object-contain rounded-lg border border-gray-600 hover:border-[#00ffb4] transition-colors"
+                                className="w-full max-w-xs sm:max-w-md h-40 sm:h-48 object-contain rounded-lg border border-gray-600 hover:border-[#00ffb4] transition-colors"
                               />
                             </motion.div>
                           </div>
@@ -892,14 +884,14 @@ const Verified: React.FC = () => {
 
                         {/* Face Verification */}
                         <motion.div
-                          className="bg-gray-800/50 border border-gray-700 p-2 sm:p-3 md:p-4 rounded-xl"
+                          className="bg-gray-800/50 border border-gray-700 p-3 sm:p-4 rounded-xl"
                           whileHover={{ scale: 1.02 }}
                           transition={{ type: "spring", stiffness: 300 }}
                         >
                           <div className="flex items-center justify-between mb-2 sm:mb-3">
-                            <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
+                            <div className="flex items-center gap-2 sm:gap-3">
                               <Camera className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
-                              <span className="text-white text-xs sm:text-sm md:text-base font-medium">
+                              <span className="text-white text-sm sm:text-base font-medium">
                                 Face Verification
                               </span>
                             </div>
@@ -909,20 +901,21 @@ const Verified: React.FC = () => {
                               <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
                             )}
                           </div>
-                          <div className="mt-1 sm:mt-2 md:mt-3 flex flex-col items-center">
+                          <div className="mt-2 sm:mt-3 flex flex-col items-center">
                             <motion.div
                               whileHover={{ scale: 1.02 }}
                               className="cursor-pointer"
-                              onClick={() =>
-                                handleImageClick(
-                                  userProfile.faceAuth?.downloadURL || ""
-                                )
-                              }
+                              onClick={() => {
+                                const url = userProfile.faceAuth?.downloadURL;
+                                if (url) {
+                                  handleImageClick(url);
+                                }
+                              }}
                             >
                               <img
                                 src={userProfile.faceAuth?.downloadURL}
                                 alt="Face Verification"
-                                className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 object-cover rounded-full border border-gray-600 hover:border-[#00ffb4] transition-colors"
+                                className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-full border border-gray-600 hover:border-[#00ffb4] transition-colors"
                               />
                             </motion.div>
                           </div>
@@ -934,107 +927,131 @@ const Verified: React.FC = () => {
               ) : (
                 <>
                   <motion.div
-                    className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-2xl p-4 md:p-6 shadow-2xl"
+                    className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-2xl p-6 shadow-2xl flex justify-between items-center"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.4 }}
                   >
-                    <div className="flex flex-col lg:flex-row justify-between items-center gap-6 lg:gap-12">
-                      {/* Credit Amount Section */}
-                      <div className="w-full lg:w-auto text-center lg:text-left">
-                        <h3 className="text-lg md:text-xl font-semibold text-white mb-2 flex items-center justify-center lg:justify-start">
-                          Credit Spend
-                        </h3>
-                        <p className="text-4xl md:text-5xl lg:text-7xl font-bold text-[#FAB609] mb-4 lg:mb-8">
-                          {`₹${String(userProfile?.creditedAmount)}`}
-                        </p>
-                      </div>
-
-                      {/* Buttons Section */}
-                      <div className="w-full lg:w-auto">
-                        <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 min-w-0 lg:min-w-[300px]">
-                          <motion.button
-                            className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg bg-[#0193C0]/50 hover:bg-[#0193C0]/90 transition-all duration-300 text-sm md:text-base font-medium text-white"
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                          >
-                            Pay Now
-                          </motion.button>
-                          <motion.button
-                            className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg bg-[#0193C0]/50 hover:bg-[#0193C0]/90 transition-all duration-300 text-sm md:text-base font-medium text-white"
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                          >
-                            EMI
-                          </motion.button>
-                        </div>
-                      </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-white mb-2">
+                        Credit Spend
+                      </h3>
+                      <p className="text-7xl font-bold text-[#FAB609]">
+                        {`₹${String(userProfile?.creditedAmount)}`}
+                      </p>
+                    </div>
+                    <div className="flex">
+                      <PaymentBtn 
+                        currentUserId={currentUser?.uid} 
+                        onCreditUpdate={(newCredit: number) => {
+                          setUserData(prev => {
+                            if (prev.length > 0 && prev[0]) {
+                              return [{
+                                ...prev[0],
+                                creditedAmount: newCredit
+                              } as UserData];
+                            }
+                            return prev;
+                          });
+                        }} 
+                      />
+                      <motion.button
+                        className="mx-2 border w-fit h-fit p-3 rounded-xl px-8 bg-[#0193C0]/50 hover:bg-[#0193C0]/90 transition-all duration-300"
+                      >
+                        EMI
+                      </motion.button>
                     </div>
                   </motion.div>
+
                   {/* Transaction History */}
                   <motion.div
-                    className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-xl md:rounded-2xl p-3 md:p-4 lg:p-6 shadow-2xl"
+                    className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 shadow-2xl"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.6 }}
                   >
-                    <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4 lg:mb-6">
-                      <Wallet className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-[#00ffb4]" />
-                      <h3 className="text-base md:text-lg lg:text-xl font-semibold text-white">
+                    <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
+                      <Wallet className="w-5 h-5 md:w-6 md:h-6 text-[#00ffb4]" />
+                      <h3 className="text-lg md:text-xl font-semibold text-white">
                         Latest Transactions
                       </h3>
                     </div>
                     <div className="space-y-2 md:space-y-3">
-                      {(transactions || []).map((transaction, index) => (
-                        <motion.div
-                          key={transaction.id || index}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ duration: 0.3, delay: index * 0.1 }}
-                          className="flex items-center justify-between p-2 md:p-3 lg:p-4 bg-gray-800/30 rounded-lg md:rounded-xl border border-gray-700/50 hover:border-gray-600/50 transition-all duration-200"
-                        >
-                          <div className="flex items-center gap-3 md:gap-4">
-                            <div
-                              className={`p-1 md:p-2 rounded-full ${
-                                transaction.type === "credit_push"
-                                  ? "bg-green-500/20 text-green-400"
-                                  : "bg-red-500/20 text-red-400"
-                              }`}
-                            >
-                              {transaction.type === "credit_push" ? (
-                                <ArrowDownRight className="w-3 h-3 md:w-4 md:h-4" />
-                              ) : (
-                                <ArrowUpRight className="w-3 h-3 md:w-4 md:h-4" />
-                              )}
+                      {transactions.length <= 0 ? (
+                        <span className="text-md md:text-lg text-white">
+                          No transactions have been recorded
+                        </span>
+                      ) : (
+                        currentTransactions.map((transaction, index) => (
+                          <motion.div
+                            key={transaction.id || index}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.3, delay: index * 0.1 }}
+                            className="flex items-center justify-between p-3 md:p-4 bg-gray-800/30 rounded-lg md:rounded-xl border border-gray-700/50 hover:border-gray-600/50 transition-all duration-200"
+                          >
+                            <div className="flex items-center gap-3 md:gap-4">
+                              <div
+                                className={`p-1 md:p-2 rounded-full ${
+                                  transaction.type === "credit_push"
+                                    ? "bg-green-500/20 text-green-400"
+                                    : "bg-red-500/20 text-red-400"
+                                }`}
+                              >
+                                {transaction.type === "credit_push" ? (
+                                  <ArrowDownRight className="w-3 h-3 md:w-4 md:h-4" />
+                                ) : (
+                                  <ArrowUpRight className="w-3 h-3 md:w-4 md:h-4" />
+                                )}
+                              </div>
+                              <div className="max-w-[150px] md:max-w-none">
+                                <p className="text-white font-medium text-sm md:text-base truncate md:whitespace-normal">
+                                  {transaction.description || `Amount Paid`}
+                                </p>
+                                <p className="text-gray-400 text-xs md:text-sm">
+                                  {formatDate(transaction.timestamp)}
+                                </p>
+                              </div>
                             </div>
-                            <div className="max-w-[150px] md:max-w-none">
-                              <p className="text-white font-medium text-sm md:text-base truncate md:whitespace-normal">
-                                {transaction.description || `Amount Paid`}
-                              </p>
-                              <p className="text-gray-400 text-xs md:text-sm">
-                                {formatDate(transaction.timestamp)}
+                            <div className="text-right">
+                              <p
+                                className={`font-semibold text-sm md:text-base ${
+                                  transaction.type === "credit_push"
+                                    ? "text-green-400"
+                                    : "text-red-400"
+                                }`}
+                              >
+                                {transaction.type === "credit_push" ? "+" : "-"}₹
+                                {transaction.paidAmount ||
+                                  transaction.creditedAmount ||
+                                  (transaction.amount ? transaction.amount / 100 : 0)}
                               </p>
                             </div>
-                          </div>
-                          <div className="text-right">
-                            <p
-                              className={`font-semibold text-sm md:text-base ${
-                                transaction.type === "credit_push"
-                                  ? "text-green-400"
-                                  : "text-red-400"
-                              }`}
-                            >
-                              {transaction.type === "credit_push" ? "+" : "-"}₹
-                              {transaction.paidAmount ||
-                                transaction.creditedAmount ||
-                                (transaction.amount
-                                  ? transaction.amount / 100
-                                  : 0)}
-                            </p>
-                          </div>
-                        </motion.div>
-                      ))}
+                          </motion.div>
+                        ))
+                      )}
                     </div>
+                    {totalPages > 1 && (
+                      <div className="flex justify-between items-center mt-6">
+                        <button
+                          onClick={handlePrevPage}
+                          disabled={currentPage === 1}
+                          className="px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white hover:bg-gray-600/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        >
+                          Previous
+                        </button>
+                        <span className="text-gray-400">
+                          Page {currentPage} of {totalPages}
+                        </span>
+                        <button
+                          onClick={handleNextPage}
+                          disabled={currentPage === totalPages}
+                          className="px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white hover:bg-gray-600/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    )}
                   </motion.div>
                 </>
               )}
