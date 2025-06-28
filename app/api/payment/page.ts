@@ -6,7 +6,7 @@ export async function getUserInfo(uid) {
   try {
     const sanpshot = await get(ref(database, `users/${uid}`));
     if (sanpshot.exists()) {
-      console.log("user foound");
+      console.log("user found");
       return sanpshot.val();
     } else {
       return {};
@@ -41,7 +41,7 @@ export const getCurrentCredit = async (userId) => {
     }
     const creditRef = ref(database, `users/${userId}/creditedAmount`);
     const snapshot = await get(creditRef);
-    console.log(snapshot.exists() ? snapshot.val() : 0)
+    // console.log(snapshot.exists() ? snapshot.val() : 0)
     return snapshot.exists() ? snapshot.val() : 0;
   } catch (error) {
     console.error('Error fetching user credit:', error);
@@ -87,15 +87,15 @@ export const uploadTransactionInfo = async (userId, orderInfo) => {
     const transactionsRef = ref(database, `users/${userId}/transactions`);
     const newTransactionRef = push(transactionsRef);
     
-    console.log('Uploading transaction:', {
-      userId,
-      transactionId: newTransactionRef.key,
-      orderInfo: transactionWithTimestamp
-    });
+    // console.log('Uploading transaction:', {
+    //   userId,
+    //   transactionId: newTransactionRef.key,
+    //   orderInfo: transactionWithTimestamp
+    // });
 
     await set(newTransactionRef, transactionWithTimestamp);
     
-    console.log('Transaction uploaded successfully');
+    // console.log('Transaction uploaded successfully');
     return {
       success: true,
       transactionId: newTransactionRef.key,

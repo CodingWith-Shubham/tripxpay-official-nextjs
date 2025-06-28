@@ -62,7 +62,7 @@ const PaymentBtn: React.FC<PaymentBtnProps> = ({ currentUserId, onCreditUpdate }
           throw new Error("No user data found");
         }
 
-        console.log("Fetched user data:", response);
+        // console.log("Fetched user data:", response);
         setUserData({ ...response, id: currentUserId });
       } catch (error) {
         console.error("Error fetching user info:", error);
@@ -113,7 +113,7 @@ const PaymentBtn: React.FC<PaymentBtnProps> = ({ currentUserId, onCreditUpdate }
         name: "TripXPay",
         description: "TripXPay Credit Payment",
         handler: async function (response: RazorpayResponse) {
-          console.log('Razorpay handler response:', response);
+          // console.log('Razorpay handler response:', response);
           try {
             // Get the latest credit amount after payment
             const currentCredit = await getCurrentCredit(userData.id);
@@ -133,23 +133,23 @@ const PaymentBtn: React.FC<PaymentBtnProps> = ({ currentUserId, onCreditUpdate }
             };
 
             // Upload transaction info and wait for response
-            console.log('Calling uploadTransactionInfo with:', {
-              userId: userData.id,
-              orderInfo
-            });
+            // console.log('Calling uploadTransactionInfo with:', {
+            //   userId: userData.id,
+            //   orderInfo
+            // });
             const uploadResult = await uploadTransactionInfo(userData.id, orderInfo);
             if (!uploadResult.success) {
               throw new Error('Failed to record transaction');
             }
 
-            console.log('Transaction recorded successfully:', uploadResult);
+            // console.log('Transaction recorded successfully:', uploadResult);
 
             // Fetch the latest user data to ensure we have the most up-to-date information
             const updatedUserData = await getUserInfo(userData.id);
             if (updatedUserData) {
               setUserData({ ...updatedUserData, id: userData.id });
             }
-
+            
             toast.success("Payment successful and credit updated");
 
             if (onCreditUpdate) {
