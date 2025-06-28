@@ -1,102 +1,75 @@
-"use client";
-import React, { useState, useEffect } from "react";
+"use client"
+import { useState, useEffect } from "react";
 
-export interface BlogPost {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  creationDate: string;
-  author: string;
+interface BlogPost {
+    id: string;
+    author: string;
+    category: string;
+    description: string;
+    title: string;
+    creationDate: string;
+    timestamp?: number;
 }
 
 interface BlogProps {
-  post: BlogPost;
-  onDelete: () => void;
+    post: BlogPost;
+    onDelete?: () => void;
 }
 
-const Blog: React.FC<BlogProps> = ({ post }) => {
-  const [readtime, setReadtime] = useState<string>("");
-  const [isHovered, setIsHovered] = useState<boolean>(false);
+const Blog: React.FC<BlogProps> = ({ post, onDelete }) => {
+    const [readtime, setReadtime] = useState<string>('');
 
-  const formatDate = (isoString: string): string => {
-    const date = new Date(isoString);
-    return date.toLocaleString("en-IN", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  };
+    const formatDate = (isoString: string): string => {
+        const date = new Date(isoString);
 
-  useEffect(() => {
-    const calculateReadtime = (): void => {
-      const now = new Date();
-      const created = new Date(post.creationDate);
-      const diffInMinutes = Math.floor(
-        (now.getTime() - created.getTime()) / 60000
-      );
+        const options: Intl.DateTimeFormatOptions = {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+        };
 
-      if (diffInMinutes < 60) {
-        setReadtime(`${diffInMinutes} min ago`);
-      } else if (diffInMinutes < 1440) {
-        const hours = Math.floor(diffInMinutes / 60);
-        setReadtime(`${hours} hour${hours > 1 ? "s" : ""} ago`);
-      } else {
-        const days = Math.floor(diffInMinutes / 1440);
-        setReadtime(`${days} day${days > 1 ? "s" : ""} ago`);
-      }
+        return date.toLocaleString("en-IN", options);
     };
 
-    calculateReadtime();
-    const interval = setInterval(calculateReadtime, 60000);
-    return () => clearInterval(interval);
-  }, [post.creationDate]);
+    useEffect(() => {
+        const trimReadtime = () => {
+            const now = new Date();
+            const created = new Date(post.creationDate);
+            const diffInMinutes = Math.floor((now.getTime() - created.getTime()) / 60000);
 
-  return (
-    <div
-      className={`blog-card ${isHovered ? "hovered" : ""}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <div className="blog-header">
-        <span className="blog-category">{post.category}</span>
-        <span className="blog-date">{formatDate(post.creationDate)}</span>
-      </div>
-      <h3 className="blog-title">{post.title}</h3>
-      <p className="blog-description">{post.description}</p>
-      <div className="blog-footer">
-        <span className="blog-author">{post.author}</span>
-        <span className="blog-readtime">{readtime}</span>
-      </div>
+            if (diffInMinutes < 60) {
+                setReadtime(`${diffInMinutes} min ago`);
+            } else if (diffInMinutes < 1440) {
+                const hours = Math.floor(diffInMinutes / 60);
+                setReadtime(`${hours} hour${hours > 1 ? 's' : ''} ago`);
+            } else {
+                const days = Math.floor(diffInMinutes / 1440);
+                setReadtime(`${days} day${days > 1 ? 's' : ''} ago`);
+            }
+        };
 
-      <style jsx>{`
-        .blog-card {
-          background: rgba(31, 41, 55, 0.8);
-          backdrop-filter: blur(10px);
-          border-radius: 0.5rem;
-          padding: 2rem;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          height: 100%;
-          letter-spacing: 0.025em;
-          gap: 1rem;
-          transition: all 0.3s ease;
-          border: 1px solid rgba(31, 41, 55, 0.5);
-          cursor: pointer;
-        }
+        trimReadtime();
+    }, [post.creationDate]);
 
-        .blog-card.hovered {
-          transform: translateY(-0.5rem);
-          background: rgba(31, 41, 55, 0.9);
-          box-shadow: 0 25px 50px -12px rgba(16, 185, 129, 0.1);
-          border-color: rgba(16, 185, 129, 0.3);
-        }
-
-        /* ... rest of the styles remain the same ... */
-      `}</style>
-    </div>
-  );
+    return (
+        <div
+            key={post.id}
+            className="bg-gray-900/80 backdrop-blur-sm rounded-lg p-8 flex flex-col justify-between h-full tracking-wide space-y-4 transition-all duration-300 hover:translate-y-[-8px] hover:bg-gray-900/90 hover:shadow-2xl hover:shadow-teal-500/10 cursor-pointer group border border-gray-800/50 hover:border-teal-500/30 transform"
+        >
+            <div className="flex items-center mb-3">
+                <span className="text-xs font-medium md:text-[18px] text-teal-500 bg-teal-500 bg-opacity-10 px-2 py-1 rounded group-hover:bg-opacity-20 group-hover:text-teal-400 transition-all duration-300">
+                     {post.category}
+                </span>
+                <span className="text-xs text-gray-400 ml-auto transition-colors duration-300 group-hover:text-gray-300">{formatDate(post.creationDate)}</span>
+            </div>
+            <h3 className="text-lg md:text-[22px] font-bold group-hover:text-teal-400 transition-colors duration-300">{post.title}</h3>
+            <p className="text-gray-400 text-[19px] group-hover:text-gray-200 transition-colors duration-300">{post.description}</p>
+            <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-800 group-hover:border-gray-700 transition-colors duration-300">
+                <span className="text-xs text-gray-400 transition-colors duration-300 group-hover:text-white">{post.author}</span>
+                <span className="text-xs text-gray-500 transition-colors duration-300 group-hover:text-gray-300">{readtime}</span>
+            </div>
+        </div>
+    );
 };
 
 export default Blog;
