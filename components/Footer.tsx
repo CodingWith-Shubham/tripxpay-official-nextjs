@@ -18,10 +18,13 @@ const Footer = () => {
           {/* Column 1 - Brand */}
           <div>
             <div className="flex items-center">
-              <Image src={"/logo.svg"} width={40} height={40} alt="main logo" />
-              <Link href="/" className="text-xl font-bold px-2 mt-2"></Link>
+              <Link href="/" className="flex items-center">
+                <Image alt="tripx pay" src="/logo.svg" width={36} height={35} />
+                <span className="ml-1.5 font-bold text-xl md:text-2xl font-space-grotesk text-white">TripxPay</span>
+              </Link>
             </div>
           </div>
+
 
           {/* Mobile-Only Container for All Links */}
           <div className="md:hidden space-y-3">

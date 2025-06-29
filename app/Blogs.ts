@@ -1,7 +1,6 @@
 import {ref, get, child, push, set, remove, query, orderByChild, limitToFirst, limitToLast, startAt, endAt} from "firebase/database";
 import { database } from "@/lib/firebase";
 
-// TypeScript interfaces
 interface BlogData {
     author: string;
     category: string;
@@ -44,7 +43,7 @@ interface ApiResponse {
     message?: string;
 }
 
-// Helper function to retry operations
+// helper function to retry ops
 export const retryOperation = async (operation: () => Promise<any>, maxRetries = 3) => {
     let lastError: any;
     for (let i = 0; i < maxRetries; i++) {
@@ -59,7 +58,7 @@ export const retryOperation = async (operation: () => Promise<any>, maxRetries =
     throw lastError;
 };
 
-// Upload a new blog
+// uploads a new blog
 export const uploadBlog = async (formData: FormData): Promise<ApiResponse> => {
     try {
         const blogsRef = ref(database, "blogs");
@@ -71,7 +70,7 @@ export const uploadBlog = async (formData: FormData): Promise<ApiResponse> => {
             description: formData.description,
             title: formData.title,
             creationDate: new Date().toISOString(),
-            // Add a timestamp for better sorting in pagination
+            // Adds a timestamp here
             timestamp: Date.now()
         };
 
@@ -93,7 +92,7 @@ export const uploadBlog = async (formData: FormData): Promise<ApiResponse> => {
     }
 };
 
-// Get total count of blogs (for pagination)
+//get total count of blogs (for pagination)
 export const getBlogCount = async (category: string | null = null): Promise<number> => {
     try {
         const dbRef = ref(database);
@@ -109,7 +108,7 @@ export const getBlogCount = async (category: string | null = null): Promise<numb
             ...blog
         }));
 
-        // Filter by category if specified
+        // Filter 
         if (category && category !== "all") {
             return blogs.filter(blog => blog.category === category).length;
         }
@@ -121,7 +120,7 @@ export const getBlogCount = async (category: string | null = null): Promise<numb
     }
 };
 
-// Fetch all blogs with pagination support
+// Fetch all blogs 
 export const getAllBlogs = async (options: BlogOptions = {}): Promise<BlogResponse> => {
     try {
         const {
@@ -152,21 +151,18 @@ export const getAllBlogs = async (options: BlogOptions = {}): Promise<BlogRespon
             ...blog
         }));
 
-        // Sort by creationDate (latest first)
         blogs.sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime());
 
-        // Filter by category if specified
         if (category && category !== "all") {
             blogs = blogs.filter(blog => blog.category === category);
         }
 
-        // Calculate pagination
         const total = blogs.length;
         const totalPages = Math.ceil(total / pageLimit);
         const startIndex = (page - 1) * pageLimit;
         const endIndex = startIndex + pageLimit;
 
-        // Get paginated results
+        // results
         const paginatedBlogs = blogs.slice(startIndex, endIndex);
 
         return {
@@ -193,17 +189,6 @@ export const getAllBlogsOptimized = async (options: BlogOptions = {}): Promise<B
             limit: pageLimit = 9,
             category = null
         } = options;
-
-        // Note: This is a more complex implementation that would require
-        // restructuring your data to work efficiently with Firebase queries
-        // For now, we'll use the simpler approach above
-
-        // If you want to implement this, you'd need to:
-        // 1. Add a timestamp field when creating blogs
-        // 2. Use orderByChild('timestamp') with limitToFirst/limitToLast
-        // 3. Implement proper cursor-based pagination
-
-        // For your current use case, the getAllBlogs function above should work well
         return await getAllBlogs(options);
 
     } catch (error) {
@@ -212,12 +197,12 @@ export const getAllBlogsOptimized = async (options: BlogOptions = {}): Promise<B
     }
 };
 
-// Get blogs by category (helper function)
+// Get blogs by category 
 export const getBlogsByCategory = async (category: string, page = 1, limit = 9): Promise<BlogResponse> => {
     return await getAllBlogs({ page, limit, category });
 };
 
-// Delete blog function (keeping your existing implementation)
+// Delete blog function 
 export const deleteBlog = async (id: string): Promise<ApiResponse> => {
     try {
         if (!id) {
@@ -226,7 +211,7 @@ export const deleteBlog = async (id: string): Promise<ApiResponse> => {
 
         const blogRef = ref(database, `blogs/${id}`);
 
-        // First check if the blog exists
+        // First checks if the blog exists
         const snapshot = await get(blogRef);
         if (!snapshot.exists()) {
             throw new Error("Blog not found");
@@ -250,7 +235,7 @@ export const deleteBlog = async (id: string): Promise<ApiResponse> => {
     }
 };
 
-// Batch operations for better performance (optional)
+// Batch ops
 export const getBlogsInBatches = async (batchSize = 50): Promise<Blog[][]> => {
     try {
         const dbRef = ref(database);
@@ -266,7 +251,7 @@ export const getBlogsInBatches = async (batchSize = 50): Promise<Blog[][]> => {
             ...blog
         }));
 
-        // Sort by creationDate (latest first)
+        // Sort by creationDate
         blogs.sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime());
 
         // Split into batches
