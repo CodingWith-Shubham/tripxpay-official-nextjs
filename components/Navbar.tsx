@@ -7,6 +7,7 @@ import Link from "next/link";
 import Logo from "@/components/Logo"
 import { getUserInfo } from "@/action/tokeninfo";
 import { toast } from "sonner";
+import Image from "next/image";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
