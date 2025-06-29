@@ -485,7 +485,6 @@ const Verified = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-900">
-        <Navbar />
         <div className="fixed inset-0 pointer-events-none">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-500/20 rounded-full filter blur-3xl" />
           <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-yellow-500/20 rounded-full filter blur-3xl" />
@@ -525,8 +524,7 @@ const Verified = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 overflow-hidden">
-      <Navbar />
+    <>
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-500/20 rounded-full filter blur-3xl" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-yellow-500/20 rounded-full filter blur-3xl" />
@@ -1229,9 +1227,8 @@ const Verified = () => {
         )}
       </AnimatePresence>
       <div className="mt-10">
-        <Footer />
       </div>
-    </div>
+    </>
   );
 };
 
