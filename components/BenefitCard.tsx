@@ -2,15 +2,13 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-const BenefitCard = ({
-  icon,
-  title,
-  description,
-}: {
-  icon: any;
+interface BenefitCardProps {
+  icon: string;
   title: string;
   description: string;
-}) => {
+}
+
+const BenefitCard: React.FC<BenefitCardProps> = ({ icon, title, description }) => {
   const renderIcon = () => {
     const commonSvgProps = {
       className: "w-10 h-10 text-teal-500",

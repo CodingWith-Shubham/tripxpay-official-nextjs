@@ -78,7 +78,7 @@ const CTASection = () => {
             </p>
             <Link
               href={isLoggedIn ? "/verified" : "/signup"}
-              className="bg-yellow-500 hover:bg-yellow-600 text-black font-medium py-2 px-6 rounded-full"
+              className="bg-yellow-500 hover:bg-yellow-600 text-black font-medium py-2 px-6 sm:py-2.5 sm:px-8 text-sm sm:text-base rounded-full w-full sm:w-auto text-center transition-all"
             >
               START YOUR JOURNEY →
             </Link>

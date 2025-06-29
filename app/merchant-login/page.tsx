@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -130,20 +129,12 @@ const MerchantLoginPage = () => {
               </div>
 
               <div className="group">
-                <div className="flex items-center justify-between mb-1">
-                  <label
-                    htmlFor="password"
-                    className="block text-sm font-medium text-gray-300 group-hover:text-teal-400 transition-colors duration-300"
-                  >
-                    Password
-                  </label>
-                  <Link
-                    href="/forgot-password"
-                    className="text-sm text-teal-500 hover:text-teal-400 transition-all duration-300 hover:scale-105"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-300 mb-1 group-hover:text-teal-400 transition-colors duration-300"
+                >
+                  Password
+                </label>
                 <input
                   id="password"
                   type="password"
@@ -153,19 +144,27 @@ const MerchantLoginPage = () => {
                   className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all duration-300 hover:bg-gray-750 hover:border-gray-600 hover:shadow-lg hover:shadow-teal-500/10"
                   placeholder="Enter your password"
                 />
+                <div className="mt-1">
+                  <Link
+                    href="/forgot-password"
+                    className="text-xs text-teal-500 hover:text-teal-400 transition-all duration-300"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
               </div>
 
-              <div className="flex items-center group cursor-pointer">
+              <div className="flex items-center">
                 <input
                   id="remember-me"
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="h-4 w-4 bg-gray-800 border-gray-700 rounded text-teal-500 focus:ring-teal-500 transition-all duration-300 hover:scale-110"
+                  className="h-4 w-4 bg-gray-800 border-gray-700 rounded text-gray-300 focus:ring-teal-500"
                 />
                 <label
                   htmlFor="remember-me"
-                  className="ml-2 block text-sm text-gray-300 group-hover:text-teal-400 transition-colors duration-300"
+                  className="ml-2 block text-sm text-gray-300"
                 >
                   Remember me
                 </label>

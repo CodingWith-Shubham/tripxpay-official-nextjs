@@ -17,6 +17,8 @@ import {
   Sparkles,
   AlertCircle,
   Loader2,
+  Users,
+  Globe,
 } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import Navbar from "@/components/Navbar";
@@ -30,6 +32,8 @@ interface FormData {
   climatePreference: string;
   travelStyle: string;
   interests: string[];
+  travelersCount: string;
+  destinationCountry: string;
 }
 
 interface TravelRecommendation {
@@ -57,6 +61,8 @@ const PlanMyTrip = () => {
     climatePreference: "",
     travelStyle: "",
     interests: [],
+    travelersCount: "1",
+    destinationCountry: "",
   });
 
   const [isPending, startTransition] = useTransition();
@@ -167,9 +173,54 @@ const PlanMyTrip = () => {
     "Local Experiences",
   ] as const;
 
+  const countries = [
+    "India",
+    "Thailand",
+    "Japan",
+    "Italy",
+    "France",
+    "Spain",
+    "USA",
+    "Canada",
+    "Australia",
+    "New Zealand",
+    "Switzerland",
+    "Germany",
+    "Greece",
+    "Portugal",
+    "Vietnam",
+    "Indonesia",
+    "Malaysia",
+    "Singapore",
+    "Dubai",
+    "South Africa",
+    "Maldives",
+    "Sri Lanka",
+    "Nepal",
+    "Bhutan",
+    "Myanmar",
+    "Cambodia",
+    "United Kingdom",
+    "Ireland",
+    "Norway",
+    "Sweden",
+    "Finland",
+    "Iceland",
+    "Brazil",
+    "Argentina",
+    "Chile",
+    "Peru",
+    "Mexico",
+    "Costa Rica",
+    "Egypt",
+    "Morocco",
+    "Turkey",
+    "Any Country",
+  ];
+
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col relative overflow-hidden">
-      {/* Background glow effects - same as career page */}
+      {/* Background glow effects */}
       <div className="absolute top-0 left-0 w-[500px] h-[300px] bg-gradient-to-br from-[#00ffb4]/40 to-transparent rotate-12 blur-[120px] rounded-[30%] pointer-events-none z-0" />
       <div className="absolute right-0 w-[550px] h-[300px] md:bg-gradient-to-tr from-yellow-400/30 to-transparent rotate-180 blur-[120px] rounded-[20%] pointer-events-none z-0 top-[1.5%]" />
       <div className="absolute inset-0 bg-[radial-gradient(#1f2937_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
@@ -192,7 +243,7 @@ const PlanMyTrip = () => {
 
         <div className="flex-grow py-12 px-4 md:px-8 lg:px-12">
           <div className="max-w-[1400px] mx-auto">
-            {/* Form Section - Full width for better desktop layout */}
+            {/* Form Section */}
             <div className="bg-gray-900/80 backdrop-blur-sm rounded-lg p-8 border border-gray-800/50 transform transition-all duration-300 hover:translate-y-[-4px] hover:bg-gray-900/90 hover:border-teal-500/30 hover:shadow-2xl hover:shadow-teal-500/10 mb-12">
               <h2 className="text-2xl font-bold mb-6 text-teal-400 flex items-center gap-3">
                 <Target className="w-6 h-6" />
@@ -332,6 +383,56 @@ const PlanMyTrip = () => {
                       <option value="romantic">Romantic</option>
                     </select>
                   </div>
+
+                  {/* Number of Travelers */}
+                  <div className="form-group">
+                    <label
+                      htmlFor="travelersCount"
+                      className="block text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2"
+                    >
+                      <Users className="w-4 h-4 text-teal-400" />
+                      Number of Travelers
+                    </label>
+                    <select
+                      id="travelersCount"
+                      name="travelersCount"
+                      value={formData.travelersCount}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-4 bg-gray-800/80 border border-gray-700/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-300 text-white hover:bg-gray-800/90 hover:border-teal-500/50"
+                    >
+                      <option value="1">1 traveler</option>
+                      <option value="2">2 travelers</option>
+                      <option value="3-5">3-5 travelers</option>
+                      <option value="6-10">6-10 travelers</option>
+                      <option value="10+">10+ travelers</option>
+                    </select>
+                  </div>
+
+                  {/* Destination Country */}
+                  <div className="form-group">
+                    <label
+                      htmlFor="destinationCountry"
+                      className="block text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2"
+                    >
+                      <Globe className="w-4 h-4 text-teal-400" />
+                      Destination Country
+                    </label>
+                    <select
+                      id="destinationCountry"
+                      name="destinationCountry"
+                      value={formData.destinationCountry}
+                      onChange={handleChange}
+                      className="w-full px-4 py-4 bg-gray-800/80 border border-gray-700/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-300 text-white hover:bg-gray-800/90 hover:border-teal-500/50"
+                    >
+                      <option value="">Any Country (We'll suggest)</option>
+                      {countries.map((country) => (
+                        <option key={country} value={country}>
+                          {country}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
                 {/* Interests - Full width section */}
@@ -363,11 +464,11 @@ const PlanMyTrip = () => {
                 </div>
 
                 {/* Submit Button - Centered */}
-                <div className="flex justify-center">
+                <div className="flex justify-center px-4">
                   <button
                     type="submit"
                     disabled={isPending}
-                    className="bg-teal-500 text-white font-semibold py-4 px-8 rounded-lg hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-teal-500/25 flex items-center justify-center gap-2 min-w-[300px]"
+                    className="w-full sm:w-auto bg-teal-500 text-white font-semibold py-3 sm:py-4 px-6 sm:px-8 rounded-lg hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-teal-500/25 flex items-center justify-center gap-2"
                   >
                     {isPending ? (
                       <>
@@ -385,7 +486,7 @@ const PlanMyTrip = () => {
               </form>
             </div>
 
-            {/* Recommendations Section - Horizontal Layout */}
+            {/* Recommendations Section */}
             {recommendations && (
               <div className="mb-12">
                 <div className="flex items-center mb-8">
@@ -507,8 +608,10 @@ const PlanMyTrip = () => {
                 ) : (
                   <div className="bg-yellow-900/20 rounded-xl p-6 border border-yellow-500/30">
                     <p className="text-yellow-300">
-                      {recommendations.message ||
-                        "Custom recommendation generated successfully!"}
+                      {typeof recommendations === "object" &&
+                      "message" in recommendations
+                        ? recommendations.message
+                        : "Custom recommendation generated successfully!"}
                     </p>
                   </div>
                 )}
