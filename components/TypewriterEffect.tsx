@@ -1,6 +1,7 @@
+// TypewriterEffect.tsx
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from 'react';
 
 interface TypewriterEffectProps {
   text?: string;
@@ -8,90 +9,89 @@ interface TypewriterEffectProps {
   typeDelay?: number;
   backspaceDelay?: number;
   pauseDelay?: number;
+  loop?: boolean;
   className?: string;
+  cursor?: boolean;
+  cursorStyle?: string;
 }
 
 const TypewriterEffect: React.FC<TypewriterEffectProps> = ({
-  text = "",
+  text = '',
   texts = [],
   typeDelay = 100,
   backspaceDelay = 50,
   pauseDelay = 1000,
-  className = "",
+  loop = true,
+  className = '',
+  cursor = true,
+  cursorStyle = 'animate-pulse',
 }) => {
-  const [displayedText, setDisplayedText] = useState<string>("");
-  const [currentIndex, setCurrentIndex] = useState<number>(0);
-  const [isTyping, setIsTyping] = useState<boolean>(true);
-  const [textIndex, setTextIndex] = useState<number>(0);
+  // Combine single text and texts array into one array
+  const textArray = texts.length > 0 ? texts : [text];
+  const [currentTextIndex, setCurrentTextIndex] = useState(0);
+  const [currentCharIndex, setCurrentCharIndex] = useState(0);
+  const [displayedText, setDisplayedText] = useState('');
+  const [isTyping, setIsTyping] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  // Use texts array if provided, otherwise fallback to single text
-  const textArray: string[] = texts.length > 0 ? texts : [text];
-  const currentText: string = textArray[textIndex] || "";
+  const currentText = textArray[currentTextIndex] ?? '';
 
-  const resetAnimation = useCallback(() => {
-    setDisplayedText("");
-    setCurrentIndex(0);
-    setIsTyping(true);
-  }, []);
-
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-
-    if (isTyping) {
-      // Typing phase
-      if (currentIndex < currentText.length) {
-        timeoutId = setTimeout(() => {
-          setDisplayedText((prev) => prev + currentText[currentIndex]);
-          setCurrentIndex((prev) => prev + 1);
-        }, typeDelay);
-      } else {
-        // Finished typing, pause then start backspacing
-        timeoutId = setTimeout(() => {
-          setIsTyping(false);
-        }, pauseDelay);
-      }
+  const typeText = useCallback(() => {
+    if (currentCharIndex < currentText.length) {
+      setDisplayedText(prev => prev + currentText[currentCharIndex]);
+      setCurrentCharIndex(prev => prev + 1);
     } else {
-      // Backspacing phase
-      if (currentIndex > 0) {
-        timeoutId = setTimeout(() => {
-          setDisplayedText((prev) => prev.slice(0, -1));
-          setCurrentIndex((prev) => prev - 1);
-        }, backspaceDelay);
-      } else {
-        // Finished backspacing, move to next text and start typing again
-        timeoutId = setTimeout(() => {
-          setTextIndex((prev) => (prev + 1) % textArray.length);
-          resetAnimation();
-        }, pauseDelay);
+      // Finished typing current text
+      setIsTyping(false);
+      setTimeout(() => {
+        if (loop || currentTextIndex < textArray.length - 1) {
+          setIsDeleting(true);
+        }
+      }, pauseDelay);
+    }
+  }, [currentCharIndex, currentText, pauseDelay, loop, currentTextIndex, textArray.length]);
+
+  const deleteText = useCallback(() => {
+    if (displayedText.length > 0) {
+      setDisplayedText(prev => prev.slice(0, -1));
+    } else {
+      // Finished deleting current text
+      setIsDeleting(false);
+      const nextTextIndex = (currentTextIndex + 1) % textArray.length;
+      
+      if (loop || nextTextIndex !== 0) {
+        setCurrentTextIndex(nextTextIndex);
+        setCurrentCharIndex(0);
+        setIsTyping(true);
       }
     }
+  }, [displayedText, currentTextIndex, textArray.length, loop]);
 
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
-  }, [
-    currentIndex,
-    isTyping,
-    currentText,
-    typeDelay,
-    backspaceDelay,
-    pauseDelay,
-    textArray.length,
-    resetAnimation,
-  ]);
-
-  // Reset animation when text array changes
   useEffect(() => {
-    resetAnimation();
-    setTextIndex(0);
-  }, [texts, text, resetAnimation]);
+    let timeout: NodeJS.Timeout;
+
+    if (isTyping) {
+      timeout = setTimeout(typeText, typeDelay);
+    } else if (isDeleting) {
+      timeout = setTimeout(deleteText, backspaceDelay);
+    }
+
+    return () => clearTimeout(timeout);
+  }, [isTyping, isDeleting, typeText, deleteText, typeDelay, backspaceDelay]);
+
+  // Reset when texts prop changes
+  useEffect(() => {
+    setCurrentTextIndex(0);
+    setCurrentCharIndex(0);
+    setDisplayedText('');
+    setIsTyping(true);
+    setIsDeleting(false);
+  }, [texts, text]);
 
   return (
     <span className={className}>
       {displayedText}
-      <span className="animate-pulse">|</span>
+      {cursor && <span className={cursorStyle}>|</span>}
     </span>
   );
 };

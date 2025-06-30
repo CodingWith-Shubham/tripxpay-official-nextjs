@@ -488,7 +488,7 @@ const ChatbotPage = () => {
             {!isMinimized && (
               <>
                 {/* Messages area */}
-                <div className="h-52 overflow-y-auto p-3 scrollbar-thin scrollbar-thumb-teal-600 scrollbar-track-slate-800/50 scrollbar-thumb-rounded-full scrollbar-track-rounded-full">
+                <div className="h-48 overflow-y-auto p-3 scrollbar-thin scrollbar-thumb-teal-600 scrollbar-track-slate-800/50 scrollbar-thumb-rounded-full scrollbar-track-rounded-full">
                   <AnimatePresence initial={false}>
                     {messages.map((msg) => (
                       <motion.div
