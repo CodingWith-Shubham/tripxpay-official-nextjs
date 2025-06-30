@@ -24,7 +24,8 @@ import ImageUploadAdharPan from "@/components/ImageUploadAdharPan";
 import FaceAuthCard from "@/components/FaceAuthCard";
 import CameraModal from "@/components/CameraModal";
 import { toast } from "sonner";
-
+import { LoadingSpinner } from "@/components/LoadingSpinner";
+import TypewriterEffect from "@/components/TypewriterEffect";
 import Compressor from "compressorjs";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/Auth";
@@ -50,42 +51,6 @@ type FaceAuth = {
   image: string;
 };
 
-// Enhanced Loading Spinner Component
-const LoadingSpinner: React.FC<{
-  size?: "small" | "medium" | "large" | "xlarge";
-  text?: string;
-}> = ({ size = "medium", text = "" }) => {
-  const sizeClasses = {
-    small: "w-4 h-4",
-    medium: "w-6 h-6",
-    large: "w-8 h-8",
-    xlarge: "w-12 h-12",
-  };
-
-  return (
-    <div className="flex flex-col items-center justify-center gap-3">
-      <div className="relative">
-        {/* Outer spinning ring */}
-        <div
-          className={`${sizeClasses[size]} border-2 border-gray-600 border-t-[#00FFB4] rounded-full animate-spin`}
-        />
-        {/* Inner pulsing dot */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-1 h-1 bg-[#00FFB4] rounded-full animate-pulse" />
-        </div>
-      </div>
-      {text && (
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-sm text-gray-400 font-medium"
-        >
-          {text}
-        </motion.p>
-      )}
-    </div>
-  );
-};
 
 // Progress Step Component
 const ProgressStep: React.FC<{
