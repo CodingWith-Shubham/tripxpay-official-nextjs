@@ -549,8 +549,8 @@ const Verified = () => {
               transition={{ duration: 0.6, delay: 0.3 }}
             >
               <h3 className="text-base sm:text-lg md:text-xl font-bold text-[#FAB609] mb-6 md:mb-4 text-center sm:text-left">
-  Merchant Information
-</h3>
+                Merchant Information
+              </h3>
 
               <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 md:gap-6">
                 <motion.div
@@ -574,9 +574,14 @@ const Verified = () => {
                   </h4>
                   <p className="text-gray-400">{merchantData.displayName}</p>
                   <div className="mt-2 text-sm text-gray-400">
-                    <p>Merchant ID: {merchantData.id}</p>
+                    <div className="flex items-center gap-2">
+                      <User className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0 text-gray-500" />
+                      <span className="break-all bg-gray-800/50 px-2 py-1 rounded-md font-mono">
+                        Merchant ID: {merchantData.id}
+                      </span>
+                    </div>
                     {merchantData.address && (
-                      <p className="mt-1">{merchantData.address}</p>
+                      <p className="mt-2 text-gray-400">{merchantData.address}</p>
                     )}
                   </div>
                 </div>
@@ -740,8 +745,10 @@ const Verified = () => {
                       <span>{userProfile.email || "N/A"}</span>
                     </div>
                     <div className="flex items-center justify-center sm:justify-start gap-2 text-xs sm:text-sm text-gray-400">
-                      <User className="w-4 h-4" />
-                      <span>UID: {userProfile.uid}</span>
+                      <User className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                      <span className="break-all bg-gray-800/50 px-2 py-1 rounded-md font-mono">
+                        UID: {userProfile.uid}
+                      </span>
                     </div>
                   </div>
 
@@ -926,43 +933,46 @@ const Verified = () => {
               ) : (
                 <>
                   <motion.div
-                    className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-2xl p-6 shadow-2xl flex justify-between items-center"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.4 }}
-                  >
-                    <div className="flex flex-col lg:flex-row justify-between items-center gap-6 lg:gap-12">
-                      {/* Credit Amount Section */}
-                      <div className="w-full lg:w-auto text-center lg:text-left">
-                        <h3 className="text-lg md:text-xl font-semibold text-white mb-2 flex items-center justify-center lg:justify-start">
-                          Credit Spend
-                        </h3>
-                        <p className="text-4xl md:text-5xl lg:text-7xl font-bold text-[#FAB609] mb-4 lg:mb-8">
-                          {`₹${String(userProfile?.creditedAmount)}`}
-                        </p>
-                      </div>
+  className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-2xl p-6 shadow-2xl w-full"
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.6, delay: 0.4 }}
+>
+  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-12 w-full">
+    
+    {/* Credit Amount Section */}
+    <div className="text-center lg:text-left w-full lg:w-auto">
+      <h3 className="text-lg md:text-xl font-semibold text-white mb-2 flex items-center justify-center lg:justify-start">
+        Credit Spend
+      </h3>
+      <p className="text-4xl md:text-5xl lg:text-7xl font-bold text-[#FAB609] mb-4 lg:mb-8">
+        {`₹${String(userProfile?.creditedAmount)}`}
+      </p>
+    </div>
 
-                      {/* Buttons Section */}
-                      <div className="w-full lg:w-auto">
-                        <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 min-w-0 lg:min-w-[300px]">
-                          <motion.button
-                            className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg bg-[#FAB609]/50 hover:bg-[#0193C0]/90 transition-all duration-300 text-sm md:text-base font-medium text-white"
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                          >
-                            Pay Now
-                          </motion.button>
-                          <motion.button
-                            className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg bg-[#0193C0]/50 hover:bg-[#0193C0]/90 transition-all duration-300 text-sm md:text-base font-medium text-white"
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                          >
-                            EMI
-                          </motion.button>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
+    {/* Buttons Section */}
+    <div className="w-full lg:w-auto">
+      <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center lg:justify-end">
+        <motion.button
+          className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300 text-sm md:text-base font-medium text-white"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          Pay Now
+        </motion.button>
+        <motion.button
+          className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg bg-[#0193C0]/50 hover:bg-[#0193C0]/90 transition-all duration-300 text-sm md:text-base font-medium text-white"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          EMI
+        </motion.button>
+      </div>
+    </div>
+
+  </div>
+</motion.div>
+
 
                   {/* Transaction History */}
                   <motion.div

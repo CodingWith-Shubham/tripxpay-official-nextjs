@@ -197,29 +197,62 @@ const CareersPage = () => {
             <div>
               <h2 className="text-2xl font-bold mb-6">Open Positions</h2>
               <div className="bg-gray-900/80 backdrop-blur-sm rounded-lg overflow-hidden border border-gray-800/50 transform transition-all duration-300 hover:border-teal-500/30 hover:shadow-2xl hover:shadow-teal-500/10">
-                <div className="grid grid-cols-12 bg-gray-800/80 py-3 px-6">
+                {/* Table Header - Hidden on mobile */}
+                <div className="hidden md:grid grid-cols-12 bg-gray-800/80 py-3 px-6">
                   <div className="col-span-5 font-medium">Position</div>
                   <div className="col-span-3 font-medium">Department</div>
                   <div className="col-span-3 font-medium">Location</div>
                   <div className="col-span-1 font-medium">Type</div>
                 </div>
+                
+                {/* Table Rows */}
                 <div className="divide-y divide-gray-800/50">
                   {openPositions.map((position, index) => (
                     <div 
                       key={index} 
-                      className="grid grid-cols-12 py-4 px-6 transition-all duration-300 hover:bg-gray-800/60 hover:translate-x-2 group cursor-pointer"
+                      className="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-0 py-4 px-6 transition-all duration-300 hover:bg-gray-800/60 md:hover:translate-x-2 group cursor-pointer"
                     >
-                      <div className="col-span-5 font-medium text-teal-500 transition-colors duration-300 group-hover:text-teal-400">{position.title}</div>
-                      <div className="col-span-3 text-gray-300 transition-colors duration-300 group-hover:text-white">{position.department}</div>
-                      <div className="col-span-3 text-gray-300 transition-colors duration-300 group-hover:text-white">{position.location}</div>
-                      <div className="col-span-1 text-gray-300 transition-colors duration-300 group-hover:text-white">{position.type}</div>
+                      {/* Mobile view - stacked layout */}
+                      <div className="md:hidden flex flex-col gap-1">
+                        <div className="font-medium text-teal-500 transition-colors duration-300 group-hover:text-teal-400">
+                          {position.title}
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-400">Department:</span>
+                          <span className="text-gray-300">{position.department}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-400">Location:</span>
+                          <span className="text-gray-300">{position.location}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-400">Type:</span>
+                          <span className="text-gray-300">{position.type}</span>
+                        </div>
+                      </div>
+                      
+                      {/* Desktop view - grid layout */}
+                      <div className="hidden md:block col-span-5 font-medium text-teal-500 transition-colors duration-300 group-hover:text-teal-400">
+                        {position.title}
+                      </div>
+                      <div className="hidden md:block col-span-3 text-gray-300 transition-colors duration-300 group-hover:text-white">
+                        {position.department}
+                      </div>
+                      <div className="hidden md:block col-span-3 text-gray-300 transition-colors duration-300 group-hover:text-white">
+                        {position.location}
+                      </div>
+                      <div className="hidden md:block col-span-1 text-gray-300 transition-colors duration-300 group-hover:text-white">
+                        {position.type}
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
 
               <div className="mt-8 text-center">
-                <p className="text-gray-400 mb-4 transition-colors duration-300 hover:text-gray-300">Don't see a position that matches your skills?</p>
+                <p className="text-gray-400 mb-4 transition-colors duration-300 hover:text-gray-300">
+                  Don't see a position that matches your skills?
+                </p>
                 <Link
                   href="/careers/upload-resume"
                   className="inline-block px-6 py-3 bg-teal-500 rounded-lg text-white font-medium transition-all duration-300 hover:bg-teal-600 hover:shadow-lg hover:shadow-teal-500/25 hover:scale-105 transform"
