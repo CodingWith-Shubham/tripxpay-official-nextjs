@@ -180,39 +180,35 @@ const PaymentBtn: React.FC<PaymentBtnProps> = ({ currentUserId, onCreditUpdate }
 
   if (isLoading) {
     return (
-      <div className="flex">
         <motion.button
-          disabled
-          className="mx-2 border w-fit h-fit p-3 rounded-xl bg-gray-400 cursor-not-allowed"
+            disabled
+            className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg mx-2 border w-fit h-fit p-3 rounded-xl bg-gray-400 cursor-not-allowed transition-all duration-300 text-sm md:text-base font-medium text-white"
         >
           Loading...
         </motion.button>
-      </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex">
         <motion.button
-          disabled
-          className="mx-2 border w-fit h-fit p-3 rounded-xl bg-red-400 cursor-not-allowed"
+            disabled
+            className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg mx-2 border w-fit h-fit p-3 rounded-xl bg-gray-400 cursor-not-allowed transition-all duration-300 text-sm md:text-base font-medium text-white"
         >
           Error
         </motion.button>
-      </div>
     );
   }
 
   return (
-    <div className="flex">
       <motion.button
-        onClick={handlePayNowBtn}
-        className="mx-1 border w-fit h-fit px-4 py-2 md:px-6 md:py-3 rounded-xl bg-[#FAAE04]/70 hover:bg-[#FAAE04]/90 transition-all duration-300 flex items-center gap-2 whitespace-nowrap text-sm md:text-base pr-56"
+          className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg bg-[#FAB609]/50 hover:bg-[#0193C0]/90 transition-all duration-300 text-sm md:text-base font-medium text-white"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={handlePayNowBtn}
       >
         Pay Now
       </motion.button>
-    </div>
   );
 };
 

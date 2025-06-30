@@ -953,13 +953,15 @@ const Verified = () => {
     {/* Buttons Section */}
     <div className="w-full lg:w-auto">
       <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center lg:justify-end">
-        <motion.button
-          className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300 text-sm md:text-base font-medium text-white"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          Pay Now
-        </motion.button>
+        <PaymentBtn 
+          currentUserId={currentUser?.uid} 
+          onCreditUpdate={(newCredit) => {
+            // Update the local state to reflect the new credit amount
+            setUserData(prev => [{
+              ...prev[0],
+              creditedAmount: newCredit
+            }]);
+          }} />
         <motion.button
           className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg bg-[#0193C0]/50 hover:bg-[#0193C0]/90 transition-all duration-300 text-sm md:text-base font-medium text-white"
           whileHover={{ scale: 1.02 }}
