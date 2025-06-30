@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/Auth";
 import {
@@ -23,7 +23,10 @@ import {
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
-import { getUserInfo , deleteUserInfo} from "../../api/documents-upload-aditya/page";
+import {
+  getUserInfo,
+  deleteUserInfo,
+} from "../../api/documents-upload-aditya/page";
 import { useRouter } from "next/navigation";
 import VerifiedPageSkeletonScreen from "@/components/VerifiedPageSkeletonScreen";
 import PaymentBtn from "@/components/PaymentBtn";
@@ -100,11 +103,15 @@ const Verified = () => {
   const [merchantData, setMerchantData] = useState<MerchantData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [expandedSections, setExpandedSections] = useState<ExpandedSections>({});
+  const [expandedSections, setExpandedSections] = useState<ExpandedSections>(
+    {}
+  );
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [scale, setScale] = useState(1);
-  const [recommendedMerchants, setRecommendedMerchants] = useState<MerchantData[]>([]);
+  const [recommendedMerchants, setRecommendedMerchants] = useState<
+    MerchantData[]
+  >([]);
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -158,18 +165,10 @@ const Verified = () => {
   }, [showRecommendations, recommendedMerchants]);
 
   useEffect(() => {
-    if (!currentUser?.uid) {
-      router.push("/login");
-      return;
-    }
-  }, [currentUser, router]);
-
-  useEffect(() => {
     if (currentUser?.uid) {
       fetchUserDetails();
     } else {
       setLoading(false);
-      setError("Please login to view verification status.");
       setUserData([]);
       setHasUserBackendProfile(false);
     }
@@ -228,14 +227,17 @@ const Verified = () => {
     const unsubscribe = onValue(transactionsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        const parsedTransactions: Transaction[] = Object.entries(data).map(([key, value]: [string, any]) => ({
-          id: key,
-          ...value,
-        }));
+        const parsedTransactions: Transaction[] = Object.entries(data).map(
+          ([key, value]: [string, any]) => ({
+            id: key,
+            ...value,
+          })
+        );
 
         // Sort by timestamp in descending order
         parsedTransactions.sort(
-          (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+          (a, b) =>
+            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         );
 
         setTransactions(parsedTransactions);
@@ -364,7 +366,6 @@ const Verified = () => {
   const fetchUserDetails = async () => {
     if (!currentUser?.uid) {
       console.error("currentUser or UID is not available.");
-      setError("Authentication required.");
       setLoading(false);
       return;
     }
@@ -581,7 +582,9 @@ const Verified = () => {
                       </span>
                     </div>
                     {merchantData.address && (
-                      <p className="mt-2 text-gray-400">{merchantData.address}</p>
+                      <p className="mt-2 text-gray-400">
+                        {merchantData.address}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -591,123 +594,132 @@ const Verified = () => {
 
           {/* Merchant Recommendations Carousel */}
           {showRecommendations && (
-          <motion.div
-            className="bg-gray-900/50 border mb-4 sm:mb-5 border-gray-800 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 shadow-2xl"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-          >
-            <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
-              <User className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-[#00ffb4]" />
-              <h3 className="text-base sm:text-lg md:text-xl font-semibold text-white">
-                Recommended Merchants
-              </h3>
-            </div>
-
-            <div
-              className="relative overflow-hidden"
-              onMouseEnter={() => {
-                setIsHovered(true);
-                stopCarousel();
-              }}
-              onMouseLeave={() => {
-                setIsHovered(false);
-                startCarousel();
-              }}
-              onTouchStart={handleTouchStart}
-              ref={carouselRef}
+            <motion.div
+              className="bg-gray-900/50 border mb-4 sm:mb-5 border-gray-800 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 shadow-2xl"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
             >
-              <div className="relative h-48 sm:h-56 md:h-64 w-full">
-                {recommendedMerchants.map((merchant, index) => (
-                  <motion.div
-                    key={merchant.id}
-                    className={`absolute inset-0 w-full h-full p-1 sm:p-2 ${
-                      index === activeIndex ? "z-10" : "z-0"
-                    }`}
-                    initial={{ opacity: 0, x: index === 0 ? 0 : 300 }}
-                    animate={{
-                      opacity: index === activeIndex ? 1 : 0.3,
-                      x:
-                        index === activeIndex
-                          ? 0
-                          : index < activeIndex
-                          ? -300
-                          : 300,
-                      scale: index === activeIndex ? 1 : 0.9,
-                    }}
-                    transition={{ duration: 0.5, ease: "easeInOut" }}
-                  >
-                    <div className="bg-gray-800/80 backdrop-blur-lg overflow-hidden rounded-lg border border-gray-700 h-full w-full p-3 sm:p-4 md:p-6 flex flex-col">
-                      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5 md:gap-6 mb-3 sm:mb-4">
-                        <motion.div
-                          className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-4 border-[#5EEAD4] shadow-lg flex-shrink-0"
-                          whileHover={{ scale: 1.05 }}
-                          transition={{ type: "spring", stiffness: 300 }}
-                        >
-                          <img
-                            src={merchant.photoUrl || "/logo.svg"}
-                            alt={merchant.companyName}
-                            className="w-full h-full object-cover"
-                          />
-                        </motion.div>
-                        <div className="flex-1 text-center sm:text-left">
-                          <h4 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-1 sm:mb-2 line-clamp-1">
-                            {merchant.companyName}
-                          </h4>
-                          <div className="flex items-center justify-center sm:justify-start gap-2 text-xs sm:text-sm md:text-base text-gray-400 mb-2 sm:mb-3">
-                            <User className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                            <span className="break-all line-clamp-1">{merchant.displayName}</span>
-                          </div>
-                          <div className="text-xs sm:text-sm text-gray-400">
-                            <div className="flex items-start justify-center sm:justify-start gap-2 mb-1">
-                              <span className="font-medium text-gray-200 flex-shrink-0">Address:</span>
-                              <span className="break-words line-clamp-2">{merchant.address}</span>
+              <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
+                <User className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-[#00ffb4]" />
+                <h3 className="text-base sm:text-lg md:text-xl font-semibold text-white">
+                  Recommended Merchants
+                </h3>
+              </div>
+
+              <div
+                className="relative overflow-hidden"
+                onMouseEnter={() => {
+                  setIsHovered(true);
+                  stopCarousel();
+                }}
+                onMouseLeave={() => {
+                  setIsHovered(false);
+                  startCarousel();
+                }}
+                onTouchStart={handleTouchStart}
+                ref={carouselRef}
+              >
+                <div className="relative h-48 sm:h-56 md:h-64 w-full">
+                  {recommendedMerchants.map((merchant, index) => (
+                    <motion.div
+                      key={merchant.id}
+                      className={`absolute inset-0 w-full h-full p-1 sm:p-2 ${
+                        index === activeIndex ? "z-10" : "z-0"
+                      }`}
+                      initial={{ opacity: 0, x: index === 0 ? 0 : 300 }}
+                      animate={{
+                        opacity: index === activeIndex ? 1 : 0.3,
+                        x:
+                          index === activeIndex
+                            ? 0
+                            : index < activeIndex
+                            ? -300
+                            : 300,
+                        scale: index === activeIndex ? 1 : 0.9,
+                      }}
+                      transition={{ duration: 0.5, ease: "easeInOut" }}
+                    >
+                      <div className="bg-gray-800/80 backdrop-blur-lg overflow-hidden rounded-lg border border-gray-700 h-full w-full p-3 sm:p-4 md:p-6 flex flex-col">
+                        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5 md:gap-6 mb-3 sm:mb-4">
+                          <motion.div
+                            className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-4 border-[#5EEAD4] shadow-lg flex-shrink-0"
+                            whileHover={{ scale: 1.05 }}
+                            transition={{ type: "spring", stiffness: 300 }}
+                          >
+                            <img
+                              src={merchant.photoUrl || "/logo.svg"}
+                              alt={merchant.companyName}
+                              className="w-full h-full object-cover"
+                            />
+                          </motion.div>
+                          <div className="flex-1 text-center sm:text-left">
+                            <h4 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-1 sm:mb-2 line-clamp-1">
+                              {merchant.companyName}
+                            </h4>
+                            <div className="flex items-center justify-center sm:justify-start gap-2 text-xs sm:text-sm md:text-base text-gray-400 mb-2 sm:mb-3">
+                              <User className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                              <span className="break-all line-clamp-1">
+                                {merchant.displayName}
+                              </span>
                             </div>
-                            <div className="flex items-center justify-center sm:justify-start gap-2">
-                              <span className="font-medium text-gray-200 flex-shrink-0">Phone:</span>
-                              <span className="break-all">{merchant.phoneNumber}</span>
+                            <div className="text-xs sm:text-sm text-gray-400">
+                              <div className="flex items-start justify-center sm:justify-start gap-2 mb-1">
+                                <span className="font-medium text-gray-200 flex-shrink-0">
+                                  Address:
+                                </span>
+                                <span className="break-words line-clamp-2">
+                                  {merchant.address}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-center sm:justify-start gap-2">
+                                <span className="font-medium text-gray-200 flex-shrink-0">
+                                  Phone:
+                                </span>
+                                <span className="break-all">
+                                  {merchant.phoneNumber}
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </div>
+
+                        <div className="mt-auto">
+                          <button
+                            onClick={() => handleConnectionRequest(merchant.id)}
+                            disabled={loading}
+                            className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 rounded-lg border border-teal-500/20 transition-colors text-xs sm:text-sm md:text-base font-medium"
+                          >
+                            {loading ? "Sending..." : "Request Connection"}
+                          </button>
+                        </div>
                       </div>
+                    </motion.div>
+                  ))}
+                </div>
 
-                      <div className="mt-auto">
-                        <button
-                          onClick={() => handleConnectionRequest(merchant.id)}
-                          disabled={loading}
-                          className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 rounded-lg border border-teal-500/20 transition-colors text-xs sm:text-sm md:text-base font-medium"
-                        >
-                          {loading ? "Sending..." : "Request Connection"}
-                        </button>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
+                {/* Navigation dots */}
+                <div className="flex justify-center mt-3 sm:mt-4 space-x-1 sm:space-x-2">
+                  {recommendedMerchants.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setActiveIndex(index);
+                        stopCarousel();
+                        setTimeout(startCarousel, mobilePauseDuration);
+                      }}
+                      className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all ${
+                        index === activeIndex
+                          ? "bg-teal-500 w-3 sm:w-4"
+                          : "bg-gray-600"
+                      }`}
+                      aria-label={`Go to slide ${index + 1}`}
+                    />
+                  ))}
+                </div>
               </div>
-
-              {/* Navigation dots */}
-              <div className="flex justify-center mt-3 sm:mt-4 space-x-1 sm:space-x-2">
-                {recommendedMerchants.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => {
-                      setActiveIndex(index);
-                      stopCarousel();
-                      setTimeout(startCarousel, mobilePauseDuration);
-                    }}
-                    className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all ${
-                      index === activeIndex
-                        ? "bg-teal-500 w-3 sm:w-4"
-                        : "bg-gray-600"
-                    }`}
-                    aria-label={`Go to slide ${index + 1}`}
-                  />
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        )}
-
+            </motion.div>
+          )}
 
           {hasUserBackendProfile && userProfile ? (
             <motion.div
@@ -832,7 +844,8 @@ const Verified = () => {
                               whileHover={{ scale: 1.02 }}
                               className="cursor-pointer"
                               onClick={() => {
-                                const url = userProfile.documents?.aadhaar?.downloadURL;
+                                const url =
+                                  userProfile.documents?.aadhaar?.downloadURL;
                                 if (url) {
                                   handleImageClick(url);
                                 }
@@ -873,7 +886,8 @@ const Verified = () => {
                               whileHover={{ scale: 1.02 }}
                               className="cursor-pointer"
                               onClick={() => {
-                                const url = userProfile.documents?.pan?.downloadURL;
+                                const url =
+                                  userProfile.documents?.pan?.downloadURL;
                                 if (url) {
                                   handleImageClick(url);
                                 }
@@ -933,46 +947,43 @@ const Verified = () => {
               ) : (
                 <>
                   <motion.div
-  className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-2xl p-6 shadow-2xl w-full"
-  initial={{ opacity: 0, y: 20 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.6, delay: 0.4 }}
->
-  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-12 w-full">
-    
-    {/* Credit Amount Section */}
-    <div className="text-center lg:text-left w-full lg:w-auto">
-      <h3 className="text-lg md:text-xl font-semibold text-white mb-2 flex items-center justify-center lg:justify-start">
-        Credit Spend
-      </h3>
-      <p className="text-4xl md:text-5xl lg:text-7xl font-bold text-[#FAB609] mb-4 lg:mb-8">
-        {`₹${String(userProfile?.creditedAmount)}`}
-      </p>
-    </div>
+                    className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-2xl p-6 shadow-2xl w-full"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.4 }}
+                  >
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-12 w-full">
+                      {/* Credit Amount Section */}
+                      <div className="text-center lg:text-left w-full lg:w-auto">
+                        <h3 className="text-lg md:text-xl font-semibold text-white mb-2 flex items-center justify-center lg:justify-start">
+                          Credit Spend
+                        </h3>
+                        <p className="text-4xl md:text-5xl lg:text-7xl font-bold text-[#FAB609] mb-4 lg:mb-8">
+                          {`₹${String(userProfile?.creditedAmount)}`}
+                        </p>
+                      </div>
 
-    {/* Buttons Section */}
-    <div className="w-full lg:w-auto">
-      <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center lg:justify-end">
-        <motion.button
-          className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300 text-sm md:text-base font-medium text-white"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          Pay Now
-        </motion.button>
-        <motion.button
-          className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg bg-[#0193C0]/50 hover:bg-[#0193C0]/90 transition-all duration-300 text-sm md:text-base font-medium text-white"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          EMI
-        </motion.button>
-      </div>
-    </div>
-
-  </div>
-</motion.div>
-
+                      {/* Buttons Section */}
+                      <div className="w-full lg:w-auto">
+                        <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center lg:justify-end">
+                          <motion.button
+                            className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300 text-sm md:text-base font-medium text-white"
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            Pay Now
+                          </motion.button>
+                          <motion.button
+                            className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg bg-[#0193C0]/50 hover:bg-[#0193C0]/90 transition-all duration-300 text-sm md:text-base font-medium text-white"
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            EMI
+                          </motion.button>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
 
                   {/* Transaction History */}
                   <motion.div
@@ -1032,10 +1043,13 @@ const Verified = () => {
                                     : "text-red-400"
                                 }`}
                               >
-                                {transaction.type === "credit_push" ? "+" : "-"}₹
+                                {transaction.type === "credit_push" ? "+" : "-"}
+                                ₹
                                 {transaction.paidAmount ||
                                   transaction.creditedAmount ||
-                                  (transaction.amount ? transaction.amount / 100 : 0)}
+                                  (transaction.amount
+                                    ? transaction.amount / 100
+                                    : 0)}
                               </p>
                             </div>
                           </motion.div>
@@ -1110,43 +1124,45 @@ const Verified = () => {
               </AnimatePresence>
 
               {/* Action Buttons */}
-              <div className="flex gap-4">
-                {(currentStatus === "rejected" ||
-                  currentStatus === "unknown") && (
-                  <>
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={handleReapply}
-                      className="flex-1 py-4 text-lg font-semibold text-gray-900 bg-gradient-to-r from-[#00FFB4] to-[#5EEAD4] rounded-xl hover:from-[#00FFB4]/90 hover:to-[#5EEAD4]/90 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#00FFB4] focus:ring-offset-2 focus:ring-offset-gray-900 shadow-lg"
-                    >
-                      Reapply for Verification
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={handleLogoutAndDeleteData}
-                      disabled={isDeleting}
-                      className={`flex-1 py-4 text-lg font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-900 shadow-lg ${
-                        isDeleting
-                          ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                          : "bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700"
-                      }`}
-                    >
-                      {isDeleting ? (
-                        <span className="flex items-center justify-center">
-                          <Clock className="animate-spin w-5 h-5 mr-2" />
-                          Deleting Data...
-                        </span>
-                      ) : (
-                        "Delete Your Data"
-                      )}
-                    </motion.button>
-                  </>
-                )}
-              </div>
+              {
+                <div className="flex gap-4">
+                  {(currentStatus === "rejected" ||
+                    currentStatus === "unknown") && (
+                    <>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleReapply}
+                        className="flex-1 py-4 text-lg font-semibold text-gray-900 bg-gradient-to-r from-[#00FFB4] to-[#5EEAD4] rounded-xl hover:from-[#00FFB4]/90 hover:to-[#5EEAD4]/90 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#00FFB4] focus:ring-offset-2 focus:ring-offset-gray-900 shadow-lg"
+                      >
+                        Reapply for Verification
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleLogoutAndDeleteData}
+                        disabled={isDeleting}
+                        className={`flex-1 py-4 text-lg font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-900 shadow-lg ${
+                          isDeleting
+                            ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                            : "bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700"
+                        }`}
+                      >
+                        {isDeleting ? (
+                          <span className="flex items-center justify-center">
+                            <Clock className="animate-spin w-5 h-5 mr-2" />
+                            Deleting Data...
+                          </span>
+                        ) : (
+                          "Delete Your Data"
+                        )}
+                      </motion.button>
+                    </>
+                  )}
+                </div>
+              }
             </motion.div>
-          ) : (
+          ) : !loading ? (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -1170,7 +1186,7 @@ const Verified = () => {
                 Reapply for Verification
               </motion.button>
             </motion.div>
-          )}
+          ) : null}
         </div>
       </main>
 
@@ -1242,8 +1258,7 @@ const Verified = () => {
           </motion.div>
         )}
       </AnimatePresence>
-      <div className="mt-10">
-      </div>
+      <div className="mt-10"></div>
     </>
   );
 };

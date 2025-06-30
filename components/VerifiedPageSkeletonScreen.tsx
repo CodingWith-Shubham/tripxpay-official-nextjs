@@ -9,7 +9,6 @@ const VerifiedPageSkeletonScreen: React.FC = () => {
   return (
     <>
       <div className="min-h-screen bg-gray-900">
-        <Navbar />
 
         {/* Background gradients */}
         <div className="fixed inset-0 pointer-events-none">
