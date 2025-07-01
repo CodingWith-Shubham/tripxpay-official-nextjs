@@ -79,7 +79,7 @@ const PaymentBtn: React.FC<PaymentBtnProps> = ({
       toast.error("User data not loaded");
       return;
     }
-
+  
     if (!userData.creditedAmount || userData.creditedAmount <= 0) {
       toast.error("No credit amount to pay");
       return;
