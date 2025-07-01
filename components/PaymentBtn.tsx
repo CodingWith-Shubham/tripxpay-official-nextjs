@@ -79,7 +79,7 @@ const PaymentBtn: React.FC<PaymentBtnProps> = ({
       toast.error("User data not loaded");
       return;
     }
-  
+
     if (!userData.creditedAmount || userData.creditedAmount <= 0) {
       toast.error("No credit amount to pay");
       return;
@@ -191,7 +191,7 @@ const PaymentBtn: React.FC<PaymentBtnProps> = ({
     return (
       <motion.button
         disabled
-        className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg mx-2 border w-fit h-fit p-3 rounded-xl bg-gray-400 cursor-not-allowed transition-all duration-300 text-sm md:text-base font-medium text-white"
+        className=" sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3  mx-2 border w-fit h-fit p-3 rounded-xl bg-gray-400 cursor-not-allowed transition-all duration-300 text-sm md:text-base font-medium text-white"
       >
         Loading...
       </motion.button>
@@ -202,7 +202,7 @@ const PaymentBtn: React.FC<PaymentBtnProps> = ({
     return (
       <motion.button
         disabled
-        className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg mx-2 border w-fit h-fit p-3 rounded-xl bg-gray-400 cursor-not-allowed transition-all duration-300 text-sm md:text-base font-medium text-white"
+        className=" sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3   mx-2 border w-fit h-fit p-3 rounded-xl bg-gray-400 cursor-not-allowed transition-all duration-300 text-sm md:text-base font-medium text-white"
       >
         Error
       </motion.button>
