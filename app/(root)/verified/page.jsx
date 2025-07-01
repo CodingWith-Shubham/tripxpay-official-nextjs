@@ -39,89 +39,27 @@ import {
   sendConnectionRequest,
 } from "../../api/fetchMerchantById/page";
 
-// TypeScript interfaces
-interface UserData {
-  uid: string;
-  displayName: string;
-  email: string;
-  photoUrl?: string;
-  phoneNumber?: string;
-  address?: string;
-  profession?: string;
-  fatherName?: string;
-  isEmailVerified: boolean;
-  isVerified: boolean;
-  creditedAmount: number;
-  submittedAt: any;
-  status: "pending" | "approved" | "rejected";
-  merchantRel?: string;
-  documents?: {
-    pan?: {
-      downloadURL: string;
-      type: string;
-      uploadedAt: any;
-    };
-    aadhaar?: {
-      downloadURL: string;
-      type: string;
-      uploadedAt: any;
-    };
-  };
-  faceAuth?: {
-    downloadURL: string;
-    uploaded: boolean;
-    uploadedAt: any;
-  };
-}
-
-interface MerchantData {
-  id: string;
-  companyName: string;
-  displayName: string;
-  photoUrl?: string;
-  address?: string;
-  phoneNumber?: string;
-}
-
-interface Transaction {
-  id: string;
-  type: "credit_push" | "credit_pull";
-  description?: string;
-  timestamp: string | number;
-  paidAmount?: number;
-  creditedAmount?: number;
-  amount?: number;
-}
-
-interface ExpandedSections {
-  [key: string]: boolean;
-}
-
 const Verified = () => {
   const router = useRouter();
   const { currentUser, logout } = useAuth();
-  const [userData, setUserData] = useState<UserData[]>([]);
-  const [merchantData, setMerchantData] = useState<MerchantData | null>(null);
+  const [userData, setUserData] = useState([]);
+  const [merchantData, setMerchantData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [expandedSections, setExpandedSections] = useState<ExpandedSections>(
-    {}
-  );
+  const [error, setError] = useState(null);
+  const [expandedSections, setExpandedSections] = useState({});
   const [isDeleting, setIsDeleting] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState(null);
   const [scale, setScale] = useState(1);
-  const [recommendedMerchants, setRecommendedMerchants] = useState<
-    MerchantData[]
-  >([]);
+  const [recommendedMerchants, setRecommendedMerchants] = useState([]);
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
-  const carouselRef = useRef<HTMLDivElement>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const carouselRef = useRef(null);
+  const intervalRef = useRef(null);
   const [hasUserBackendProfile, setHasUserBackendProfile] = useState(false);
-  const addressRef = useRef<HTMLSpanElement>(null);
+  const addressRef = useRef(null);
   const [isAddressOverflowing, setIsAddressOverflowing] = useState(false);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const transactionsPerPage = 5;
   const userId = currentUser?.uid;
@@ -176,7 +114,7 @@ const Verified = () => {
   }, [currentUser]);
 
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
+    const handleEscape = (e) => {
       if (e.key === "Escape") {
         handleCloseImage();
       }
@@ -188,7 +126,7 @@ const Verified = () => {
 
   useEffect(() => {
     if (selectedImage) {
-      const handleWheelEvent = (e: WheelEvent) => {
+      const handleWheelEvent = (e) => {
         if (e.ctrlKey) {
           e.preventDefault();
           const delta = e.deltaY;
@@ -228,12 +166,10 @@ const Verified = () => {
     const unsubscribe = onValue(transactionsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        const parsedTransactions: Transaction[] = Object.entries(data).map(
-          ([key, value]: [string, any]) => ({
-            id: key,
-            ...value,
-          })
-        );
+        const parsedTransactions = Object.entries(data).map(([key, value]) => ({
+          id: key,
+          ...value,
+        }));
 
         // Sort by timestamp in descending order
         parsedTransactions.sort(
@@ -250,7 +186,7 @@ const Verified = () => {
     return () => unsubscribe(); // cleanup listener
   }, [userId]);
 
-  const getVerificationStatus = (user: UserData): string => {
+  const getVerificationStatus = (user) => {
     if (!user) return "unknown";
     if (user.status === "pending" && user.isVerified === false)
       return "pending";
@@ -261,7 +197,7 @@ const Verified = () => {
     return "unknown";
   };
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status) => {
     switch (status) {
       case "verified":
         return <Check className="w-6 h-6 text-green-500" />;
@@ -274,7 +210,7 @@ const Verified = () => {
     }
   };
 
-  const getStatusText = (status: string): string => {
+  const getStatusText = (status) => {
     switch (status) {
       case "verified":
         return "Your verification has been approved!";
@@ -287,7 +223,7 @@ const Verified = () => {
     }
   };
 
-  const formatDate = (timestamp: string | number): string => {
+  const formatDate = (timestamp) => {
     if (!timestamp) return "N/A";
     const date = new Date(timestamp);
     return date.toLocaleDateString("en-US", {
@@ -297,7 +233,7 @@ const Verified = () => {
     });
   };
 
-  const toggleSection = (section: string) => {
+  const toggleSection = (section) => {
     setExpandedSections((prev) => ({
       ...prev,
       [section]: !prev[section],
@@ -357,7 +293,7 @@ const Verified = () => {
         router.push("/");
       }, 1500);
     } catch (error) {
-      console.error("Logout failed:", (error as Error).message);
+      console.error("Logout failed:", error.message);
       router.push("/");
     } finally {
       setIsDeleting(false);
@@ -379,7 +315,7 @@ const Verified = () => {
       const response = await getUserInfo(currentUser.uid);
 
       if (response && Object.keys(response).length > 0) {
-        setUserData([response as UserData]);
+        setUserData([response]);
         setHasUserBackendProfile(true);
       } else {
         setUserData([]);
@@ -390,7 +326,7 @@ const Verified = () => {
       }
     } catch (error) {
       console.error("Error fetching user details:", error);
-      setError("Failed to fetch user details: " + (error as Error).message);
+      setError("Failed to fetch user details: " + error.message);
       setUserData([]);
       setHasUserBackendProfile(false);
     } finally {
@@ -416,7 +352,7 @@ const Verified = () => {
     router.push("/verificationdashboard");
   };
 
-  const handleImageClick = (imageUrl: string) => {
+  const handleImageClick = (imageUrl) => {
     setSelectedImage(imageUrl);
     setScale(1);
   };
@@ -434,7 +370,7 @@ const Verified = () => {
     setScale((prev) => Math.max(prev - 0.25, 0.5));
   };
 
-  const handleWheel = (e: React.WheelEvent) => {
+  const handleWheel = (e) => {
     e.preventDefault();
     const delta = e.deltaY;
     if (delta < 0) {
@@ -444,7 +380,7 @@ const Verified = () => {
     }
   };
 
-  const handleConnectionRequest = async (merchantId: string) => {
+  const handleConnectionRequest = async (merchantId) => {
     try {
       setLoading(true);
       const responseconnection = sendConnectionRequest(
@@ -535,15 +471,15 @@ const Verified = () => {
 
       <main className="relative z-10 py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
-          <motion.h1 
+          <motion.h1
             className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-white mb-6 md:mb-8"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-           <TypewriterEffect 
-              texts={["Welcome", userProfile?.displayName || "User"]} 
-              className="inline-block" 
+            <TypewriterEffect
+              texts={["Welcome", userProfile?.displayName || "User"]}
+              className="inline-block"
             />
           </motion.h1>
           {merchantData && (
@@ -596,134 +532,137 @@ const Verified = () => {
             </motion.div>
           )}
 
-          {/* Merchant Recommendations Carousel */}
-          {showRecommendations && (
-            <motion.div
-              className="bg-gray-900/50 border mb-4 sm:mb-5 border-gray-800 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 shadow-2xl"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-            >
-              <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
-                <User className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-[#00ffb4]" />
-                <h3 className="text-base sm:text-lg md:text-xl font-semibold text-white">
-                  Recommended Merchants
-                </h3>
-              </div>
-
-              <div
-                className="relative overflow-hidden"
-                onMouseEnter={() => {
-                  setIsHovered(true);
-                  stopCarousel();
-                }}
-                onMouseLeave={() => {
-                  setIsHovered(false);
-                  startCarousel();
-                }}
-                onTouchStart={handleTouchStart}
-                ref={carouselRef}
+          {
+            // Merchant Recommendations Carousel
+            showRecommendations && (
+              <motion.div
+                className="bg-gray-900/50 border mb-4 sm:mb-5 border-gray-800 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 shadow-2xl"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
               >
-                <div className="relative h-48 sm:h-56 md:h-64 w-full">
-                  {recommendedMerchants.map((merchant, index) => (
-                    <motion.div
-                      key={merchant.id}
-                      className={`absolute inset-0 w-full h-full p-1 sm:p-2 ${
-                        index === activeIndex ? "z-10" : "z-0"
-                      }`}
-                      initial={{ opacity: 0, x: index === 0 ? 0 : 300 }}
-                      animate={{
-                        opacity: index === activeIndex ? 1 : 0.3,
-                        x:
-                          index === activeIndex
-                            ? 0
-                            : index < activeIndex
-                            ? -300
-                            : 300,
-                        scale: index === activeIndex ? 1 : 0.9,
-                      }}
-                      transition={{ duration: 0.5, ease: "easeInOut" }}
-                    >
-                      <div className="bg-gray-800/80 backdrop-blur-lg overflow-hidden rounded-lg border border-gray-700 h-full w-full p-3 sm:p-4 md:p-6 flex flex-col">
-                        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5 md:gap-6 mb-3 sm:mb-4">
-                          <motion.div
-                            className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-4 border-[#5EEAD4] shadow-lg flex-shrink-0"
-                            whileHover={{ scale: 1.05 }}
-                            transition={{ type: "spring", stiffness: 300 }}
-                          >
-                            <img
-                              src={merchant.photoUrl || "/logo.svg"}
-                              alt={merchant.companyName}
-                              className="w-full h-full object-cover"
-                            />
-                          </motion.div>
-                          <div className="flex-1 text-center sm:text-left">
-                            <h4 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-1 sm:mb-2 line-clamp-1">
-                              {merchant.companyName}
-                            </h4>
-                            <div className="flex items-center justify-center sm:justify-start gap-2 text-xs sm:text-sm md:text-base text-gray-400 mb-2 sm:mb-3">
-                              <User className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                              <span className="break-all line-clamp-1">
-                                {merchant.displayName}
-                              </span>
-                            </div>
-                            <div className="text-xs sm:text-sm text-gray-400">
-                              <div className="flex items-start justify-center sm:justify-start gap-2 mb-1">
-                                <span className="font-medium text-gray-200 flex-shrink-0">
-                                  Address:
-                                </span>
-                                <span className="break-words line-clamp-2">
-                                  {merchant.address}
+                <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
+                  <User className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-[#00ffb4]" />
+                  <h3 className="text-base sm:text-lg md:text-xl font-semibold text-white">
+                    Recommended Merchants
+                  </h3>
+                </div>
+
+                <div
+                  className="relative overflow-hidden"
+                  onMouseEnter={() => {
+                    setIsHovered(true);
+                    stopCarousel();
+                  }}
+                  onMouseLeave={() => {
+                    setIsHovered(false);
+                    startCarousel();
+                  }}
+                  onTouchStart={handleTouchStart}
+                  ref={carouselRef}
+                >
+                  <div className="relative h-48 sm:h-56 md:h-64 w-full">
+                    {recommendedMerchants.map((merchant, index) => (
+                      <motion.div
+                        key={merchant.id}
+                        className={`absolute inset-0 w-full h-full p-1 sm:p-2 ${
+                          index === activeIndex ? "z-10" : "z-0"
+                        }`}
+                        initial={{ opacity: 0, x: index === 0 ? 0 : 300 }}
+                        animate={{
+                          opacity: index === activeIndex ? 1 : 0.3,
+                          x:
+                            index === activeIndex
+                              ? 0
+                              : index < activeIndex
+                              ? -300
+                              : 300,
+                          scale: index === activeIndex ? 1 : 0.9,
+                        }}
+                        transition={{ duration: 0.5, ease: "easeInOut" }}
+                      >
+                        <div className="bg-gray-800/80 backdrop-blur-lg overflow-hidden rounded-lg border border-gray-700 h-full w-full p-3 sm:p-4 md:p-6 flex flex-col">
+                          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5 md:gap-6 mb-3 sm:mb-4">
+                            <motion.div
+                              className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-4 border-[#5EEAD4] shadow-lg flex-shrink-0"
+                              whileHover={{ scale: 1.05 }}
+                              transition={{ type: "spring", stiffness: 300 }}
+                            >
+                              <img
+                                src={merchant.photoUrl || "/logo.svg"}
+                                alt={merchant.companyName}
+                                className="w-full h-full object-cover"
+                              />
+                            </motion.div>
+                            <div className="flex-1 text-center sm:text-left">
+                              <h4 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-1 sm:mb-2 line-clamp-1">
+                                {merchant.companyName}
+                              </h4>
+                              <div className="flex items-center justify-center sm:justify-start gap-2 text-xs sm:text-sm md:text-base text-gray-400 mb-2 sm:mb-3">
+                                <User className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                                <span className="break-all line-clamp-1">
+                                  {merchant.displayName}
                                 </span>
                               </div>
-                              <div className="flex items-center justify-center sm:justify-start gap-2">
-                                <span className="font-medium text-gray-200 flex-shrink-0">
-                                  Phone:
-                                </span>
-                                <span className="break-all">
-                                  {merchant.phoneNumber}
-                                </span>
+                              <div className="text-xs sm:text-sm text-gray-400">
+                                <div className="flex items-start justify-center sm:justify-start gap-2 mb-1">
+                                  <span className="font-medium text-gray-200 flex-shrink-0">
+                                    Address:
+                                  </span>
+                                  <span className="break-words line-clamp-2">
+                                    {merchant.address}
+                                  </span>
+                                </div>
+                                <div className="flex items-center justify-center sm:justify-start gap-2">
+                                  <span className="font-medium text-gray-200 flex-shrink-0">
+                                    Phone:
+                                  </span>
+                                  <span className="break-all">
+                                    {merchant.phoneNumber}
+                                  </span>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
 
-                        <div className="mt-auto">
-                          <button
-                            onClick={() => handleConnectionRequest(merchant.id)}
-                            disabled={loading}
-                            className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 rounded-lg border border-teal-500/20 transition-colors text-xs sm:text-sm md:text-base font-medium"
-                          >
-                            {loading ? "Sending..." : "Request Connection"}
-                          </button>
+                          <div className="mt-auto">
+                            <button
+                              onClick={() =>
+                                handleConnectionRequest(merchant.id)
+                              }
+                              disabled={loading}
+                              className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 rounded-lg border border-teal-500/20 transition-colors text-xs sm:text-sm md:text-base font-medium"
+                            >
+                              {loading ? "Sending..." : "Request Connection"}
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    </motion.div>
-                  ))}
+                      </motion.div>
+                    ))}
+                  </div>
+                  // Navigation dots
+                  <div className="flex justify-center mt-3 sm:mt-4 space-x-1 sm:space-x-2">
+                    {recommendedMerchants.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => {
+                          setActiveIndex(index);
+                          stopCarousel();
+                          setTimeout(startCarousel, mobilePauseDuration);
+                        }}
+                        className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all ${
+                          index === activeIndex
+                            ? "bg-teal-500 w-3 sm:w-4"
+                            : "bg-gray-600"
+                        }`}
+                        aria-label={`Go to slide ${index + 1}`}
+                      />
+                    ))}
+                  </div>
                 </div>
-
-                {/* Navigation dots */}
-                <div className="flex justify-center mt-3 sm:mt-4 space-x-1 sm:space-x-2">
-                  {recommendedMerchants.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => {
-                        setActiveIndex(index);
-                        stopCarousel();
-                        setTimeout(startCarousel, mobilePauseDuration);
-                      }}
-                      className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all ${
-                        index === activeIndex
-                          ? "bg-teal-500 w-3 sm:w-4"
-                          : "bg-gray-600"
-                      }`}
-                      aria-label={`Go to slide ${index + 1}`}
-                    />
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          )}
+              </motion.div>
+            )
+          }
 
           {hasUserBackendProfile && userProfile ? (
             <motion.div
@@ -732,7 +671,7 @@ const Verified = () => {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="space-y-6"
             >
-              {/* User Profile Section */}
+              // User Profile Section
               <div className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-2xl">
                 <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 mb-4 sm:mb-6">
                   <motion.div
@@ -745,7 +684,7 @@ const Verified = () => {
                       alt={userProfile.displayName || "User"}
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        const target = e.target as HTMLImageElement;
+                        const target = e.target;
                         target.onerror = null;
                         target.src = "/logo.svg";
                       }}
@@ -792,8 +731,7 @@ const Verified = () => {
                   </motion.div>
                 </div>
               </div>
-
-              {/* Conditional rendering based on verification status */}
+              // Conditional rendering based on verification status
               {currentStatus !== "verified" ? (
                 <motion.div
                   className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-2xl mt-4"
@@ -828,7 +766,7 @@ const Verified = () => {
                         transition={{ duration: 0.3 }}
                         className="mt-3 sm:mt-4 space-y-3 sm:space-y-4"
                       >
-                        {/* Aadhaar Card */}
+                        // Aadhaar Card
                         <motion.div
                           className="bg-gray-800/50 border border-gray-700 p-3 sm:p-4 rounded-xl"
                           whileHover={{ scale: 1.02 }}
@@ -865,8 +803,7 @@ const Verified = () => {
                             </motion.div>
                           </div>
                         </motion.div>
-
-                        {/* PAN Card */}
+                        // PAN Card
                         <motion.div
                           className="bg-gray-800/50 border border-gray-700 p-3 sm:p-4 rounded-xl"
                           whileHover={{ scale: 1.02 }}
@@ -905,8 +842,7 @@ const Verified = () => {
                             </motion.div>
                           </div>
                         </motion.div>
-
-                        {/* Face Verification */}
+                        // Face Verification
                         <motion.div
                           className="bg-gray-800/50 border border-gray-700 p-3 sm:p-4 rounded-xl"
                           whileHover={{ scale: 1.02 }}
@@ -951,33 +887,55 @@ const Verified = () => {
               ) : (
                 <>
                   <motion.div
-  className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-2xl p-6 shadow-2xl w-full"
-  initial={{ opacity: 0, y: 20 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.6, delay: 0.4 }}
->
-  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-12 w-full">
-    
-    {/* Credit Amount Section */}
-    <div className="text-center lg:text-left w-full lg:w-auto">
-      <h3 className="text-lg md:text-xl font-semibold text-white mb-2 flex items-center justify-center lg:justify-start">
-        Credit Spend
-      </h3>
-      <p className="text-4xl md:text-5xl lg:text-7xl font-bold text-[#FAB609] mb-4 lg:mb-8">
-        {`₹${String(userProfile?.creditedAmount)}`}
-      </p>
-    </div>
-
-                      {/* Buttons Section */}
+                    className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-2xl p-6 shadow-2xl w-full"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.4 }}
+                  >
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-12 w-full">
+                      // Credit Amount Section
+                      <div className="text-center lg:text-left w-full lg:w-auto">
+                        <h3 className="text-lg md:text-xl font-semibold text-white mb-2 flex items-center justify-center lg:justify-start">
+                          Credit Spend
+                        </h3>
+                        <p className="text-4xl md:text-5xl lg:text-7xl font-bold text-[#FAB609] mb-4 lg:mb-8">
+                          {`₹${String(userProfile?.creditedAmount)}`}
+                        </p>
+                      </div>
+                      // Buttons Section
                       <div className="w-full lg:w-auto">
                         <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center lg:justify-end">
-                          <motion.button
-                            className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300 text-sm md:text-base font-medium text-white"
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                          >
-                            Pay Now
-                          </motion.button>
+                          <PaymentBtn
+                            currentUserId={currentUser?.uid}
+                            onCreditUpdate={(newCredit) => {
+                              setUserData((prev) =>
+                                prev.length > 0
+                                  ? [
+                                      {
+                                        uid: prev[0].uid,
+                                        displayName: prev[0].displayName,
+                                        email: prev[0].email,
+                                        isEmailVerified:
+                                          prev[0].isEmailVerified,
+                                        isVerified: prev[0].isVerified,
+                                        creditedAmount: newCredit,
+                                        submittedAt: prev[0].submittedAt,
+                                        status: prev[0].status,
+                                        // Optional fields
+                                        photoUrl: prev[0].photoUrl,
+                                        phoneNumber: prev[0].phoneNumber,
+                                        address: prev[0].address,
+                                        profession: prev[0].profession,
+                                        fatherName: prev[0].fatherName,
+                                        merchantRel: prev[0].merchantRel,
+                                        documents: prev[0].documents,
+                                        faceAuth: prev[0].faceAuth,
+                                      },
+                                    ]
+                                  : prev
+                              );
+                            }}
+                          />
                           <motion.button
                             className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg bg-[#0193C0]/50 hover:bg-[#0193C0]/90 transition-all duration-300 text-sm md:text-base font-medium text-white"
                             whileHover={{ scale: 1.02 }}
@@ -989,33 +947,7 @@ const Verified = () => {
                       </div>
                     </div>
                   </motion.div>
-    {/* Buttons Section */}
-    <div className="w-full lg:w-auto">
-      <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center lg:justify-end">
-        <PaymentBtn 
-          currentUserId={currentUser?.uid} 
-          onCreditUpdate={(newCredit) => {
-            // Update the local state to reflect the new credit amount
-            setUserData(prev => [{
-              ...prev[0],
-              creditedAmount: newCredit
-            }]);
-          }} />
-        <motion.button
-          className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg bg-[#0193C0]/50 hover:bg-[#0193C0]/90 transition-all duration-300 text-sm md:text-base font-medium text-white"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          EMI
-        </motion.button>
-      </div>
-    </div>
-
-  </div>
-</motion.div>
-
-
-                  {/* Transaction History */}
+                  // Transaction History
                   <motion.div
                     className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 shadow-2xl"
                     initial={{ opacity: 0, y: 20 }}
@@ -1110,8 +1042,7 @@ const Verified = () => {
                   </motion.div>
                 </>
               )}
-
-              {/* Status Messages */}
+              // Status Messages
               <AnimatePresence>
                 {currentStatus === "pending" && (
                   <motion.div
@@ -1152,8 +1083,7 @@ const Verified = () => {
                   </motion.div>
                 )}
               </AnimatePresence>
-
-              {/* Action Buttons */}
+              // Action Buttons
               {
                 <div className="flex gap-4">
                   {(currentStatus === "rejected" ||
