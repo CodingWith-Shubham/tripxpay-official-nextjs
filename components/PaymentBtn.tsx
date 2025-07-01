@@ -1,200 +1,224 @@
-// import React, { useEffect, useState } from "react";
-// import { motion } from "framer-motion";
-// import { toast } from "sonner";
-// import {
-//   loadRazorpayScript,
-//   getCurrentCredit,
-//   updateUserCreditAmount,
-//   uploadTransactionInfo,
-//   getUserInfo,
-// } from "../services/payment";
+"use client";
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { toast } from "sonner";
 
-// const PaymentBtn = ({ currentUserId, onCreditUpdate }) => {
-//   const [userData, setUserData] = useState(null);
-//   const [isLoading, setIsLoading] = useState(true);
-//   const [error, setError] = useState(null);
+// TypeScript interfaces
+interface UserData {
+  id: string;
+  displayName?: string;
+  email: string;
+  phoneNumber?: string;
+  address?: string;
+  creditedAmount: number;
+}
 
-//   useEffect(() => {
-//     const fetchDetails = async () => {
-//       if (!currentUserId) {
-//         setError("User ID is required");
-//         setIsLoading(false);
-//         return;
-//       }
+interface PaymentBtnProps {
+  currentUserId?: string | undefined;
+  onCreditUpdate?: (newCredit: number) => void;
+}
 
-//       try {
-//         setIsLoading(true);
-//         setError(null);
-//         // console.log(`currentUserId : ${currentUserId}`);
-//         const response = await getUserInfo(currentUserId);
-//         // console.log(`response : ${response}`);
+interface RazorpayResponse {
+  razorpay_payment_id?: string;
+  razorpay_order_id?: string;
+  razorpay_signature?: string;
+}
 
-//         if (!response) {
-//           throw new Error("No user data found");
-//         }
+// Extend Window interface for Razorpay
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
-//         console.log("Fetched user data:", response);
-//         setUserData({ ...response, id: currentUserId });
-//       } catch (error) {
-//         console.error("Error fetching user info:", error);
-//         setError(error.message || "Failed to load user info");
-//         toast.error("Failed to load user info");
-//       } finally {
-//         setIsLoading(false);
-//       }
-//     };
-//     fetchDetails();
-//   }, [currentUserId]);
+const PaymentBtn: React.FC<PaymentBtnProps> = ({
+  currentUserId,
+  onCreditUpdate,
+}) => {
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-//   const handlePayNowBtn = async () => {
-//     // console.log(`userData : ${userData.id}`);
-//     if (!userData) {
-//       toast.error("User data not loaded");
-//       return;
-//     }
+  useEffect(() => {
+    const fetchDetails = async () => {
+      if (!currentUserId) {
+        setError("User ID is required");
+        setIsLoading(false);
+        return;
+      }
 
-//     if (!userData.creditedAmount || userData.creditedAmount <= 0) {
-//       toast.error("No credit amount to pay");
-//       return;
-//     }
+      try {
+        setIsLoading(true);
+        setError(null);
+        // console.log(`currentUserId : ${currentUserId}`);
+        const { data } = await fetch(`/api/getuserdata?uid=${currentUserId}`, {
+          method: "POST",
+        }).then((res) => res.json());
+        // console.log(`response : ${response}`);
 
-//     try {
-//       const scriptLoaded = await loadRazorpayScript();
-//       if (!scriptLoaded) {
-//         toast.error("Failed to load Razorpay script");
-//         return;
-//       }
+        if (!data) {
+          throw new Error("No user data found");
+        }
 
-//       const amountToPay = userData.creditedAmount * 100;
+        // console.log("Fetched user data:", response);
+        setUserData({ ...data, id: currentUserId });
+      } catch (error) {
+        console.error("Error fetching user info:", error);
+        setError((error as Error).message || "Failed to load user info");
+        toast.error("Failed to load user info");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchDetails();
+  }, [currentUserId]);
 
-//       const transactionInfo = {
-//         name: userData.displayName || "User",
-//         email: userData.email,
-//         phone: userData.phoneNumber,
-//         address: userData.address,
-//         userId: userData.id,
-//         date: new Date().toLocaleString("en-IN"),
-//         amount: amountToPay,
-//       };
+  const handlePayNowBtn = async () => {
+    // console.log(`userData : ${userData.id}`);
+    if (!userData) {
+      toast.error("User data not loaded");
+      return;
+    }
 
-//       const options = {
-//         key: process.env.RAZORPAY_API_KEY || "rzp_test_2u2uO4phE3V6TC",
-//         amount: amountToPay,
-//         currency: "INR",
-//         name: "TripXPay",
-//         description: "TripXPay Credit Payment",
-//         handler: async function (response) {
-//           console.log("Razorpay handler response:", response);
-//           try {
-//             // Get the latest credit amount after payment
-//             const currentCredit = await getCurrentCredit(userData.id);
-//             const paidAmount = amountToPay / 100;
-//             const newAmount = currentCredit - paidAmount;
+    if (!userData.creditedAmount || userData.creditedAmount <= 0) {
+      toast.error("No credit amount to pay");
+      return;
+    }
 
-//             await updateUserCreditAmount(userData.id, newAmount);
+    try {
+      const amountToPay = userData.creditedAmount * 100;
 
-//             const orderInfo = {
-//               ...transactionInfo,
-//               paymentID: response.razorpay_payment_id ?? "",
-//               orderID: response.razorpay_order_id ?? "",
-//               signature: response.razorpay_signature ?? "",
-//               paidAmount,
-//               newCreditAmount: newAmount,
-//               type: "payment",
-//             };
+      const transactionInfo = {
+        name: userData.displayName || "User",
+        email: userData.email,
+        phone: userData.phoneNumber,
+        address: userData.address,
+        userId: userData.id,
+        date: new Date().toLocaleString("en-IN"),
+        amount: amountToPay,
+      };
 
-//             // Upload transaction info and wait for response
-//             console.log("Calling uploadTransactionInfo with:", {
-//               userId: userData.id,
-//               orderInfo,
-//             });
-//             const uploadResult = await uploadTransactionInfo(
-//               userData.id,
-//               orderInfo
-//             );
-//             if (!uploadResult.success) {
-//               throw new Error("Failed to record transaction");
-//             }
+      const options = {
+        key: process.env.RAZORPAY_API_KEY || "rzp_test_2u2uO4phE3V6TC",
+        amount: amountToPay,
+        currency: "INR",
+        name: "TripXPay",
+        description: "TripXPay Credit Payment",
+        handler: async function (response: RazorpayResponse) {
+          // console.log('Razorpay handler response:', response);
+          try {
+            // Get the latest credit amount after payment
+            const { currentCredit } = await fetch(
+              `/api/getcreditamount?uid=${userData?.id}`,
+              { method: "POST" }
+            ).then((res) => res.json());
+            const paidAmount = amountToPay / 100;
+            const newAmount = currentCredit - paidAmount;
 
-//             console.log("Transaction recorded successfully:", uploadResult);
+            await fetch(
+              `/api/updatecredit?amount=${newAmount}&userid=${userData.id}`,
+              { method: "POST" }
+            );
+            const orderInfo = {
+              ...transactionInfo,
+              paymentID: response.razorpay_payment_id ?? "",
+              orderID: response.razorpay_order_id ?? "",
+              signature: response.razorpay_signature ?? "",
+              paidAmount,
+              newCreditAmount: newAmount,
+              type: "payment",
+            };
 
-//             // Fetch the latest user data to ensure we have the most up-to-date information
-//             const updatedUserData = await getUserInfo(userData.id);
-//             if (updatedUserData) {
-//               setUserData({ ...updatedUserData, id: userData.id });
-//             }
+            // Upload transaction info and wait for response
+            // console.log('Calling uploadTransactionInfo with:', {
+            //   userId: userData.id,
+            //   orderInfo
+            // });
+            const uploadResult = await fetch(
+              `/api/updatetransaction?userid=${userData.id}`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ orderinfo: orderInfo }),
+              }
+            ).then((res) => res.json());
+            if (!uploadResult.success) {
+              throw new Error("Failed to record transaction");
+            }
 
-//             toast.success("Payment successful and credit updated");
+            // console.log('Transaction recorded successfully:', uploadResult);
 
-//             if (onCreditUpdate) {
-//               onCreditUpdate(newAmount);
-//             }
-//           } catch (err) {
-//             console.error(err);
-//             toast.error("Payment succeeded but credit update failed");
-//           }
-//         },
-//         prefill: {
-//           name: userData.displayName || "User",
-//           email: userData.email,
-//           contact: userData.phoneNumber,
-//         },
-//         theme: {
-//           color: "#051726",
-//         },
-//       };
+            // Fetch the latest user data to ensure we have the most up-to-date information
+            const { data } = await fetch(
+              `/api/getuserdata?uid=${userData.id}`,
+              { method: "POST" }
+            ).then((res) => res.json());
+            if (data) {
+              setUserData({ ...data, id: userData.id });
+            }
 
-//       const rzp = new window.Razorpay(options);
-//       rzp.open();
-//     } catch (error) {
-//       console.error("Error initiating payment:", error);
-//       toast.error("Failed to initiate payment");
-//     }
-//   };
+            toast.success("Payment successful and credit updated");
 
-//   if (isLoading) {
-//     return (
-//       <div className="flex">
-//         <motion.button
-//           disabled
-//           className="mx-2 border w-fit h-fit p-3 rounded-xl bg-gray-400 cursor-not-allowed"
-//         >
-//           Loading...
-//         </motion.button>
-//       </div>
-//     );
-//   }
+            if (onCreditUpdate) {
+              onCreditUpdate(newAmount);
+            }
+          } catch (err) {
+            console.error(err);
+            toast.error("Payment succeeded but credit update failed");
+          }
+        },
+        prefill: {
+          name: userData.displayName || "User",
+          email: userData.email,
+          contact: userData.phoneNumber,
+        },
+        theme: {
+          color: "#051726",
+        },
+      };
 
-//   if (error) {
-//     return (
-//       <div className="flex">
-//         <motion.button
-//           disabled
-//           className="mx-2 border w-fit h-fit p-3 rounded-xl bg-red-400 cursor-not-allowed"
-//         >
-//           Error
-//         </motion.button>
-//       </div>
-//     );
-//   }
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (error) {
+      console.error("Error initiating payment:", error);
+      toast.error("Failed to initiate payment");
+    }
+  };
 
-//   return (
-//     <div className="flex w-full">
-//       <motion.button
-//         onClick={handlePayNowBtn}
-//         className="w-full border px-4 py-3 md:px-6 md:py-3 rounded-lg bg-[#FAAE04]/70 hover:bg-[#FAAE04]/90 transition-all duration-300 flex items-center justify-center gap-2 whitespace-nowrap text-sm md:text-base"
-//       >
-//         Pay Now
-//       </motion.button>
-//     </div>
-//   );
-// };
+  if (isLoading) {
+    return (
+      <motion.button
+        disabled
+        className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg mx-2 border w-fit h-fit p-3 rounded-xl bg-gray-400 cursor-not-allowed transition-all duration-300 text-sm md:text-base font-medium text-white"
+      >
+        Loading...
+      </motion.button>
+    );
+  }
 
-// export default PaymentBtn;
-import React from "react";
+  if (error) {
+    return (
+      <motion.button
+        disabled
+        className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg mx-2 border w-fit h-fit p-3 rounded-xl bg-gray-400 cursor-not-allowed transition-all duration-300 text-sm md:text-base font-medium text-white"
+      >
+        Error
+      </motion.button>
+    );
+  }
 
-const PaymentBtn = () => {
-  return <div>PaymentBtn</div>;
+  return (
+    <motion.button
+      className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg bg-[#FAB609]/50 hover:bg-[#0193C0]/90 transition-all duration-300 text-sm md:text-base font-medium text-white"
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      onClick={handlePayNowBtn}
+    >
+      Pay Now
+    </motion.button>
+  );
 };
 
 export default PaymentBtn;

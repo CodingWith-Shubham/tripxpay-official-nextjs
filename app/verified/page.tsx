@@ -953,13 +953,36 @@ const Verified: React.FC = () => {
                       {/* Buttons Section */}
                       <div className="w-full lg:w-auto">
                         <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 min-w-0 lg:min-w-[300px]">
-                          <motion.button
-                            className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg bg-[#0193C0]/50 hover:bg-[#0193C0]/90 transition-all duration-300 text-sm md:text-base font-medium text-white"
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                          >
-                            Pay Now
-                          </motion.button>
+                          <PaymentBtn
+                            currentUserId={userProfile?.uid}
+                            onCreditUpdate={(newCredit) => {
+                              setUserData((prev) => {
+                                if (!prev[0]) return prev;
+                                return [
+                                  {
+                                    uid: prev[0].uid,
+                                    displayName: prev[0].displayName,
+                                    email: prev[0].email,
+                                    phoneNumber: prev[0].phoneNumber,
+                                    photoUrl: prev[0].photoUrl || "",
+                                    status: prev[0].status,
+                                    isVerified: prev[0].isVerified,
+                                    creditedAmount: newCredit,
+                                    merchantRel: prev[0].merchantRel || "",
+                                    documents: prev[0].documents
+                                      ? prev[0].documents
+                                      : {
+                                          aadhaar: { downloadURL: "" },
+                                          pan: { downloadURL: "" },
+                                        },
+                                    faceAuth: prev[0].faceAuth
+                                      ? prev[0].faceAuth
+                                      : { downloadURL: "" },
+                                  },
+                                ];
+                              });
+                            }}
+                          />
                           <motion.button
                             className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg bg-[#0193C0]/50 hover:bg-[#0193C0]/90 transition-all duration-300 text-sm md:text-base font-medium text-white"
                             whileHover={{ scale: 1.02 }}
