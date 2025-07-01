@@ -38,6 +38,7 @@ import {
   getRecommendedMerchants,
   sendConnectionRequest,
 } from "../../api/fetchMerchantById/page";
+import Image from "next/image";
 
 const Verified = () => {
   const router = useRouter();
@@ -311,6 +312,8 @@ const Verified = () => {
       return;
     }
 
+    setLoading(true);
+
     try {
       setError(null);
       setHasUserBackendProfile(false);
@@ -473,17 +476,19 @@ const Verified = () => {
 
       <main className="relative z-10 py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
-          <motion.h1
-            className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-white mb-6 md:mb-8"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <TypewriterEffect
-              texts={["Welcome", userProfile?.displayName || "User"]}
-              className="inline-block"
-            />
-          </motion.h1>
+          {!loading && hasUserBackendProfile && userProfile && (
+            <motion.h1
+              className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-white mb-6 md:mb-8"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <TypewriterEffect
+                texts={["Welcome", userProfile?.displayName || "User"]}
+                className="inline-block"
+              />
+            </motion.h1>
+          )}
           {merchantData && (
             <motion.div
               className="bg-gray-900/50 border border-gray-800 mb-5 backdrop-blur-sm rounded-2xl p-6 shadow-2xl"
@@ -501,7 +506,9 @@ const Verified = () => {
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
-                  <img
+                  <Image
+                    width={500}
+                    height={500}
                     src={merchantData.photoUrl || "/logo.svg"}
                     alt={merchantData.companyName || "Merchant"}
                     className="w-full h-full object-cover"
@@ -590,7 +597,9 @@ const Verified = () => {
                               whileHover={{ scale: 1.05 }}
                               transition={{ type: "spring", stiffness: 300 }}
                             >
-                              <img
+                              <Image
+                                width={500}
+                                height={500}
                                 src={merchant.photoUrl || "/logo.svg"}
                                 alt={merchant.companyName}
                                 className="w-full h-full object-cover"
@@ -681,7 +690,9 @@ const Verified = () => {
                     whileHover={{ scale: 1.05 }}
                     transition={{ type: "spring", stiffness: 300 }}
                   >
-                    <img
+                    <Image
+                      width={500}
+                      height={500}
                       src={userProfile.photoUrl || "/logo.svg"}
                       alt={userProfile.displayName || "User"}
                       className="w-full h-full object-cover"
@@ -795,7 +806,9 @@ const Verified = () => {
                                 }
                               }}
                             >
-                              <img
+                              <Image
+                                width={500}
+                                height={500}
                                 src={
                                   userProfile.documents?.aadhaar?.downloadURL
                                 }
@@ -836,7 +849,9 @@ const Verified = () => {
                                 }
                               }}
                             >
-                              <img
+                              <Image
+                                width={500}
+                                height={500}
                                 src={userProfile.documents?.pan?.downloadURL}
                                 alt="PAN Document"
                                 className="w-full max-w-xs sm:max-w-md h-40 sm:h-48 object-contain rounded-lg border border-gray-600 hover:border-[#00ffb4] transition-colors"
@@ -874,7 +889,9 @@ const Verified = () => {
                                 }
                               }}
                             >
-                              <img
+                              <Image
+                                width={500}
+                                height={500}
                                 src={userProfile.faceAuth?.downloadURL}
                                 alt="Face Verification"
                                 className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-full border border-gray-600 hover:border-[#00ffb4] transition-colors"
@@ -1181,7 +1198,9 @@ const Verified = () => {
                 style={{ scale }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
               >
-                <img
+                <Image
+                  width={500}
+                  height={500}
                   src={selectedImage}
                   alt="Document preview"
                   className="w-full h-full object-contain select-none"
