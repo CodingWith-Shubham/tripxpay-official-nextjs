@@ -1205,4 +1205,11 @@ const LoginPageContent = () => {
   );
 };
 
-export default LoginPageContent;
+const LoginPage = () => {
+  return (
+    <Suspense fallback={<div className="animate-bounce">Loading...</div>}>
+      <LoginPageContent />
+    </Suspense>
+  );
+};
+export default LoginPage;
