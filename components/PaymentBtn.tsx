@@ -1,7 +1,7 @@
-"use client"
+"use client";
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import {
   loadRazorpayScript,
   getCurrentCredit,
@@ -38,7 +38,10 @@ declare global {
   }
 }
 
-const PaymentBtn: React.FC<PaymentBtnProps> = ({ currentUserId, onCreditUpdate }) => {
+const PaymentBtn: React.FC<PaymentBtnProps> = ({
+  currentUserId,
+  onCreditUpdate,
+}) => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +60,7 @@ const PaymentBtn: React.FC<PaymentBtnProps> = ({ currentUserId, onCreditUpdate }
         // console.log(`currentUserId : ${currentUserId}`);
         const response = await getUserInfo(currentUserId);
         // console.log(`response : ${response}`);
-        
+
         if (!response) {
           throw new Error("No user data found");
         }
@@ -107,7 +110,7 @@ const PaymentBtn: React.FC<PaymentBtnProps> = ({ currentUserId, onCreditUpdate }
       };
 
       const options = {
-        key: process.env.RAZORPAY_API_KEY ||"rzp_test_2u2uO4phE3V6TC",
+        key: process.env.RAZORPAY_API_KEY || "rzp_test_2u2uO4phE3V6TC",
         amount: amountToPay,
         currency: "INR",
         name: "TripXPay",
@@ -124,12 +127,12 @@ const PaymentBtn: React.FC<PaymentBtnProps> = ({ currentUserId, onCreditUpdate }
 
             const orderInfo = {
               ...transactionInfo,
-              paymentID: response.razorpay_payment_id ?? '',
-              orderID: response.razorpay_order_id ?? '',
-              signature: response.razorpay_signature ?? '',
+              paymentID: response.razorpay_payment_id ?? "",
+              orderID: response.razorpay_order_id ?? "",
+              signature: response.razorpay_signature ?? "",
               paidAmount,
               newCreditAmount: newAmount,
-              type:"payment",
+              type: "payment",
             };
 
             // Upload transaction info and wait for response
@@ -137,9 +140,12 @@ const PaymentBtn: React.FC<PaymentBtnProps> = ({ currentUserId, onCreditUpdate }
             //   userId: userData.id,
             //   orderInfo
             // });
-            const uploadResult = await uploadTransactionInfo(userData.id, orderInfo);
+            const uploadResult = await uploadTransactionInfo(
+              userData.id,
+              orderInfo
+            );
             if (!uploadResult.success) {
-              throw new Error('Failed to record transaction');
+              throw new Error("Failed to record transaction");
             }
 
             // console.log('Transaction recorded successfully:', uploadResult);
@@ -149,7 +155,7 @@ const PaymentBtn: React.FC<PaymentBtnProps> = ({ currentUserId, onCreditUpdate }
             if (updatedUserData) {
               setUserData({ ...updatedUserData, id: userData.id });
             }
-            
+
             toast.success("Payment successful and credit updated");
 
             if (onCreditUpdate) {
@@ -180,35 +186,35 @@ const PaymentBtn: React.FC<PaymentBtnProps> = ({ currentUserId, onCreditUpdate }
 
   if (isLoading) {
     return (
-        <motion.button
-            disabled
-            className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg mx-2 border w-fit h-fit p-3 rounded-xl bg-gray-400 cursor-not-allowed transition-all duration-300 text-sm md:text-base font-medium text-white"
-        >
-          Loading...
-        </motion.button>
+      <motion.button
+        disabled
+        className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg mx-2 border w-fit h-fit p-3 rounded-xl bg-gray-400 cursor-not-allowed transition-all duration-300 text-sm md:text-base font-medium text-white"
+      >
+        Loading...
+      </motion.button>
     );
   }
 
   if (error) {
     return (
-        <motion.button
-            disabled
-            className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg mx-2 border w-fit h-fit p-3 rounded-xl bg-gray-400 cursor-not-allowed transition-all duration-300 text-sm md:text-base font-medium text-white"
-        >
-          Error
-        </motion.button>
+      <motion.button
+        disabled
+        className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg mx-2 border w-fit h-fit p-3 rounded-xl bg-gray-400 cursor-not-allowed transition-all duration-300 text-sm md:text-base font-medium text-white"
+      >
+        Error
+      </motion.button>
     );
   }
 
   return (
-      <motion.button
-          className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg bg-[#FAB609]/50 hover:bg-[#0193C0]/90 transition-all duration-300 text-sm md:text-base font-medium text-white"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={handlePayNowBtn}
-      >
-        Pay Now
-      </motion.button>
+    <motion.button
+      className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg bg-[#FAB609]/50 hover:bg-[#0193C0]/90 transition-all duration-300 text-sm md:text-base font-medium text-white"
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      onClick={handlePayNowBtn}
+    >
+      Pay Now
+    </motion.button>
   );
 };
 
