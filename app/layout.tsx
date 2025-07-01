@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/Auth";
 import Head from "next/head";
+import { ConsumerOrMerchantProvider } from "@/contexts/ConsumerOrMerchantContext";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -80,7 +81,9 @@ export default function RootLayout({
         />
       </Head>
       <body className={`${spaceGrotesk.variable} ${inter.variable}`}>
-        <AuthProvider>{children}</AuthProvider>
+        <ConsumerOrMerchantProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </ConsumerOrMerchantProvider>
         <Toaster
           style={{
             backgroundColor: "#172533",

@@ -32,6 +32,7 @@ import VerifiedPageSkeletonScreen from "@/components/VerifiedPageSkeletonScreen"
 import PaymentBtn from "@/components/PaymentBtn";
 import { ref, onValue } from "firebase/database";
 import { database } from "@/lib/firebase";
+import TypewriterEffect from "@/components/TypewriterEffect";
 import {
   fetchMerchantById,
   getRecommendedMerchants,
@@ -534,13 +535,16 @@ const Verified = () => {
 
       <main className="relative z-10 py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
-          <motion.h1
-            className="text-4xl font-bold text-center text-white mb-8"
+          <motion.h1 
+            className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-white mb-6 md:mb-8"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            Dashboard
+           <TypewriterEffect 
+              texts={["Welcome", userProfile?.displayName || "User"]} 
+              className="inline-block" 
+            />
           </motion.h1>
           {merchantData && (
             <motion.div
@@ -947,21 +951,22 @@ const Verified = () => {
               ) : (
                 <>
                   <motion.div
-                    className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-2xl p-6 shadow-2xl w-full"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.4 }}
-                  >
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-12 w-full">
-                      {/* Credit Amount Section */}
-                      <div className="text-center lg:text-left w-full lg:w-auto">
-                        <h3 className="text-lg md:text-xl font-semibold text-white mb-2 flex items-center justify-center lg:justify-start">
-                          Credit Spend
-                        </h3>
-                        <p className="text-4xl md:text-5xl lg:text-7xl font-bold text-[#FAB609] mb-4 lg:mb-8">
-                          {`₹${String(userProfile?.creditedAmount)}`}
-                        </p>
-                      </div>
+  className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-2xl p-6 shadow-2xl w-full"
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.6, delay: 0.4 }}
+>
+  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-12 w-full">
+    
+    {/* Credit Amount Section */}
+    <div className="text-center lg:text-left w-full lg:w-auto">
+      <h3 className="text-lg md:text-xl font-semibold text-white mb-2 flex items-center justify-center lg:justify-start">
+        Credit Spend
+      </h3>
+      <p className="text-4xl md:text-5xl lg:text-7xl font-bold text-[#FAB609] mb-4 lg:mb-8">
+        {`₹${String(userProfile?.creditedAmount)}`}
+      </p>
+    </div>
 
                       {/* Buttons Section */}
                       <div className="w-full lg:w-auto">
@@ -984,6 +989,31 @@ const Verified = () => {
                       </div>
                     </div>
                   </motion.div>
+    {/* Buttons Section */}
+    <div className="w-full lg:w-auto">
+      <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center lg:justify-end">
+        <PaymentBtn 
+          currentUserId={currentUser?.uid} 
+          onCreditUpdate={(newCredit) => {
+            // Update the local state to reflect the new credit amount
+            setUserData(prev => [{
+              ...prev[0],
+              creditedAmount: newCredit
+            }]);
+          }} />
+        <motion.button
+          className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg bg-[#0193C0]/50 hover:bg-[#0193C0]/90 transition-all duration-300 text-sm md:text-base font-medium text-white"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          EMI
+        </motion.button>
+      </div>
+    </div>
+
+  </div>
+</motion.div>
+
 
                   {/* Transaction History */}
                   <motion.div
