@@ -63,6 +63,7 @@ const Verified = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const transactionsPerPage = 5;
   const userId = currentUser?.uid;
+  const [merchantLoading, setMerchantLoading] = useState(false);
 
   // Carousel settings
   const carouselSpeed = 3000; // 3 seconds per slide
@@ -248,11 +249,14 @@ const Verified = () => {
   useEffect(() => {
     if (userProfile?.merchantRel) {
       const fetchMerchant = async () => {
+        setMerchantLoading(true);
         try {
           const merchant = await fetchMerchantById(userProfile.merchantRel);
           setMerchantData(merchant);
         } catch (error) {
           console.error("Error fetching merchant data:", error);
+        } finally {
+          setMerchantLoading(false);
         }
       };
       fetchMerchant();
@@ -416,7 +420,7 @@ const Verified = () => {
     }
   };
 
-  if (loading) {
+  if (loading || merchantLoading) {
     return <VerifiedPageSkeletonScreen />;
   }
 
@@ -671,7 +675,7 @@ const Verified = () => {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="space-y-6"
             >
-              // User Profile Section
+              {/* User Profile Section */}
               <div className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-2xl">
                 <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 mb-4 sm:mb-6">
                   <motion.div
@@ -731,7 +735,7 @@ const Verified = () => {
                   </motion.div>
                 </div>
               </div>
-              // Conditional rendering based on verification status
+              {/* Conditional rendering based on verification status */}
               {currentStatus !== "verified" ? (
                 <motion.div
                   className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-2xl mt-4"
@@ -766,7 +770,7 @@ const Verified = () => {
                         transition={{ duration: 0.3 }}
                         className="mt-3 sm:mt-4 space-y-3 sm:space-y-4"
                       >
-                        // Aadhaar Card
+                        {/* Aadhaar Card */}
                         <motion.div
                           className="bg-gray-800/50 border border-gray-700 p-3 sm:p-4 rounded-xl"
                           whileHover={{ scale: 1.02 }}
@@ -803,7 +807,7 @@ const Verified = () => {
                             </motion.div>
                           </div>
                         </motion.div>
-                        // PAN Card
+                        {/* PAN Card */}
                         <motion.div
                           className="bg-gray-800/50 border border-gray-700 p-3 sm:p-4 rounded-xl"
                           whileHover={{ scale: 1.02 }}
@@ -842,7 +846,7 @@ const Verified = () => {
                             </motion.div>
                           </div>
                         </motion.div>
-                        // Face Verification
+                        {/* Face Verification */}
                         <motion.div
                           className="bg-gray-800/50 border border-gray-700 p-3 sm:p-4 rounded-xl"
                           whileHover={{ scale: 1.02 }}
@@ -886,68 +890,70 @@ const Verified = () => {
                 </motion.div>
               ) : (
                 <>
-                  <motion.div
-                    className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-2xl p-6 shadow-2xl w-full"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.4 }}
-                  >
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-12 w-full">
-                      // Credit Amount Section
-                      <div className="text-center lg:text-left w-full lg:w-auto">
-                        <h3 className="text-lg md:text-xl font-semibold text-white mb-2 flex items-center justify-center lg:justify-start">
-                          Credit Spend
-                        </h3>
-                        <p className="text-4xl md:text-5xl lg:text-7xl font-bold text-[#FAB609] mb-4 lg:mb-8">
-                          {`₹${String(userProfile?.creditedAmount)}`}
-                        </p>
-                      </div>
-                      // Buttons Section
-                      <div className="w-full lg:w-auto">
-                        <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center lg:justify-end">
-                          <PaymentBtn
-                            currentUserId={currentUser?.uid}
-                            onCreditUpdate={(newCredit) => {
-                              setUserData((prev) =>
-                                prev.length > 0
-                                  ? [
-                                      {
-                                        uid: prev[0].uid,
-                                        displayName: prev[0].displayName,
-                                        email: prev[0].email,
-                                        isEmailVerified:
-                                          prev[0].isEmailVerified,
-                                        isVerified: prev[0].isVerified,
-                                        creditedAmount: newCredit,
-                                        submittedAt: prev[0].submittedAt,
-                                        status: prev[0].status,
-                                        // Optional fields
-                                        photoUrl: prev[0].photoUrl,
-                                        phoneNumber: prev[0].phoneNumber,
-                                        address: prev[0].address,
-                                        profession: prev[0].profession,
-                                        fatherName: prev[0].fatherName,
-                                        merchantRel: prev[0].merchantRel,
-                                        documents: prev[0].documents,
-                                        faceAuth: prev[0].faceAuth,
-                                      },
-                                    ]
-                                  : prev
-                              );
-                            }}
-                          />
-                          <motion.button
-                            className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg bg-[#0193C0]/50 hover:bg-[#0193C0]/90 transition-all duration-300 text-sm md:text-base font-medium text-white"
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                          >
-                            EMI
-                          </motion.button>
+                  {userData.length > 1 && (
+                    <motion.div
+                      className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-2xl p-6 shadow-2xl w-full"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, delay: 0.4 }}
+                    >
+                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-12 w-full">
+                        {/* Credit Amount Section */}
+                        <div className="text-center lg:text-left w-full lg:w-auto">
+                          <h3 className="text-lg md:text-xl font-semibold text-white mb-2 flex items-center justify-center lg:justify-start">
+                            Credit Spend
+                          </h3>
+                          <p className="text-4xl md:text-5xl lg:text-7xl font-bold text-[#FAB609] mb-4 lg:mb-8">
+                            {`₹${String(userProfile?.creditedAmount)}`}
+                          </p>
+                        </div>
+                        {/* Buttons Section */}
+                        <div className="w-full lg:w-auto">
+                          <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center lg:justify-end">
+                            <PaymentBtn
+                              currentUserId={currentUser?.uid}
+                              onCreditUpdate={(newCredit) => {
+                                setUserData((prev) =>
+                                  prev.length > 0
+                                    ? [
+                                        {
+                                          uid: prev[0].uid,
+                                          displayName: prev[0].displayName,
+                                          email: prev[0].email,
+                                          isEmailVerified:
+                                            prev[0].isEmailVerified,
+                                          isVerified: prev[0].isVerified,
+                                          creditedAmount: newCredit,
+                                          submittedAt: prev[0].submittedAt,
+                                          status: prev[0].status,
+                                          // Optional fields
+                                          photoUrl: prev[0].photoUrl,
+                                          phoneNumber: prev[0].phoneNumber,
+                                          address: prev[0].address,
+                                          profession: prev[0].profession,
+                                          fatherName: prev[0].fatherName,
+                                          merchantRel: prev[0].merchantRel,
+                                          documents: prev[0].documents,
+                                          faceAuth: prev[0].faceAuth,
+                                        },
+                                      ]
+                                    : prev
+                                );
+                              }}
+                            />
+                            <motion.button
+                              className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg bg-[#0193C0]/50 hover:bg-[#0193C0]/90 transition-all duration-300 text-sm md:text-base font-medium text-white"
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                            >
+                              EMI
+                            </motion.button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </motion.div>
-                  // Transaction History
+                    </motion.div>
+                  )}
+                  {/* Transaction History */}
                   <motion.div
                     className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 shadow-2xl"
                     initial={{ opacity: 0, y: 20 }}
@@ -1042,7 +1048,7 @@ const Verified = () => {
                   </motion.div>
                 </>
               )}
-              // Status Messages
+              {/* Status Messages */}
               <AnimatePresence>
                 {currentStatus === "pending" && (
                   <motion.div
@@ -1083,68 +1089,103 @@ const Verified = () => {
                   </motion.div>
                 )}
               </AnimatePresence>
-              // Action Buttons
-              {
-                <div className="flex gap-4">
-                  {(currentStatus === "rejected" ||
-                    currentStatus === "unknown") && (
-                    <>
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handleReapply}
-                        className="flex-1 py-4 text-lg font-semibold text-gray-900 bg-gradient-to-r from-[#00FFB4] to-[#5EEAD4] rounded-xl hover:from-[#00FFB4]/90 hover:to-[#5EEAD4]/90 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#00FFB4] focus:ring-offset-2 focus:ring-offset-gray-900 shadow-lg"
-                      >
-                        Reapply for Verification
-                      </motion.button>
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handleLogoutAndDeleteData}
-                        disabled={isDeleting}
-                        className={`flex-1 py-4 text-lg font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-900 shadow-lg ${
-                          isDeleting
-                            ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                            : "bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700"
-                        }`}
-                      >
-                        {isDeleting ? (
-                          <span className="flex items-center justify-center">
-                            <Clock className="animate-spin w-5 h-5 mr-2" />
-                            Deleting Data...
-                          </span>
-                        ) : (
-                          "Delete Your Data"
-                        )}
-                      </motion.button>
-                    </>
-                  )}
-                </div>
-              }
+              {/* Action Buttons */}
+              <div className="flex gap-4">
+                {(currentStatus === "rejected" ||
+                  currentStatus === "unknown") && (
+                  <>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleReapply}
+                      className="flex-1 py-4 text-lg font-semibold text-gray-900 bg-gradient-to-r from-[#00FFB4] to-[#5EEAD4] rounded-xl hover:from-[#00FFB4]/90 hover:to-[#5EEAD4]/90 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#00FFB4] focus:ring-offset-2 focus:ring-offset-gray-900 shadow-lg"
+                    >
+                      Reapply for Verification
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleLogoutAndDeleteData}
+                      disabled={isDeleting}
+                      className={`flex-1 py-4 text-lg font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-900 shadow-lg ${
+                        isDeleting
+                          ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                          : "bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700"
+                      }`}
+                    >
+                      {isDeleting ? (
+                        <span className="flex items-center justify-center">
+                          <Clock className="animate-spin w-5 h-5 mr-2" />
+                          Deleting Data...
+                        </span>
+                      ) : (
+                        "Delete Your Data"
+                      )}
+                    </motion.button>
+                  </>
+                )}
+              </div>
             </motion.div>
           ) : !loading ? (
             <motion.div
+              className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-2xl p-6 shadow-2xl w-full"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-2xl p-8 text-center text-gray-400"
+              transition={{ duration: 0.6, delay: 0.4 }}
             >
-              <AlertCircle className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-              <h3 className="text-gray-400 font-bold text-xl mb-3">
-                No User Data Found
-              </h3>
-              <p className="text-gray-400 mb-6">
-                It looks like your verification data is missing or incomplete in
-                our records. Please reapply to complete your verification
-                process.
-              </p>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleReapply}
-                className="py-4 px-8 text-lg font-semibold text-gray-900 bg-gradient-to-r from-[#00FFB4] to-[#5EEAD4] rounded-xl hover:from-[#00FFB4]/90 hover:to-[#5EEAD4]/90 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#00FFB4] focus:ring-offset-2 focus:ring-offset-gray-900 shadow-lg"
-              >
-                Reapply for Verification
-              </motion.button>
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-12 w-full">
+                {/* Credit Amount Section */}
+                <div className="text-center lg:text-left w-full lg:w-auto">
+                  <h3 className="text-lg md:text-xl font-semibold text-white mb-2 flex items-center justify-center lg:justify-start">
+                    Credit Spend
+                  </h3>
+                  <p className="text-4xl md:text-5xl lg:text-7xl font-bold text-[#FAB609] mb-4 lg:mb-8">
+                    {`₹${String(userProfile?.creditedAmount)}`}
+                  </p>
+                </div>
+                {/* Buttons Section */}
+                <div className="w-full lg:w-auto">
+                  <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center lg:justify-end">
+                    <PaymentBtn
+                      currentUserId={currentUser?.uid}
+                      onCreditUpdate={(newCredit) => {
+                        setUserData((prev) =>
+                          prev.length > 0
+                            ? [
+                                {
+                                  uid: prev[0].uid,
+                                  displayName: prev[0].displayName,
+                                  email: prev[0].email,
+                                  isEmailVerified: prev[0].isEmailVerified,
+                                  isVerified: prev[0].isVerified,
+                                  creditedAmount: newCredit,
+                                  submittedAt: prev[0].submittedAt,
+                                  status: prev[0].status,
+                                  // Optional fields
+                                  photoUrl: prev[0].photoUrl,
+                                  phoneNumber: prev[0].phoneNumber,
+                                  address: prev[0].address,
+                                  profession: prev[0].profession,
+                                  fatherName: prev[0].fatherName,
+                                  merchantRel: prev[0].merchantRel,
+                                  documents: prev[0].documents,
+                                  faceAuth: prev[0].faceAuth,
+                                },
+                              ]
+                            : prev
+                        );
+                      }}
+                    />
+                    <motion.button
+                      className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg bg-[#0193C0]/50 hover:bg-[#0193C0]/90 transition-all duration-300 text-sm md:text-base font-medium text-white"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      EMI
+                    </motion.button>
+                  </div>
+                </div>
+              </div>
             </motion.div>
           ) : null}
         </div>
