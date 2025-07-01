@@ -890,7 +890,7 @@ const Verified = () => {
                 </motion.div>
               ) : (
                 <>
-                  {userData.length > 1 && (
+                  {
                     <motion.div
                       className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-2xl p-6 shadow-2xl w-full"
                       initial={{ opacity: 0, y: 20 }}
@@ -952,7 +952,7 @@ const Verified = () => {
                         </div>
                       </div>
                     </motion.div>
-                  )}
+                  }
                   {/* Transaction History */}
                   <motion.div
                     className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 shadow-2xl"
