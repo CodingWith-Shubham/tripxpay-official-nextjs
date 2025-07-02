@@ -324,8 +324,7 @@ const Verified: React.FC = () => {
           method: "POST",
         });
         const { merchants } = await response.json();
-        console.log({ merchants });
-
+        console.log("Fetched merchants:", merchants);
         setRecommendedMerchants(Array.isArray(merchants) ? merchants : []);
         setShowRecommendations(true);
       };
@@ -584,7 +583,7 @@ const Verified: React.FC = () => {
           )}
 
           {/* Merchant Recommendations Carousel */}
-          {showRecommendations && (
+          {showRecommendations && recommendedMerchants.length > 0 && (
             <motion.div
               className="bg-gray-900/50 border mb-4 sm:mb-5 border-gray-800 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 shadow-2xl"
               initial={{ opacity: 0, y: 20 }}
