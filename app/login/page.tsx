@@ -493,30 +493,43 @@ const LoginPageContent = () => {
   const handleMerchantRelationship = async (userId: string) => {
     try {
       setInviteLoading(true);
-
-      const result = fetch(
-        `/api/updatemerchantrel?userid=${userId}&merchantid=${merchantRelParam}`,
+      const { success } = await fetch(
+        `/api/checkmerchant?merchantid=${userId}`,
         { method: "POST" }
-      );
-
-      toast.promise(result, {
-        loading: "Updating merchant relationship...",
-        error: "Failed to update merchant relationship",
-        success: "Merchant realation updated successfully",
-        position: "top-right",
-        style: { backgroundColor: "#172533", border: "#FBAE04", color: "#fff" },
-      });
-
-      const response = await result;
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.message || "Failed to update merchant relationship"
+      ).then((res) => res.json());
+      if (success) {
+        toast.error("This user is already registered in the merchant part.", {
+          duration: 10000,
+        });
+      } else {
+        const result = fetch(
+          `/api/updatemerchantrel?userid=${userId}&merchantid=${merchantRelParam}`,
+          { method: "POST" }
         );
-      }
 
-      localStorage.removeItem("merchantRel");
+        toast.promise(result, {
+          loading: "Updating merchant relationship...",
+          error: "Failed to update merchant relationship",
+          success: "Merchant realation updated successfully",
+          position: "top-right",
+          style: {
+            backgroundColor: "#172533",
+            border: "#FBAE04",
+            color: "#fff",
+          },
+        });
+
+        const response = await result;
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(
+            errorData.message || "Failed to update merchant relationship"
+          );
+        }
+
+        localStorage.removeItem("merchantRel");
+      }
     } catch (error: any) {
       console.error("Failed to update merchantRel:", error);
       toast.error(error.message || "Failed to update merchant relationship", {
@@ -530,25 +543,41 @@ const LoginPageContent = () => {
   // Helper function to check user status and redirect
   const checkUserStatusAndRedirect = async (userId: string) => {
     try {
-      const result = fetch(`/api/checkuser?uid=${userId}`, { method: "POST" });
-
-      toast.promise(result, {
-        loading: "Checking your account status...",
-        error: "Failed to check your status",
-        success: "Status verified",
-        position: "top-right",
-        style: { backgroundColor: "#172533", border: "#FBAE04", color: "#fff" },
-      });
-
-      const response = await result;
-      const data = await response.json();
-
-      if (data.success) {
-        await setConsumer();
-        router.push("/verified");
+      const { success } = await fetch(
+        `/api/checkmerchant?merchantid=${userId}`,
+        { method: "POST" }
+      ).then((res) => res.json());
+      if (success) {
+        toast.error("This user is already registered in the merchant part.", {
+          duration: 10000,
+        });
       } else {
-        await setConsumer();
-        router.push("/verificationdashboard");
+        const result = fetch(`/api/checkuser?uid=${userId}`, {
+          method: "POST",
+        });
+
+        toast.promise(result, {
+          loading: "Checking your account status...",
+          error: "Failed to check your status",
+          success: "Status verified",
+          position: "top-right",
+          style: {
+            backgroundColor: "#172533",
+            border: "#FBAE04",
+            color: "#fff",
+          },
+        });
+
+        const response = await result;
+        const data = await response.json();
+
+        if (data.success) {
+          await setConsumer();
+          router.push("/verified");
+        } else {
+          await setConsumer();
+          router.push("/verificationdashboard");
+        }
       }
     } catch (error: any) {
       console.error("Failed to check user status:", error);
