@@ -655,7 +655,7 @@ const Verified = () => {
                       </motion.div>
                     ))}
                   </div>
-                  // Navigation dots
+                
                   <div className="flex justify-center mt-3 sm:mt-4 space-x-1 sm:space-x-2">
                     {recommendedMerchants.map((_, index) => (
                       <button

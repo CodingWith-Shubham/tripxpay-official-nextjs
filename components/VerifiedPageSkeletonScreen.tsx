@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import Navbar from "./Navbar";
+
 import { ChevronRight } from "lucide-react";
 import Footer from "./Footer";
 
@@ -30,7 +30,7 @@ const VerifiedPageSkeletonScreen: React.FC = () => {
           <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-gray-500/20 rounded-full blur-3xl" />
         </div>
 
-        <main className="relative z-10 py-20 px-4 sm:px-6 lg:px-8">
+        <main className="relative z-10 pt-10 pb-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-4xl font-bold text-center text-white mb-8">Dashboard</h1>
 

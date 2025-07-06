@@ -121,43 +121,88 @@ const PlanMyTrip = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError(null);
+  e.preventDefault();
+  setError(null);
 
-    startTransition(async () => {
-      try {
-        console.log("Form submitted with data:", formData);
+  startTransition(async () => {
+    try {
+      console.log("Form submitted with data:", formData);
 
-        // Test if user is authenticated
-        const user = auth.currentUser;
-        console.log("Current user:", user);
-        console.log("Calling getTravelRecommendations...");
+      // test if user is authenticated
+      const user = auth.currentUser;
+      console.log("Current user:", user);
+      console.log("Calling Gemini API...");
 
-        // const recs = await getTravelRecommendations(formData);
-        const recs = "";
-        console.log("Received recommendations:", recs);
+      const prompt = `Based on the following travel preferences, provide 3 personalized travel recommendations in JSON format:
+- Travel Dates: ${formData.travelDates}
+- Duration: ${formData.duration}
+- Budget: ${formData.budget}
+- Climate: ${formData.climatePreference}
+- Travel Style: ${formData.travelStyle}
+- Interests: ${formData.interests.join(", ")}
+- Travelers: ${formData.travelersCount}
+- Destination Country: ${formData.destinationCountry || "Any"}
 
-        if (!recs) {
-          throw new Error("No recommendations received");
-        }
+Return only a JSON array with this structure:
+[
+  {
+    "destination": "City, Country",
+    "duration": "X days",
+    "bestTime": "Month-Month",
+    "budget": "Estimated cost breakdown",
+    "reason": "Why this destination matches preferences",
+    "highlights": "Main attractions and experiences",
+    "activities": ["activity1", "activity2", "activity3"]
+  }
+]`;
 
-        setRecommendations(recs);
-        console.log("Recommendations set successfully");
-      } catch (error) {
-        console.error("Error in handleSubmit:", {
-          error: error instanceof Error ? error.message : "Unknown error",
-          stack: error instanceof Error ? error.stack : undefined,
-          formData,
-        });
-        setError(
-          error instanceof Error
-            ? error.message
-            : "Failed to generate recommendations. Please try again."
-        );
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.NEXT_PUBLIC_REACT_APP_GEMINI_API_KEY}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: prompt
+            }]
+          }]
+        })
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error?.message || 'Failed to get recommendations');
       }
-    });
-  };
 
+      const text = data.candidates[0].content.parts[0].text;
+      
+      // Parse the JSON response
+      const recs = JSON.parse(text.replace(/```json\n?|\n?```/g, ''));
+      
+      console.log("Received recommendations:", recs);
+
+      if (!recs || recs.length === 0) {
+        throw new Error("No recommendations received");
+      }
+
+      setRecommendations(recs);
+      console.log("Recommendations set successfully");
+    } catch (error) {
+      console.error("Error in handleSubmit:", {
+        error: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : undefined,
+        formData,
+      });
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to generate recommendations. Please try again."
+      );
+    }
+  });
+};
   const interests = [
     "History & Museums",
     "Food & Cuisine",

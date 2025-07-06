@@ -1,5 +1,28 @@
 "use client";
+import { motion } from "framer-motion";
 import PageHeader from "@/components/PageHeader";
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i = 1) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: i * 0.3,
+      duration: 0.6,
+      ease: [0.25, 1, 0.5, 1],
+    },
+  }),
+};
+
+const containerStagger = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.3,
+    },
+  },
+};
 
 const AboutPage = () => {
   return (
@@ -12,7 +35,6 @@ const AboutPage = () => {
       <div className="absolute inset-0 bg-[radial-gradient(#1f2937_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
 
       <div className="relative z-10">
-
         <PageHeader
           title="About TripxPay"
           description="We're revolutionizing how travel agencies handle payments, making it easier, safer, and more efficient. Our platform streamlines the entire payment process, reduces transaction costs, eliminates currency conversion headaches, and provides unparalleled security and fraud protection. With TripxPay, travel agencies can focus on creating exceptional experiences while we handle the financial complexities."
@@ -20,46 +42,57 @@ const AboutPage = () => {
 
         <div className="flex-grow py-12 px-6 md:px-12">
           <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16 animate-fadeInUp">
-              <div>
-                <h2 className="text-2xl font-bold mb-4 text-yellow-500">
-                  Our Mission
-                </h2>
-                <p className="text-gray-300 mb-4">
-                  At TripxPay, our mission is to transform the travel payment
-                  landscape by providing innovative, secure, and flexible
-                  payment solutions that empower travel agencies to grow their
-                  business without financial constraints.
-                </p>
-                <p className="text-gray-300">
-                  We believe that travel agencies should focus on creating
-                  amazing experiences for their clients, not worrying about
-                  payment processing, cash flow, or financial risk.
-                </p>
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold mb-4 text-yellow-500">
-                  Our Story
-                </h2>
-                <p className="text-gray-300 mb-4">
-                  Founded in 2025 by a team of travel industry veterans and
-                  fintech experts, TripxPay was born out of the recognition that
-                  traditional payment methods were failing travel agencies.
-                </p>
-                <p className="text-gray-300">
-                  We've since grown to serve hundreds of forward-thinking travel
-                  agencies across the globe, processing millions in travel
-                  payments and helping our clients focus on what they do best:
-                  creating unforgettable travel experiences.
-                </p>
-              </div>
-            </div>
 
-            <div className="mb-16 animate-fadeIn">
-              <h2 className="text-2xl font-bold mb-6 text-center animate-fadeIn">
-                Our Core Values
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Mission & Story */}
+            <motion.div
+              variants={containerStagger}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.3 }}
+              className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16"
+            >
+              {[
+                {
+                  heading: "Our Mission",
+                  content: [
+                    "At TripxPay, our mission is to transform the travel payment landscape by providing innovative, secure, and flexible payment solutions that empower travel agencies to grow their business without financial constraints.",
+                    "We believe that travel agencies should focus on creating amazing experiences for their clients, not worrying about payment processing, cash flow, or financial risk.",
+                  ],
+                },
+                {
+                  heading: "Our Story",
+                  content: [
+                    "Founded in 2025 by a team of travel industry veterans and fintech experts, TripxPay was born out of the recognition that traditional payment methods were failing travel agencies.",
+                    "We've since grown to serve hundreds of forward-thinking travel agencies across the globe, processing millions in travel payments and helping our clients focus on what they do best: creating unforgettable travel experiences.",
+                  ],
+                },
+              ].map((section, i) => (
+                <motion.div key={i} custom={i} variants={fadeInUp}>
+                  <h2 className="text-2xl font-bold mb-4 text-yellow-500">
+                    {section.heading}
+                  </h2>
+                  {section.content.map((text, idx) => (
+                    <p key={idx} className="text-gray-300 mb-4">
+                      {text}
+                    </p>
+                  ))}
+                </motion.div>
+              ))}
+            </motion.div>
+
+            {/* Core Values */}
+            <motion.div
+              className="mb-16 text-center"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              variants={fadeInUp}
+            >
+              <h2 className="text-2xl font-bold mb-6">Our Core Values</h2>
+              <motion.div
+                className="grid grid-cols-1 md:grid-cols-3 gap-8"
+                variants={containerStagger}
+              >
                 {[
                   {
                     title: "Innovation",
@@ -77,25 +110,34 @@ const AboutPage = () => {
                       "We measure our success by the success of our clients. Their growth is our growth.",
                   },
                 ].map((value, index) => (
-                  <div
+                  <motion.div
                     key={index}
-                    className="bg-gray-900/80 backdrop-blur-sm p-6 rounded-lg border border-gray-800/50 animate-fadeInUp"
-                    style={{ animationDelay: `${index * 0.1}s` }}
+                    className="bg-gray-900/80 backdrop-blur-sm p-6 rounded-lg border border-gray-800/50"
+                    custom={index}
+                    variants={fadeInUp}
                   >
                     <h3 className="text-xl font-bold mb-3 text-teal-500">
                       {value.title}
                     </h3>
                     <p className="text-gray-300">{value.description}</p>
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
 
-            <div className="mt-24 animate-fadeIn">
-              <h2 className="text-2xl font-bold mb-6 text-center">
-                Our Leadership Team
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-2xl mx-auto">
+            {/* Leadership */}
+            <motion.div
+              className="mt-24 text-center"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.3 }}
+              variants={fadeInUp}
+            >
+              <h2 className="text-2xl font-bold mb-6">Our Leadership Team</h2>
+              <motion.div
+                className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-2xl mx-auto"
+                variants={containerStagger}
+              >
                 {[
                   {
                     name: "Mukul Kaushik",
@@ -108,10 +150,11 @@ const AboutPage = () => {
                     bio: "Fintech expert with experience at leading payment processors.",
                   },
                 ].map((person, index) => (
-                  <div
+                  <motion.div
                     key={index}
-                    className="text-center animate-fadeInUp"
-                    style={{ animationDelay: `${index * 0.2}s` }}
+                    className="text-center"
+                    custom={index}
+                    variants={fadeInUp}
                   >
                     <div className="w-32 h-32 bg-gray-800 rounded-full mx-auto mb-4 flex items-center justify-center">
                       <span className="text-4xl text-teal-500">
@@ -121,44 +164,14 @@ const AboutPage = () => {
                     <h3 className="text-lg font-bold">{person.name}</h3>
                     <p className="text-teal-500 mb-2">{person.title}</p>
                     <p className="text-gray-400 text-sm">{person.bio}</p>
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
+
           </div>
         </div>
-
       </div>
-
-      <style jsx global>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .animate-fadeIn {
-          animation: fadeIn 0.6s ease-out forwards;
-        }
-
-        .animate-fadeInUp {
-          animation: fadeInUp 0.6s ease-out forwards;
-        }
-      `}</style>
     </div>
   );
 };
