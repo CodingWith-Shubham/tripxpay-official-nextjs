@@ -574,7 +574,8 @@ const Verified = () => {
                   onTouchStart={handleTouchStart}
                   ref={carouselRef}
                 >
-                  <div className="relative h-48 sm:h-56 md:h-64 w-full">
+                  {/* Adjusted height for better mobile responsiveness */}
+                  <div className="relative h-84 sm:h-68 md:h-68 lg:h-60 w-full">
                     {recommendedMerchants.map((merchant, index) => (
                       <motion.div
                         key={merchant.id}
@@ -594,10 +595,11 @@ const Verified = () => {
                         }}
                         transition={{ duration: 0.5, ease: "easeInOut" }}
                       >
-                        <div className="bg-gray-800/80 backdrop-blur-lg overflow-hidden rounded-lg border border-gray-700 h-full w-full p-3 sm:p-4 md:p-6 flex flex-col">
-                          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5 md:gap-6 mb-3 sm:mb-4">
+                        <div className="bg-gray-800/80 backdrop-blur-lg overflow-hidden rounded-lg border border-gray-700 h-full w-full p-4 sm:p-4 md:p-6 flex flex-col">
+                          {/* Mobile-first layout adjustments */}
+                          <div className="flex flex-col items-center gap-4 mb-4 sm:flex-row sm:items-start sm:gap-5 md:gap-6 sm:mb-4">
                             <motion.div
-                              className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-4 border-[#5EEAD4] shadow-lg flex-shrink-0"
+                              className="relative w-20 h-20 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-4 border-[#5EEAD4] shadow-lg flex-shrink-0"
                               whileHover={{ scale: 1.05 }}
                               transition={{ type: "spring", stiffness: 300 }}
                             >
@@ -609,30 +611,34 @@ const Verified = () => {
                                 className="w-full h-full object-cover"
                               />
                             </motion.div>
-                            <div className="flex-1 text-center sm:text-left">
-                              <h4 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-1 sm:mb-2 line-clamp-1">
+                            
+                            <div className="flex-1 text-center sm:text-left w-full">
+                              <h4 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2 sm:mb-2 line-clamp-1">
                                 {merchant.companyName}
                               </h4>
-                              <div className="flex items-center justify-center sm:justify-start gap-2 text-xs sm:text-sm md:text-base text-gray-400 mb-2 sm:mb-3">
-                                <User className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                              
+                              <div className="flex items-center justify-center sm:justify-start gap-2 text-sm sm:text-sm md:text-base text-gray-400 mb-3 sm:mb-3">
+                                <User className="w-4 h-4 sm:w-4 sm:h-4 flex-shrink-0" />
                                 <span className="break-all line-clamp-1">
                                   {merchant.displayName}
                                 </span>
                               </div>
-                              <div className="text-xs sm:text-sm text-gray-400">
-                                <div className="flex items-start justify-center sm:justify-start gap-2 mb-1">
+                              
+                              {/* Better spacing and layout for contact info */}
+                              <div className="text-sm sm:text-sm text-gray-400 space-y-2">
+                                <div className="flex flex-col sm:flex-row sm:items-start justify-center sm:justify-start gap-1 sm:gap-2">
                                   <span className="font-medium text-gray-200 flex-shrink-0">
                                     Address:
                                   </span>
-                                  <span className="break-words line-clamp-2">
+                                  <span className="break-words line-clamp-2 text-center sm:text-left">
                                     {merchant.address}
                                   </span>
                                 </div>
-                                <div className="flex items-center justify-center sm:justify-start gap-2">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-center sm:justify-start gap-1 sm:gap-2">
                                   <span className="font-medium text-gray-200 flex-shrink-0">
                                     Phone:
                                   </span>
-                                  <span className="break-all">
+                                  <span className="break-all text-center sm:text-left">
                                     {merchant.phoneNumber}
                                   </span>
                                 </div>
@@ -640,13 +646,12 @@ const Verified = () => {
                             </div>
                           </div>
 
+                          {/* Button positioned at bottom with better mobile sizing */}
                           <div className="mt-auto">
                             <button
-                              onClick={() =>
-                                handleConnectionRequest(merchant.id)
-                              }
+                              onClick={() => handleConnectionRequest(merchant.id)}
                               disabled={loading}
-                              className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 rounded-lg border border-teal-500/20 transition-colors text-xs sm:text-sm md:text-base font-medium"
+                              className="w-full px-4 py-1 sm:px-4 sm:py-2 bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 rounded-lg border border-teal-500/20 transition-colors text-sm sm:text-sm md:text-base font-medium"
                             >
                               {loading ? "Sending..." : "Request Connection"}
                             </button>
@@ -655,8 +660,9 @@ const Verified = () => {
                       </motion.div>
                     ))}
                   </div>
-                
-                  <div className="flex justify-center mt-3 sm:mt-4 space-x-1 sm:space-x-2">
+
+                  {/* Carousel indicators with better mobile spacing */}
+                  <div className="flex justify-center mt-4 sm:mt-4 space-x-2 sm:space-x-2">
                     {recommendedMerchants.map((_, index) => (
                       <button
                         key={index}
@@ -665,9 +671,9 @@ const Verified = () => {
                           stopCarousel();
                           setTimeout(startCarousel, mobilePauseDuration);
                         }}
-                        className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all ${
+                        className={`w-2 h-2 sm:w-2 sm:h-2 rounded-full transition-all ${
                           index === activeIndex
-                            ? "bg-teal-500 w-3 sm:w-4"
+                            ? "bg-teal-500 w-4 sm:w-4"
                             : "bg-gray-600"
                         }`}
                         aria-label={`Go to slide ${index + 1}`}

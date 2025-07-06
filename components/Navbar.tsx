@@ -119,7 +119,7 @@ const Navbar = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="bg-transparent text-white w-full relative z-50"
+        className="bg-transparent text-white w-full z-50 backdrop-blur-md"
         role="navigation"
         aria-label="Main navigation"
       >

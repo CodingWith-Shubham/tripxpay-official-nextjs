@@ -5,6 +5,7 @@ import PageHeader from "@/components/PageHeader";
 import { RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
 import Blog from "@/components/Blog";
 import { motion } from "framer-motion";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 interface BlogPost {
   id: string;
@@ -27,8 +28,8 @@ const fadeInUp = {
     opacity: 1,
     y: 0,
     transition: {
-      delay: i * 0.3,
-      duration: 0.6,
+      delay: i * 0.1,
+      duration: 0.4,
       ease: [0.25, 1, 0.5, 1],
     },
   }),
@@ -38,7 +39,7 @@ const containerStagger = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.3,
+      staggerChildren: 0.1,
     },
   },
 };
@@ -50,13 +51,12 @@ const UploadBlogsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
-  // Pagination states
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPosts, setTotalPosts] = useState<number>(0);
   const [hasNextPage, setHasNextPage] = useState<boolean>(false);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
 
-  const POSTS_PER_PAGE = 9; // Adjust based on your grid (3x3)
+  const POSTS_PER_PAGE = 9;
 
   const categories: Category[] = [
     { id: "all", name: "All" },
@@ -75,7 +75,6 @@ const UploadBlogsPage = () => {
           setLoadingMore(true);
         }
 
-        // Pass pagination parameters to your service
         const result = await getAllBlogs({
           page,
           limit: POSTS_PER_PAGE,
@@ -86,10 +85,8 @@ const UploadBlogsPage = () => {
           const { blogs, total, hasMore, hasNextPage } = result;
 
           if (isLoadMore) {
-            // Append new posts for "Load More" functionality
             setPosts((prevPosts) => [...prevPosts, ...blogs]);
           } else {
-            // Replace posts for new page or category change
             setPosts(blogs);
           }
 
@@ -110,7 +107,6 @@ const UploadBlogsPage = () => {
   );
 
   useEffect(() => {
-    // Reset to page 1 when category changes
     setCurrentPage(1);
     fetchBlogs(1, activeCategory);
   }, [activeCategory, fetchBlogs]);
@@ -135,19 +131,15 @@ const UploadBlogsPage = () => {
 
   const handleCategoryChange = (categoryId: string) => {
     setActiveCategory(categoryId);
-    setError(null); // Clear any existing errors
+    setError(null);
   };
 
   const totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE);
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col relative overflow-hidden">
-      {/* Background glows */}
-      <div className="absolute top-0 left-0 w-[500px] h-[300px] bg-gradient-to-br from-[#00ffb4]/40 to-transparent rotate-12 blur-[120px] rounded-[30%] pointer-events-none z-0" />
-      <div className="absolute right-0 w-[550px] h-[300px] md:bg-gradient-to-tr from-yellow-400/30 to-transparent rotate-180 blur-[120px] rounded-[20%] pointer-events-none z-0 top-[1.5%]" />
-
-      {/* Grid dots background */}
-      <div className="absolute inset-0 bg-[radial-gradient(#1f2937_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
+      <div className="absolute top-0 left-0 w-[300px] md:w-[500px] h-[200px] md:h-[300px] bg-gradient-to-br from-[#00ffb4]/40 to-transparent rotate-12 blur-[80px] md:blur-[120px] rounded-[30%] pointer-events-none z-0" />
+      <div className="absolute right-0 w-[300px] md:w-[550px] h-[200px] md:h-[300px] bg-gradient-to-tr from-yellow-400/30 to-transparent rotate-180 blur-[80px] md:blur-[120px] rounded-[20%] pointer-events-none z-0 top-[1.5%]" />
 
       <div className="relative z-10">
         <PageHeader
@@ -155,26 +147,25 @@ const UploadBlogsPage = () => {
           description="Stay informed about the latest updates, features, and events."
         />
 
-        <div className="flex-grow py-12 px-6 md:px-12">
+        <div className="flex-grow py-6 md:py-12 px-4 sm:px-6 md:px-12">
           <div className="max-w-6xl mx-auto">
             <motion.div
               variants={containerStagger}
               initial="hidden"
-              whileInView="visible"
+              animate="visible"
               viewport={{ once: true, amount: 0.3 }}
-              className="flex justify-between items-center mb-8"
+              className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8"
             >
-              {/*list of categories*/}
               <motion.div
                 custom={0}
                 variants={fadeInUp}
-                className="overflow-x-auto"
+                className="w-full overflow-x-auto pb-2 md:pb-0"
               >
-                <div className="flex space-x-4 min-w-max">
+                <div className="flex space-x-2 md:space-x-4 min-w-max">
                   {categories.map((category) => (
                     <button
                       key={category.id}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium md:text-[18px] whitespace-nowrap ${
+                      className={`px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs sm:text-sm md:text-base font-medium whitespace-nowrap ${
                         activeCategory === category.id
                           ? "bg-teal-500 text-white"
                           : "bg-gray-800 text-gray-300 hover:bg-gray-700"
@@ -187,50 +178,45 @@ const UploadBlogsPage = () => {
                 </div>
               </motion.div>
 
-              {/*refresh button*/}
               <motion.button
-                custom={1}
-                variants={fadeInUp}
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-                className={`p-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors ${
-                  isRefreshing ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                title="Refresh blogs"
-              >
-                <RefreshCw
-                  size={20}
-                  className={`text-gray-300 ${
-                    isRefreshing ? "animate-spin" : ""
-                  }`}
-                />
-              </motion.button>
-            </motion.div>
+              custom={1}
+              variants={fadeInUp}
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className={`p-1.5 md:p-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center ${
+                isRefreshing ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              title="Refresh blogs"
+            >
+              {isRefreshing ? (
+                <LoadingSpinner size="medium" text="Refreshing..." />
+              ) : (
+                <RefreshCw size={18} className="text-gray-300" />
+              )}
+            </motion.button>
+          </motion.div>
 
-            {/*showing blogs*/}
             {loading ? (
               <motion.div
                 initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
+                animate="visible"
                 variants={fadeInUp}
-                className="text-center py-12"
+                className="text-center py-8 md:py-12"
               >
-                <div className="inline-block w-8 h-8 border-4 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
-                <p className="mt-4 text-gray-400">Loading blogs...</p>
+                <div className="inline-block w-6 h-6 md:w-8 md:h-8 border-3 md:border-4 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
+                <p className="mt-3 md:mt-4 text-sm md:text-base text-gray-400">Loading blogs...</p>
               </motion.div>
             ) : error ? (
               <motion.div
                 initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
+                animate="visible"
                 variants={fadeInUp}
-                className="text-center py-12"
+                className="text-center py-8 md:py-12"
               >
-                <p className="text-red-400">{error}</p>
+                <p className="text-sm md:text-base text-red-400">{error}</p>
                 <button
                   onClick={handleRefresh}
-                  className="mt-4 px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
+                  className="mt-3 md:mt-4 px-3 py-1.5 md:px-4 md:py-2 text-sm md:text-base bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
                 >
                   Try Again
                 </button>
@@ -238,12 +224,11 @@ const UploadBlogsPage = () => {
             ) : posts.length === 0 ? (
               <motion.div
                 initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
+                animate="visible"
                 variants={fadeInUp}
-                className="text-center py-12"
+                className="text-center py-8 md:py-12"
               >
-                <p className="text-gray-400">
+                <p className="text-sm md:text-base text-gray-400">
                   No announcements found in this category.
                 </p>
               </motion.div>
@@ -252,9 +237,9 @@ const UploadBlogsPage = () => {
                 <motion.div
                   variants={containerStagger}
                   initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true, amount: 0.2 }}
-                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"
+                  animate="visible"
+                  viewport={{ once: true, amount: 0.1 }}
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8"
                 >
                   {posts.map((post, index) => (
                     <motion.div
@@ -267,30 +252,28 @@ const UploadBlogsPage = () => {
                   ))}
                 </motion.div>
 
-                {/* Pagination Controls */}
                 {totalPages > 1 && (
                   <motion.div
                     initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true }}
+                    animate="visible"
                     variants={fadeInUp}
-                    className="flex justify-center items-center mt-12 space-x-4"
+                    className="flex flex-col sm:flex-row justify-center items-center mt-8 md:mt-12 gap-3 sm:gap-4"
                   >
                     <button
                       onClick={() => handlePageChange(currentPage - 1)}
                       disabled={currentPage === 1}
-                      className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
+                      className={`flex items-center px-3 py-1.5 md:px-4 md:py-2 text-sm md:text-base rounded-lg transition-colors ${
                         currentPage === 1
                           ? "bg-gray-800 text-gray-500 cursor-not-allowed"
                           : "bg-gray-800 text-gray-300 hover:bg-gray-700"
                       }`}
                     >
                       <ChevronLeft size={16} className="mr-1" />
-                      Previous
+                      <span className="hidden sm:inline">Previous</span>
+                      <span className="sm:hidden">Prev</span>
                     </button>
 
-                    <div className="flex items-center space-x-2">
-                      {/* Page numbers */}
+                    <div className="flex items-center gap-1 sm:gap-2">
                       {Array.from(
                         { length: Math.min(5, totalPages) },
                         (_, i) => {
@@ -309,7 +292,7 @@ const UploadBlogsPage = () => {
                             <button
                               key={pageNum}
                               onClick={() => handlePageChange(pageNum)}
-                              className={`w-10 h-10 rounded-lg transition-colors ${
+                              className={`w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm rounded-lg transition-colors ${
                                 currentPage === pageNum
                                   ? "bg-teal-500 text-white"
                                   : "bg-gray-800 text-gray-300 hover:bg-gray-700"
@@ -325,13 +308,14 @@ const UploadBlogsPage = () => {
                     <button
                       onClick={() => handlePageChange(currentPage + 1)}
                       disabled={currentPage === totalPages}
-                      className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
+                      className={`flex items-center px-3 py-1.5 md:px-4 md:py-2 text-sm md:text-base rounded-lg transition-colors ${
                         currentPage === totalPages
                           ? "bg-gray-800 text-gray-500 cursor-not-allowed"
                           : "bg-gray-800 text-gray-300 hover:bg-gray-700"
                       }`}
                     >
-                      Next
+                      <span className="hidden sm:inline">Next</span>
+                      <span className="sm:hidden">Next</span>
                       <ChevronRight size={16} className="ml-1" />
                     </button>
                   </motion.div>
