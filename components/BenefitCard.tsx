@@ -26,7 +26,7 @@ const BenefitCard: React.FC<BenefitCardProps> = ({ icon, title, description }) =
           opacity: 1,
           scale: 1,
           transition: {
-            duration: 0.9,
+            duration: 1.2,
             type: "spring",
             stiffness: 80,
           },
@@ -36,7 +36,7 @@ const BenefitCard: React.FC<BenefitCardProps> = ({ icon, title, description }) =
           scale: 1.1,
           rotate: 5,
           transition: {
-            duration: 0.8,
+            duration: 1.2,
             type: "spring",
             stiffness: 300,
           },
@@ -52,7 +52,7 @@ const BenefitCard: React.FC<BenefitCardProps> = ({ icon, title, description }) =
         pathLength: 1,
         opacity: 1,
         transition: {
-          duration: 0.9,
+          duration: 1.2,
           delay: 0.1,
         },
       },
@@ -149,7 +149,7 @@ const BenefitCard: React.FC<BenefitCardProps> = ({ icon, title, description }) =
       whileInView={{
         opacity: 1,
         y: 0,
-        transition: { duration: 0.6 },
+        transition: { duration: 0.9 },
       }}
       viewport={{ once: true, amount: 0.3 }}
       whileHover={{ y: -5 }}
@@ -158,7 +158,7 @@ const BenefitCard: React.FC<BenefitCardProps> = ({ icon, title, description }) =
         className="bg-gray-800 rounded-full p-4 mb-4"
         whileHover={{
           boxShadow: "0px 0px 8px rgba(56, 178, 172, 0.6)",
-          transition: { duration: 0.3 },
+          transition: { duration: 0.5 },
         }}
       >
         {renderIcon()}

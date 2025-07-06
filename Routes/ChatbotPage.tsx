@@ -48,7 +48,7 @@ const getUserData = async (uid: string): Promise<any> => {
 
 const askTripXPayBot = async (message: string): Promise<string> => {
   try {
-    const response = await fetch('/api/askBot', {
+    const response = await fetch('/api/asktripxpaybot', {  // Changed from '/api/askBot' to '/api/asktripxpaybot'
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -190,7 +190,7 @@ const ChatbotPage = () => {
     // Report Issue
     if (lowerMessage.includes('report an issue') || lowerMessage.includes('report issue')) {
       return {
-        text: `📝 Please describe your issue in detail below and click Send when ready.\n\nOur team will review it and get back to you.`,
+        text: `Please describe your issue in detail below and click Send when ready.\n\nOur team will review it and get back to you.`,
         options: []
       };
     }
@@ -333,10 +333,10 @@ const ChatbotPage = () => {
         addBotMessage("Opening email client to contact support...", []);
       } else if (userMessage.toLowerCase().includes('report an issue') || 
                  userMessage.toLowerCase().includes('report issue')) {
-        addBotMessage(" Please describe your issue in detail below and click Send when ready.\n\nOur team will review it and get back to you.", []);
+        addBotMessage("Please describe your issue in detail below and click Send when ready.\n\nOur team will review it and get back to you.", []);
       } else if (userMessage.toLowerCase().includes('describe') && 
                  userMessage.toLowerCase().includes('issue')) {
-        addBotMessage(" Your issue has been reported to our support team. We'll get back to you soon!", []);
+        addBotMessage("Your issue has been reported to our support team. We'll get back to you soon!", []);
       } else {
         const response = await processMessage(userMessage);
         addBotMessage(response.text, response.options);
