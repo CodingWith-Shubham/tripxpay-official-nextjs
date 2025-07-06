@@ -1087,7 +1087,11 @@ const LoginPageContent = () => {
                 <p className="text-gray-400">
                   Don't have an account?{" "}
                   <Link
-                    href="/signup"
+                    href={
+                      merchantRelParam
+                        ? `/signup?merchantRel=${merchantRelParam}`
+                        : "/signup"
+                    }
                     className="text-teal-500 hover:text-teal-400 font-medium transition-all duration-300 hover:scale-105 inline-block"
                   >
                     Sign up

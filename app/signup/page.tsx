@@ -1,7 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FiArrowUpRight } from "react-icons/fi";
 import {
   signInWithPhoneNumber,
@@ -53,6 +53,9 @@ const SignupPage = () => {
     agreeTerms: false,
   });
 
+  /// searchpams
+  const searchparams = useSearchParams();
+  const merchantRelParam = searchparams.get("merchantRel");
   // UI state
   const [emailUserdata, setEmailUserData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -77,7 +80,6 @@ const SignupPage = () => {
 
   // Get auth functions from context
   const { signInWithGoogle } = useAuth();
-  const [merchantrel, setMerchantRel] = useState<string | null>(null);
 
   // Clean up recaptcha on unmount
   useEffect(() => {
@@ -89,14 +91,6 @@ const SignupPage = () => {
     };
   }, []);
 
-  useEffect(() => {
-    const merchantrel = localStorage.getItem("merchantRel");
-    console.log(
-      "this is the saved merchant resl on the localstorage",
-      merchantrel
-    );
-    setMerchantRel(merchantrel);
-  }, []);
   // Handle form input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -170,8 +164,8 @@ const SignupPage = () => {
       toggleAzenda(true);
       setVerficationSent(true);
       setEmailUserData(userCredential.user);
-      if (merchantrel) {
-        await updateMerchantRel(userCredential.user.uid, merchantrel);
+      if (merchantRelParam) {
+        await updateMerchantRel(userCredential.user.uid, merchantRelParam);
       }
       await fetch(`/api/token`, { method: "POST" });
       toast.success("Verification email sent! Please check your inbox.", {
@@ -317,8 +311,8 @@ const SignupPage = () => {
       });
       const result = await response;
       if (result.user) {
-        if (merchantrel) {
-          await updateMerchantRel(result.user.uid, merchantrel);
+        if (merchantRelParam) {
+          await updateMerchantRel(result.user.uid, merchantRelParam);
         }
         await fetch(`/api/token`, { method: "POST" });
         router.push("/verificationdashboard");
@@ -358,8 +352,8 @@ const SignupPage = () => {
       console.log("Google sign up successful", result.user);
       // Navigate to verification dashboard after successful Google signup
       if (result) {
-        if (merchantrel) {
-          await updateMerchantRel(result.user.uid, merchantrel);
+        if (merchantRelParam) {
+          await updateMerchantRel(result.user.uid, merchantRelParam);
         }
         await fetch(`/api/token`, { method: "POST" });
         router.push("/verificationdashboard");
