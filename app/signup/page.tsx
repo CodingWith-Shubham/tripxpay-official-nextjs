@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FiArrowUpRight } from "react-icons/fi";
@@ -948,4 +948,11 @@ const SignupPage = () => {
   );
 };
 
-export default SignupPage;
+const SignUpPagecontent = () => {
+  return (
+    <Suspense>
+      <SignupPage />
+    </Suspense>
+  );
+};
+export default SignUpPagecontent;
