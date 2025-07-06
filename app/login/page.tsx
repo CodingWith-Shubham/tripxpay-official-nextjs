@@ -201,17 +201,16 @@ const LoginPageContent = () => {
         }
 
         const { user } = await response.json();
-
         // Set session cookie
         await setSessionCookie(user);
 
         // Handle merchant relationship if exists
         if (merchantRelParam) {
-          await handleMerchantRelationship(user.uid);
+          await handleMerchantRelationship(user.user.uid);
         }
 
         // Check user status and redirect
-        await checkUserStatusAndRedirect(user.uid);
+        await checkUserStatusAndRedirect(user?.user.uid);
       } catch (error: any) {
         console.error(error);
         setError(error.message || "Login failed. Please try again.");
@@ -543,6 +542,10 @@ const LoginPageContent = () => {
   // Helper function to check user status and redirect
   const checkUserStatusAndRedirect = async (userId: string) => {
     try {
+      console.log(
+        "this is the uid fo the user when try to login with the ",
+        userId
+      );
       const { success } = await fetch(
         `/api/checkmerchant?merchantid=${userId}`,
         { method: "POST" }
