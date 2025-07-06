@@ -266,7 +266,7 @@ const Verified = () => {
 
   useEffect(() => {
     if (!userProfile?.merchantRel && hasUserBackendProfile) {
-      const fetchRecommendations = async (): Promise<void> => {
+      const fetchRecommendations = async () => {
         const response = await fetch(`/api/merchantrecommendation?limit=${5}`, {
           method: "POST",
         });
