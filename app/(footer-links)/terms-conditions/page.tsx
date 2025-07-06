@@ -4,6 +4,7 @@ const TermsConditionsPage = () => {
   const sections = [
     {
       title: "Will be updated soon !!!",
+      content: ""
     }
   ]
 

@@ -9,12 +9,12 @@ const UploadResume = () => {
     occupation: "",
     linkedin: "",
     github: "",
-    resume: null
+    resume: null as File | null
   })
 
   const [dragActive, setDragActive] = useState(false)
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({
       ...prev,
@@ -22,15 +22,15 @@ const UploadResume = () => {
     }))
   }
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0]
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null
     setFormData(prev => ({
       ...prev,
       resume: file
     }))
   }
 
-  const handleDrag = (e) => {
+  const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault()
     e.stopPropagation()
     if (e.type === "dragenter" || e.type === "dragover") {
@@ -40,7 +40,7 @@ const UploadResume = () => {
     }
   }
 
-  const handleDrop = (e) => {
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault()
     e.stopPropagation()
     setDragActive(false)
@@ -49,12 +49,12 @@ const UploadResume = () => {
     if (files && files[0]) {
       setFormData(prev => ({
         ...prev,
-        resume: files[0]
+        resume: files[0] || null
       }))
     }
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     console.log("Form submitted:", formData)
     alert("Resume submitted successfully!")
@@ -196,7 +196,7 @@ const UploadResume = () => {
                       onDragLeave={handleDrag}
                       onDragOver={handleDrag}
                       onDrop={handleDrop}
-                      onClick={() => document.getElementById("resume-upload").click()}
+                      onClick={() => document.getElementById("resume-upload")?.click()}
                     >
                       <input
                         type="file"
@@ -228,7 +228,7 @@ const UploadResume = () => {
                         
                         {formData.resume ? (
                           <div>
-                            <p className="text-teal-500 font-medium truncate">{formData.resume.name}</p>
+                            <p className="text-teal-500 font-medium truncate">{formData.resume && formData.resume.name}</p>
                             <p className="text-gray-400 text-sm mt-1">Click to change file</p>
                           </div>
                         ) : (

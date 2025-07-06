@@ -1,8 +1,7 @@
-"use client"
 import { get, ref, set } from "firebase/database";
 import { database } from "@/lib/firebase";
 
-export const fetchMerchantById = async (merchantId) => {
+export const fetchMerchantById = async (merchantId: string) => {
   try {
     const merchantRef = ref(database, `merchants/${merchantId}`);
     const snapshot = await get(merchantRef);
@@ -20,13 +19,12 @@ export const fetchMerchantById = async (merchantId) => {
   }
 };
 
-// database/fetch-merchants.js
 export const getRecommendedMerchants = async (limit = 5) => {
   try {
     const merchantsRef = ref(database, "merchants");
     const snapshot = await get(merchantsRef);
     if (snapshot.exists()) {
-      const merchants = [];
+      const merchants: any[] = [];
       snapshot.forEach((childSnapshot) => {
         merchants.push({
           id: childSnapshot.key,
@@ -43,7 +41,11 @@ export const getRecommendedMerchants = async (limit = 5) => {
   }
 };
 
-export const sendConnectionRequest = async (merchantId, userId, userData) => {
+export const sendConnectionRequest = async (
+  merchantId: string,
+  userId: string,
+  userData: any
+) => {
   try {
     const requestRef = ref(database, `merchantInvites/${merchantId}/${userId}`);
     await set(requestRef, {
@@ -57,4 +59,4 @@ export const sendConnectionRequest = async (merchantId, userId, userData) => {
     console.error("Error sending connection request:", error);
     return false;
   }
-};
+}; 

@@ -1,9 +1,18 @@
 "use client";
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
-export const ConsumerOrMerchantContext = createContext(null);
+interface ConsumerOrMerchantContextType {
+  consumer: boolean;
+  toggleAzenda: (val?: boolean) => void;
+}
 
-export function ConsumerOrMerchantProvider({ children }) {
+export const ConsumerOrMerchantContext = createContext<ConsumerOrMerchantContextType | null>(null);
+
+interface ConsumerOrMerchantProviderProps {
+  children: ReactNode;
+}
+
+export function ConsumerOrMerchantProvider({ children }: ConsumerOrMerchantProviderProps) {
   const [consumer, setConsumer] = useState(() => {
     if (typeof window !== "undefined") {
       try {
@@ -18,13 +27,13 @@ export function ConsumerOrMerchantProvider({ children }) {
 
   useEffect(() => {
     try {
-      localStorage.setItem("isConsumer", consumer);
+      localStorage.setItem("isConsumer", consumer.toString());
     } catch (error) {
       console.error("Failed to save 'isConsumer' to localStorage:", error);
     }
   }, [consumer]);
 
-  const toggleAzenda = (val) => {
+  const toggleAzenda = (val?: boolean) => {
     if (typeof val === "boolean") {
       setConsumer(val);
     } else {

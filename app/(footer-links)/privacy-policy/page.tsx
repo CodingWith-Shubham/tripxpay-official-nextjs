@@ -3,7 +3,8 @@ import PageHeader from "../../../components/PageHeader"
 const PrivacyPolicyPage = () => {
   const sections = [
     {
-      title: "Will be updated soon !!!"
+      title: "Will be updated soon !!!",
+      content: "Our privacy policy will be updated soon. Please check back later for detailed information about how we collect, use, and protect your personal information."
     }
   ]
 

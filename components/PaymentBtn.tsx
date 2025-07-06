@@ -3,12 +3,12 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import {
-  loadRazorpayScript,
+  getUserInfo,
   getCurrentCredit,
   updateUserCreditAmount,
   uploadTransactionInfo,
-  getUserInfo,
-} from "@/app/api/payment/page";
+  loadRazorpayScript
+} from "@/lib/payment";
 
 // TypeScript interfaces
 interface UserData {

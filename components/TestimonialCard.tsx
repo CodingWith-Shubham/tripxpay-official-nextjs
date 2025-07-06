@@ -19,7 +19,7 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
 }) => {
   const controls = useAnimation();
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { threshold: 0.2 });
+  const inView = useInView(ref);
 
   useEffect(() => {
     if (inView) {
@@ -36,7 +36,7 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
       y: 0,
       transition: {
         duration: 1,
-        ease: "easeOut",
+        ease: "easeOut" as const,
         delay: index * 0.3,
       },
     },

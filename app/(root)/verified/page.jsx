@@ -26,7 +26,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   getUserInfo,
   deleteUserInfo,
-} from "../../api/documents-upload-aditya/page";
+} from "@/lib/documents-upload-aditya";
 import { useRouter } from "next/navigation";
 import VerifiedPageSkeletonScreen from "@/components/VerifiedPageSkeletonScreen";
 import PaymentBtn from "@/components/PaymentBtn";
@@ -37,7 +37,7 @@ import {
   fetchMerchantById,
   getRecommendedMerchants,
   sendConnectionRequest,
-} from "../../api/fetchMerchantById/page";
+} from "@/lib/fetchMerchantById";
 import Image from "next/image";
 
 const Verified = () => {
