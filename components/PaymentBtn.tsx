@@ -2,13 +2,6 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import {
-  getUserInfo,
-  getCurrentCredit,
-  updateUserCreditAmount,
-  uploadTransactionInfo,
-  loadRazorpayScript
-} from "@/lib/payment";
 
 // TypeScript interfaces
 interface UserData {
@@ -58,15 +51,17 @@ const PaymentBtn: React.FC<PaymentBtnProps> = ({
         setIsLoading(true);
         setError(null);
         // console.log(`currentUserId : ${currentUserId}`);
-        const response = await getUserInfo(currentUserId);
+        const { data } = await fetch(`/api/getuserdata?uid=${currentUserId}`, {
+          method: "POST",
+        }).then((res) => res.json());
         // console.log(`response : ${response}`);
 
-        if (!response) {
+        if (!data) {
           throw new Error("No user data found");
         }
 
         // console.log("Fetched user data:", response);
-        setUserData({ ...response, id: currentUserId });
+        setUserData({ ...data, id: currentUserId });
       } catch (error) {
         console.error("Error fetching user info:", error);
         setError((error as Error).message || "Failed to load user info");
@@ -91,12 +86,6 @@ const PaymentBtn: React.FC<PaymentBtnProps> = ({
     }
 
     try {
-      const scriptLoaded = await loadRazorpayScript();
-      if (!scriptLoaded) {
-        toast.error("Failed to load Razorpay script");
-        return;
-      }
-
       const amountToPay = userData.creditedAmount * 100;
 
       const transactionInfo = {
@@ -119,12 +108,17 @@ const PaymentBtn: React.FC<PaymentBtnProps> = ({
           // console.log('Razorpay handler response:', response);
           try {
             // Get the latest credit amount after payment
-            const currentCredit = await getCurrentCredit(userData.id);
+            const { currentCredit } = await fetch(
+              `/api/getcreditamount?uid=${userData?.id}`,
+              { method: "POST" }
+            ).then((res) => res.json());
             const paidAmount = amountToPay / 100;
             const newAmount = currentCredit - paidAmount;
 
-            await updateUserCreditAmount(userData.id, newAmount);
-
+            await fetch(
+              `/api/updatecredit?amount=${newAmount}&userid=${userData.id}`,
+              { method: "POST" }
+            );
             const orderInfo = {
               ...transactionInfo,
               paymentID: response.razorpay_payment_id ?? "",
@@ -140,10 +134,16 @@ const PaymentBtn: React.FC<PaymentBtnProps> = ({
             //   userId: userData.id,
             //   orderInfo
             // });
-            const uploadResult = await uploadTransactionInfo(
-              userData.id,
-              orderInfo
-            );
+            const uploadResult = await fetch(
+              `/api/updatetransaction?userid=${userData.id}`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ orderinfo: orderInfo }),
+              }
+            ).then((res) => res.json());
             if (!uploadResult.success) {
               throw new Error("Failed to record transaction");
             }
@@ -151,9 +151,12 @@ const PaymentBtn: React.FC<PaymentBtnProps> = ({
             // console.log('Transaction recorded successfully:', uploadResult);
 
             // Fetch the latest user data to ensure we have the most up-to-date information
-            const updatedUserData = await getUserInfo(userData.id);
-            if (updatedUserData) {
-              setUserData({ ...updatedUserData, id: userData.id });
+            const { data } = await fetch(
+              `/api/getuserdata?uid=${userData.id}`,
+              { method: "POST" }
+            ).then((res) => res.json());
+            if (data) {
+              setUserData({ ...data, id: userData.id });
             }
 
             toast.success("Payment successful and credit updated");
@@ -188,7 +191,7 @@ const PaymentBtn: React.FC<PaymentBtnProps> = ({
     return (
       <motion.button
         disabled
-        className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg mx-2 border w-fit h-fit p-3 rounded-xl bg-gray-400 cursor-not-allowed transition-all duration-300 text-sm md:text-base font-medium text-white"
+        className=" sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3  mx-2 border w-fit h-fit p-3 rounded-xl bg-gray-400 cursor-not-allowed transition-all duration-300 text-sm md:text-base font-medium text-white"
       >
         Loading...
       </motion.button>
@@ -199,7 +202,7 @@ const PaymentBtn: React.FC<PaymentBtnProps> = ({
     return (
       <motion.button
         disabled
-        className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg mx-2 border w-fit h-fit p-3 rounded-xl bg-gray-400 cursor-not-allowed transition-all duration-300 text-sm md:text-base font-medium text-white"
+        className=" sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3   mx-2 border w-fit h-fit p-3 rounded-xl bg-gray-400 cursor-not-allowed transition-all duration-300 text-sm md:text-base font-medium text-white"
       >
         Error
       </motion.button>

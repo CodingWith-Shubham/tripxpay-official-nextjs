@@ -266,9 +266,13 @@ const Verified = () => {
 
   useEffect(() => {
     if (!userProfile?.merchantRel && hasUserBackendProfile) {
-      const fetchRecommendations = async () => {
-        const merchants = await getRecommendedMerchants();
-        setRecommendedMerchants(merchants);
+      const fetchRecommendations = async (): Promise<void> => {
+        const response = await fetch(`/api/merchantrecommendation?limit=${5}`, {
+          method: "POST",
+        });
+        const { merchants } = await response.json();
+        console.log("Fetched merchants:", merchants);
+        setRecommendedMerchants(Array.isArray(merchants) ? merchants : []);
         setShowRecommendations(true);
       };
       fetchRecommendations();
@@ -543,7 +547,7 @@ const Verified = () => {
 
           {
             // Merchant Recommendations Carousel
-            showRecommendations && (
+            showRecommendations && recommendedMerchants.length > 0 && (
               <motion.div
                 className="bg-gray-900/50 border mb-4 sm:mb-5 border-gray-800 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 shadow-2xl"
                 initial={{ opacity: 0, y: 20 }}
@@ -905,69 +909,67 @@ const Verified = () => {
                 </motion.div>
               ) : (
                 <>
-                  {
-                    <motion.div
-                      className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-2xl p-6 shadow-2xl w-full"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.6, delay: 0.4 }}
-                    >
-                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-12 w-full">
-                        {/* Credit Amount Section */}
-                        <div className="text-center lg:text-left w-full lg:w-auto">
-                          <h3 className="text-lg md:text-xl font-semibold text-white mb-2 flex items-center justify-center lg:justify-start">
-                            Credit Spend
-                          </h3>
-                          <p className="text-4xl md:text-5xl lg:text-7xl font-bold text-[#FAB609] mb-4 lg:mb-8">
-                            {`₹${String(userProfile?.creditedAmount)}`}
-                          </p>
-                        </div>
-                        {/* Buttons Section */}
-                        <div className="w-full lg:w-auto">
-                          <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center lg:justify-end">
-                            <PaymentBtn
-                              currentUserId={currentUser?.uid}
-                              onCreditUpdate={(newCredit) => {
-                                setUserData((prev) =>
-                                  prev.length > 0
-                                    ? [
-                                        {
-                                          uid: prev[0].uid,
-                                          displayName: prev[0].displayName,
-                                          email: prev[0].email,
-                                          isEmailVerified:
-                                            prev[0].isEmailVerified,
-                                          isVerified: prev[0].isVerified,
-                                          creditedAmount: newCredit,
-                                          submittedAt: prev[0].submittedAt,
-                                          status: prev[0].status,
-                                          // Optional fields
-                                          photoUrl: prev[0].photoUrl,
-                                          phoneNumber: prev[0].phoneNumber,
-                                          address: prev[0].address,
-                                          profession: prev[0].profession,
-                                          fatherName: prev[0].fatherName,
-                                          merchantRel: prev[0].merchantRel,
-                                          documents: prev[0].documents,
-                                          faceAuth: prev[0].faceAuth,
+                  <motion.div
+                    className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-2xl p-4 md:p-6 shadow-2xl"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.4 }}
+                  >
+                    <div className="flex flex-col lg:flex-row justify-between items-center gap-6 lg:gap-12">
+                      {/* Credit Amount Section */}
+                      <div className="w-full lg:w-auto text-center lg:text-left">
+                        <h3 className="text-lg md:text-xl font-semibold text-white mb-2 flex items-center justify-center lg:justify-start">
+                          Credit Spend
+                        </h3>
+                        <p className="text-4xl md:text-5xl lg:text-7xl font-bold text-[#FAB609] mb-4 lg:mb-8">
+                          {`₹${String(userProfile?.creditedAmount)}`}
+                        </p>
+                      </div>
+
+                      {/* Buttons Section */}
+                      <div className="w-full lg:w-auto">
+                        <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 min-w-0 lg:min-w-[300px]">
+                          <PaymentBtn
+                            currentUserId={userProfile?.uid}
+                            onCreditUpdate={(newCredit) => {
+                              setUserData((prev) => {
+                                if (!prev[0]) return prev;
+                                return [
+                                  {
+                                    uid: prev[0].uid,
+                                    displayName: prev[0].displayName,
+                                    email: prev[0].email,
+                                    phoneNumber: prev[0].phoneNumber,
+                                    photoUrl: prev[0].photoUrl || "",
+                                    status: prev[0].status,
+                                    isVerified: prev[0].isVerified,
+                                    creditedAmount: newCredit,
+                                    merchantRel: prev[0].merchantRel || "",
+                                    documents: prev[0].documents
+                                      ? prev[0].documents
+                                      : {
+                                          aadhaar: { downloadURL: "" },
+                                          pan: { downloadURL: "" },
                                         },
-                                      ]
-                                    : prev
-                                );
-                              }}
-                            />
-                            <motion.button
-                              className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg bg-[#0193C0]/50 hover:bg-[#0193C0]/90 transition-all duration-300 text-sm md:text-base font-medium text-white"
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                            >
-                              EMI
-                            </motion.button>
-                          </div>
+                                    faceAuth: prev[0].faceAuth
+                                      ? prev[0].faceAuth
+                                      : { downloadURL: "" },
+                                  },
+                                ];
+                              });
+                            }}
+                          />
+                          <motion.button
+                            className="w-full sm:w-auto sm:min-w-[100px] lg:min-w-[120px] px-4 py-3 border rounded-lg bg-[#0193C0]/50 hover:bg-[#0193C0]/90 transition-all duration-300 text-sm md:text-base font-medium text-white"
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            EMI
+                          </motion.button>
                         </div>
                       </div>
-                    </motion.div>
-                  }
+                    </div>
+                  </motion.div>
                   {/* Transaction History */}
                   <motion.div
                     className="bg-gray-900/50 border border-gray-800 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 shadow-2xl"

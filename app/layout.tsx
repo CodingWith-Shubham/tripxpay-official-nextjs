@@ -4,7 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/Auth";
 import Head from "next/head";
-import { ConsumerOrMerchantProvider } from "@/contexts/ConsumerOrMerchantContext";
+import Script from "next/script";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -81,9 +81,7 @@ export default function RootLayout({
         />
       </Head>
       <body className={`${spaceGrotesk.variable} ${inter.variable}`}>
-        <ConsumerOrMerchantProvider>
-          <AuthProvider>{children}</AuthProvider>
-        </ConsumerOrMerchantProvider>
+        <AuthProvider>{children}</AuthProvider>
         <Toaster
           style={{
             backgroundColor: "#172533",
@@ -91,6 +89,7 @@ export default function RootLayout({
             color: "#fff",
           }}
         />
+        <Script src="https://checkout.razorpay.com/v1/checkout.js"></Script>
       </body>
     </html>
   );

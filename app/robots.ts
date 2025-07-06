@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: "/verified",
+      disallow: "/verified", 
     },
     sitemap: "https://tripxpay.in/sitemap.xml",
   };

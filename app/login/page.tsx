@@ -202,17 +202,16 @@ const LoginPageContent = () => {
         }
 
         const { user } = await response.json();
-
         // Set session cookie
         await setSessionCookie(user);
 
         // Handle merchant relationship if exists
         if (merchantRelParam) {
-          await handleMerchantRelationship(user.uid);
+          await handleMerchantRelationship(user.user.uid);
         }
 
         // Check user status and redirect
-        await checkUserStatusAndRedirect(user.uid);
+        await checkUserStatusAndRedirect(user?.user.uid);
       } catch (error: any) {
         console.error(error);
         setError(error.message || "Login failed. Please try again.");
@@ -494,30 +493,43 @@ const LoginPageContent = () => {
   const handleMerchantRelationship = async (userId: string) => {
     try {
       setInviteLoading(true);
-
-      const result = fetch(
-        `/api/updatemerchantrel?userid=${userId}&merchantid=${merchantRelParam}`,
+      const { success } = await fetch(
+        `/api/checkmerchant?merchantid=${userId}`,
         { method: "POST" }
-      );
-
-      toast.promise(result, {
-        loading: "Updating merchant relationship...",
-        error: "Failed to update merchant relationship",
-        success: "Merchant realation updated successfully",
-        position: "top-right",
-        style: { backgroundColor: "#172533", border: "#FBAE04", color: "#fff" },
-      });
-
-      const response = await result;
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.message || "Failed to update merchant relationship"
+      ).then((res) => res.json());
+      if (success) {
+        toast.error("This user is already registered in the merchant part.", {
+          duration: 10000,
+        });
+      } else {
+        const result = fetch(
+          `/api/updatemerchantrel?userid=${userId}&merchantid=${merchantRelParam}`,
+          { method: "POST" }
         );
-      }
 
-      localStorage.removeItem("merchantRel");
+        toast.promise(result, {
+          loading: "Updating merchant relationship...",
+          error: "Failed to update merchant relationship",
+          success: "Merchant realation updated successfully",
+          position: "top-right",
+          style: {
+            backgroundColor: "#172533",
+            border: "#FBAE04",
+            color: "#fff",
+          },
+        });
+
+        const response = await result;
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(
+            errorData.message || "Failed to update merchant relationship"
+          );
+        }
+
+        localStorage.removeItem("merchantRel");
+      }
     } catch (error: any) {
       console.error("Failed to update merchantRel:", error);
       toast.error(error.message || "Failed to update merchant relationship", {
@@ -531,25 +543,45 @@ const LoginPageContent = () => {
   // Helper function to check user status and redirect
   const checkUserStatusAndRedirect = async (userId: string) => {
     try {
-      const result = fetch(`/api/checkuser?uid=${userId}`, { method: "POST" });
-
-      toast.promise(result, {
-        loading: "Checking your account status...",
-        error: "Failed to check your status",
-        success: "Status verified",
-        position: "top-right",
-        style: { backgroundColor: "#172533", border: "#FBAE04", color: "#fff" },
-      });
-
-      const response = await result;
-      const data = await response.json();
-
-      if (data.success) {
-        await setConsumer();
-        router.push("/verified");
+      console.log(
+        "this is the uid fo the user when try to login with the ",
+        userId
+      );
+      const { success } = await fetch(
+        `/api/checkmerchant?merchantid=${userId}`,
+        { method: "POST" }
+      ).then((res) => res.json());
+      if (success) {
+        toast.error("This user is already registered in the merchant part.", {
+          duration: 10000,
+        });
       } else {
-        await setConsumer();
-        router.push("/verificationdashboard");
+        const result = fetch(`/api/checkuser?uid=${userId}`, {
+          method: "POST",
+        });
+
+        toast.promise(result, {
+          loading: "Checking your account status...",
+          error: "Failed to check your status",
+          success: "Status verified",
+          position: "top-right",
+          style: {
+            backgroundColor: "#172533",
+            border: "#FBAE04",
+            color: "#fff",
+          },
+        });
+
+        const response = await result;
+        const data = await response.json();
+
+        if (data.success) {
+          await setConsumer();
+          router.push("/verified");
+        } else {
+          await setConsumer();
+          router.push("/verificationdashboard");
+        }
       }
     } catch (error: any) {
       console.error("Failed to check user status:", error);
@@ -909,98 +941,98 @@ const LoginPageContent = () => {
                     </p>
                   </div>
 
-                  {isPending && (
-                    <div className="flex justify-center">
-                      <svg
-                        className="animate-spin h-8 w-8 text-teal-500"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
+                    {isPending && (
+                      <div className="flex justify-center">
+                        <svg
+                          className="animate-spin h-8 w-8 text-teal-500"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                      </div>
+                    )}
+
+                    {error && (
+                      <div className="bg-red-900/50 border border-red-700 text-red-300 px-4 py-3 rounded-lg animate-fadeIn">
+                        {error}
+                      </div>
+                    )}
+
+                    <div className="text-center">
+                      <button
+                        onClick={() => setLoginMethod("email")}
+                        className="text-teal-500 hover:text-teal-400 font-medium transition-all duration-300"
                       >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
+                        Back to Login
+                      </button>
                     </div>
-                  )}
+                  </div>
+                )}
 
-                  {error && (
-                    <div className="bg-red-900/50 border border-red-700 text-red-300 px-4 py-3 rounded-lg animate-fadeIn">
-                      {error}
+                {/* Phone Login Form */}
+                {loginMethod === "phone" && (
+                  <form onSubmit={handlePhoneLogin} className="space-y-6">
+                    <div className="group">
+                      <label
+                        htmlFor="phoneNumber"
+                        className="block text-sm font-medium text-gray-300 mb-1 group-hover:text-teal-400 transition-colors duration-300"
+                      >
+                        Phone Number
+                      </label>
+                      <input
+                        id="phoneNumber"
+                        name="phoneNumber"
+                        type="tel"
+                        value={formData.phoneNumber}
+                        onChange={(e) => {
+                          // Update both form state and context
+                          const value = e.target.value;
+                          setFormData((prev) => ({
+                            ...prev,
+                            phoneNumber: value,
+                          }));
+                        }}
+                        required
+                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all duration-300 hover:bg-gray-750 hover:border-gray-600 hover:shadow-lg hover:shadow-teal-500/10"
+                        placeholder="+91 1234567890"
+                        disabled={isPending}
+                      />
+                      <p className="mt-1 text-xs text-gray-500">
+                        Enter your 10-digit Indian mobile number
+                      </p>
                     </div>
-                  )}
 
-                  <div className="text-center">
                     <button
-                      onClick={() => setLoginMethod("email")}
-                      className="text-teal-500 hover:text-teal-400 font-medium transition-all duration-300"
-                    >
-                      Back to Login
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Phone Login Form */}
-              {loginMethod === "phone" && (
-                <form onSubmit={handlePhoneLogin} className="space-y-6">
-                  <div className="group">
-                    <label
-                      htmlFor="phoneNumber"
-                      className="block text-sm font-medium text-gray-300 mb-1 group-hover:text-teal-400 transition-colors duration-300"
-                    >
-                      Phone Number
-                    </label>
-                    <input
-                      id="phoneNumber"
-                      name="phoneNumber"
-                      type="tel"
-                      value={formData.phoneNumber}
-                      onChange={(e) => {
-                        // Update both form state and context
-                        const value = e.target.value;
-                        setFormData((prev) => ({
-                          ...prev,
-                          phoneNumber: value,
-                        }));
-                      }}
-                      required
-                      className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all duration-300 hover:bg-gray-750 hover:border-gray-600 hover:shadow-lg hover:shadow-teal-500/10"
-                      placeholder="+91 1234567890"
+                      type="submit"
                       disabled={isPending}
-                    />
-                    <p className="mt-1 text-xs text-gray-500">
-                      Enter your 10-digit Indian mobile number
-                    </p>
-                  </div>
+                      className="w-full py-3 px-4 bg-gradient-to-r from-teal-500 to-teal-600 text-white font-medium rounded-lg hover:from-teal-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:opacity-50 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-teal-500/25 transform"
+                    >
+                      {isPending ? "Sending Code..." : "Send Verification Code"}
+                    </button>
 
-                  <button
-                    type="submit"
-                    disabled={isPending}
-                    className="w-full py-3 px-4 bg-gradient-to-r from-teal-500 to-teal-600 text-white font-medium rounded-lg hover:from-teal-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:opacity-50 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-teal-500/25 transform"
-                  >
-                    {isPending ? "Sending Code..." : "Send Verification Code"}
-                  </button>
-
-                  {/* Updated reCAPTCHA container */}
-                  <div
-                    id="recaptcha-container"
-                    className="flex justify-center min-h-[78px] items-center"
-                  ></div>
-                </form>
-              )}
-            </>
-          )}
+                    {/* Updated reCAPTCHA container */}
+                    <div
+                      id="recaptcha-container"
+                      className="flex justify-center min-h-[78px] items-center"
+                    ></div>
+                  </form>
+                )}
+              </>
+            )}
 
           {/* Step 2: Phone Verification */}
           {step === 2 && (
@@ -1072,151 +1104,149 @@ const LoginPageContent = () => {
                   Resend Code
                 </button>
 
-                <button
-                  onClick={() => setStep(1)}
-                  className="w-full py-3 px-4 text-gray-400 hover:text-white font-medium transition-colors duration-200"
-                >
-                  Back to Login Options
-                </button>
-              </div>
-            </div>
-          )}
-
-          {step === 1 && (
-            <div className="mt-8 text-center">
-              <p className="text-gray-400">
-                Don't have an account?{" "}
-                <Link
-                  href="/signup"
-                  className="text-teal-500 hover:text-teal-400 font-medium transition-all duration-300 hover:scale-105 inline-block"
-                >
-                  Sign up
-                </Link>
-              </p>
-            </div>
-          )}
-
-          {showInvitationPopup && (
-            <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
-              <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4 border border-teal-500">
-                <h3 className="text-xl font-bold mb-4">
-                  Accept Merchant Invitation
-                </h3>
-
-                {/* Add this error display */}
-                {merchantRelParam === currentUser?.uid && (
-                  <div className="bg-red-900/50 border border-red-700 text-red-300 px-4 py-3 rounded-lg mb-4">
-                    You cannot create a merchant relationship with yourself
-                  </div>
-                )}
-
-                <p className="mb-6 text-gray-300">
-                  Do you want to accept this merchant relationship?
-                </p>
-                <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4">
                   <button
-                    onClick={() => {
-                      setShowInvitationPopup(false);
-                      localStorage.removeItem("merchantRel");
-                    }}
-                    className="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600 transition-colors duration-200 w-full sm:w-auto"
+                    onClick={() => setStep(1)}
+                    className="w-full py-3 px-4 text-gray-400 hover:text-white font-medium transition-colors duration-200"
                   >
-                    {error.toLowerCase().includes("yourself")
-                      ? "Close"
-                      : "Decline"}
+                    Back to Login Options
                   </button>
-                  {!error.toLowerCase().includes("yourself") ? (
-                    <button
-                      onClick={async () => {
-                        try {
-                          // Add this validation check
-                          if (merchantRelParam === currentUser?.uid) {
-                            setError(
-                              "You cannot create a merchant relationship with yourself"
-                            );
-                            return;
-                          }
-
-                          setInviteLoading(true);
-
-                          // Update merchant relationship
-                          const updateResult = fetch(
-                            `/api/updatemerchantrel?userid=${
-                              currentUser!.uid
-                            }&merchantid=${merchantRelParam}`,
-                            { method: "POST" }
-                          );
-
-                          toast.promise(updateResult, {
-                            loading: "Updating merchant relationship...",
-                            error: "Failed to update merchant relationship",
-                            success:
-                              "Merchant relationship updated successfully",
-                            position: "top-right",
-                            style: {
-                              backgroundColor: "#172533",
-                              border: "#FBAE04",
-                              color: "#fff",
-                            },
-                          });
-
-                          const updateResponse = await updateResult;
-
-                          if (!updateResponse.ok) {
-                            const errorData = await updateResponse.json();
-                            throw new Error(
-                              errorData.message ||
-                                "Failed to update merchant relationship"
-                            );
-                          }
-
-                          // Check user status and redirect
-                          await checkUserStatusAndRedirect(currentUser!.uid);
-                        } catch (error: any) {
-                          console.error(
-                            "Failed to accept invitation:",
-                            error
-                          );
-                          setError(
-                            error.message || "Failed to accept invitation"
-                          );
-                        } finally {
-                          setInviteLoading(false);
-                          setShowInvitationPopup(false);
-                        }
-                      }}
-                      className="px-4 py-2 bg-teal-500 rounded hover:bg-teal-600 transition-colors duration-200 w-full sm:w-auto"
-                    >
-                      {inviteLoading ? "Accepting..." : "Accept"}
-                    </button>
-                  ) : (
-                    ""
-                  )}
                 </div>
               </div>
-            </div>
-          )}
-        </div>
-      </div>
+            )}
 
-      <Footer />
-    </div>
-  );
-};
+            {step === 1 && (
+              <div className="mt-8 text-center">
+                <p className="text-gray-400">
+                  Don't have an account?{" "}
+                  <Link
+                    href={
+                      merchantRelParam
+                        ? `/signup?merchantRel=${merchantRelParam}`
+                        : "/signup"
+                    }
+                    className="text-teal-500 hover:text-teal-400 font-medium transition-all duration-300 hover:scale-105 inline-block"
+                  >
+                    Sign up
+                  </Link>
+                </p>
+              </div>
+            )}
 
-const LoginPage = () => {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500 mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading...</p>
+            {showInvitationPopup && (
+              <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+                <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4 border border-teal-500">
+                  <h3 className="text-xl font-bold mb-4">
+                    Accept Merchant Invitation
+                  </h3>
+
+                  {/* Add this error display */}
+                  {merchantRelParam === currentUser?.uid && (
+                    <div className="bg-red-900/50 border border-red-700 text-red-300 px-4 py-3 rounded-lg mb-4">
+                      You cannot create a merchant relationship with yourself
+                    </div>
+                  )}
+
+                  <p className="mb-6 text-gray-300">
+                    Do you want to accept this merchant relationship?
+                  </p>
+                  <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4">
+                    <button
+                      onClick={() => {
+                        setShowInvitationPopup(false);
+                        localStorage.removeItem("merchantRel");
+                      }}
+                      className="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600 transition-colors duration-200 w-full sm:w-auto"
+                    >
+                      {error.toLowerCase().includes("yourself")
+                        ? "Close"
+                        : "Decline"}
+                    </button>
+                    {!error.toLowerCase().includes("yourself") ? (
+                      <button
+                        onClick={async () => {
+                          try {
+                            // Add this validation check
+                            if (merchantRelParam === currentUser?.uid) {
+                              setError(
+                                "You cannot create a merchant relationship with yourself"
+                              );
+                              return;
+                            }
+
+                            setInviteLoading(true);
+
+                            // Update merchant relationship
+                            const updateResult = fetch(
+                              `/api/updatemerchantrel?userid=${
+                                currentUser!.uid
+                              }&merchantid=${merchantRelParam}`,
+                              { method: "POST" }
+                            );
+
+                            toast.promise(updateResult, {
+                              loading: "Updating merchant relationship...",
+                              error: "Failed to update merchant relationship",
+                              success:
+                                "Merchant relationship updated successfully",
+                              position: "top-right",
+                              style: {
+                                backgroundColor: "#172533",
+                                border: "#FBAE04",
+                                color: "#fff",
+                              },
+                            });
+
+                            const updateResponse = await updateResult;
+
+                            if (!updateResponse.ok) {
+                              const errorData = await updateResponse.json();
+                              throw new Error(
+                                errorData.message ||
+                                  "Failed to update merchant relationship"
+                              );
+                            }
+
+                            // Check user status and redirect
+                            await checkUserStatusAndRedirect(currentUser!.uid);
+                          } catch (error: any) {
+                            console.error(
+                              "Failed to accept invitation:",
+                              error
+                            );
+                            setError(
+                              error.message || "Failed to accept invitation"
+                            );
+                          } finally {
+                            setInviteLoading(false);
+                            setShowInvitationPopup(false);
+                          }
+                        }}
+                        className="px-4 py-2 bg-teal-500 rounded hover:bg-teal-600 transition-colors duration-200 w-full sm:w-auto"
+                      >
+                        {inviteLoading ? "Accepting..." : "Accept"}
+                      </button>
+                    ) : (
+                      ""
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
+
+        <Footer />
       </div>
-    }>
-      <LoginPageContent />
     </Suspense>
   );
 };
 
+export default LoginPage;
+const LoginPage = () => {
+  return (
+    <Suspense fallback={<div className="animate-bounce">Loading...</div>}>
+      <LoginPageContent />
+    </Suspense>
+  );
+};
 export default LoginPage;
