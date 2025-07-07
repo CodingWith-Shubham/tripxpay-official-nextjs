@@ -5,7 +5,7 @@ import {
   getAllUsers, 
   uploadMerchantDocuments, 
   deleteUserInfo 
-} from '@/lib/documents-upload-aditya';
+} from '@/lib/User';
 
 export async function POST(request: NextRequest) {
   try {

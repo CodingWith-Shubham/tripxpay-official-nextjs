@@ -3,13 +3,14 @@ import { database } from "@/lib/firebase";
 
 export const fetchMerchantById = async (merchantId: string) => {
   try {
-    const merchantRef = ref(database, `merchants/${merchantId}`);
-    const snapshot = await get(merchantRef);
+    const res= await fetch(`api/fetchMerchantById?merchantId=${merchantId}`);
+    const json = await res.json();
+    console.log(`my API call : ${json.data}`);
 
-    if (snapshot.exists()) {
+    if (json.data) {
       return {
         id: merchantId,
-        ...snapshot.val(),
+        ...json.data,
       };
     }
     return null;

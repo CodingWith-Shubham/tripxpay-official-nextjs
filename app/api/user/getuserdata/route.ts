@@ -2,24 +2,23 @@ import { database } from "@/lib/firebase";
 import { get, ref } from "firebase/database";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
     const uid = req.nextUrl.searchParams.get("uid");
+
     if (!uid) {
-      return NextResponse.json(
-        { message: "uid must be required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: "uid is required" }, { status: 400 });
     }
-    const rtdbref = ref(database, `users/${uid}`);
-    const snapshot = await get(rtdbref);
+
+    const rtdbRef = ref(database, `users/${uid}`);
+    const snapshot = await get(rtdbRef);
+
     if (!snapshot.exists()) {
-      return NextResponse.json(
-        { message: "User data not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: "User data not found" }, { status: 404 });
     }
+
     const data = snapshot.val();
+
     return NextResponse.json(
       {
         success: true,
@@ -28,7 +27,7 @@ export async function POST(req: NextRequest) {
           displayName: data.displayName,
           email: data.email,
           phoneNumber: data.phoneNumber,
-          photoURL: data.photoURL,
+          photoUrl: data.photoURL,
           status: data.status,
           isVerified: data.isVerified,
           creditedAmount: data.creditedAmount,
@@ -40,9 +39,8 @@ export async function POST(req: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    return NextResponse.json(
-      { message: "Internal server issue" },
-      { status: 500 }
-    );
+    console.error("Error fetching user:", error);
+    return NextResponse.json({ message: "Internal server issue" }, { status: 500 });
   }
 }
+

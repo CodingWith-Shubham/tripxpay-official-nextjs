@@ -26,7 +26,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   getUserInfo,
   deleteUserInfo,
-} from "@/lib/documents-upload-aditya";
+} from "@/lib/User";
 import { useRouter } from "next/navigation";
 import VerifiedPageSkeletonScreen from "@/components/VerifiedPageSkeletonScreen";
 import PaymentBtn from "@/components/PaymentBtn";
@@ -163,29 +163,24 @@ const Verified = () => {
   useEffect(() => {
     if (!userId) return;
 
-    const transactionsRef = ref(database, `users/${userId}/transactions`);
-
-    const unsubscribe = onValue(transactionsRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const parsedTransactions = Object.entries(data).map(([key, value]) => ({
-          id: key,
-          ...value,
-        }));
-
+    const fetchTransactions = async () => {
+      try {
+        const res = await fetch(`/api/user/transactions?uid=${userId}`);
+        const json = await res.json();
+        let parsedTransactions = Array.isArray(json.transactions) ? json.transactions : [];
         // Sort by timestamp in descending order
         parsedTransactions.sort(
           (a, b) =>
             new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         );
-
         setTransactions(parsedTransactions);
-      } else {
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
         setTransactions([]);
       }
-    });
+    };
 
-    return () => unsubscribe(); // cleanup listener
+    fetchTransactions();
   }, [userId]);
 
   const getVerificationStatus = (user) => {
@@ -271,7 +266,7 @@ const Verified = () => {
           method: "POST",
         });
         const { merchants } = await response.json();
-        console.log("Fetched merchants:", merchants);
+        // console.log("Fetched merchants:", merchants);
         setRecommendedMerchants(Array.isArray(merchants) ? merchants : []);
         setShowRecommendations(true);
       };
@@ -663,9 +658,9 @@ const Verified = () => {
 
                   {/* Carousel indicators with better mobile spacing */}
                   <div className="flex justify-center mt-4 sm:mt-4 space-x-2 sm:space-x-2">
-                    {recommendedMerchants.map((_, index) => (
+                    {recommendedMerchants.map((merchant, index) => (
                       <button
-                        key={index}
+                        key={merchant.id}
                         onClick={() => {
                           setActiveIndex(index);
                           stopCarousel();

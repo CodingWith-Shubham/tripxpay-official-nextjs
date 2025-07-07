@@ -13,6 +13,7 @@ import {
   remove,
 } from "firebase/database";
 import { database } from "@/lib/firebase";
+import { signJWT } from "./jwt";
 
 // Enhanced function to upload documents with better structure
 export async function uploadDocuments(
@@ -83,13 +84,9 @@ export async function uploadDocuments(
 
 export async function getUserInfo(uid: string) {
   try {
-    const sanpshot = await get(ref(database, `users/${uid}`));
-    if (sanpshot.exists()) {
-      console.log("user found");
-      return sanpshot.val();
-    } else {
-      return {};
-    }
+    const res = await fetch(`/api/user/getuserdata?uid=${uid}`);
+    const json = await res.json();
+    return json.data || {};
   } catch (error) {
     console.log("error while getting the user", error);
     throw error;
