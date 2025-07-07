@@ -13,7 +13,6 @@ import {
   remove,
 } from "firebase/database";
 import { database } from "@/lib/firebase";
-import { signJWT } from "./jwt";
 
 // Enhanced function to upload documents with better structure
 export async function uploadDocuments(
