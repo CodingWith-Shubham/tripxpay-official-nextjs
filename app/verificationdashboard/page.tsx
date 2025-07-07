@@ -1404,7 +1404,6 @@ export default function VerificationDashboard() {
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <LoadingSpinner
           size="large"
-          text="Please login to access verification."
         />
       </div>
     );
@@ -1603,7 +1602,6 @@ export default function VerificationDashboard() {
                 >
                   <LoadingSpinner
                     size="large"
-                    text="Uploading your documents..."
                   />
                   <div className="mt-6 space-y-3">
                     <div className="flex justify-between text-sm">

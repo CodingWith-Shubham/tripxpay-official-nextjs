@@ -4,7 +4,7 @@ import { getAllBlogs } from "../../Blogs";
 import PageHeader from "@/components/PageHeader";
 import { RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
 import Blog from "@/components/Blog";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 interface BlogPost {
@@ -24,15 +24,14 @@ interface Category {
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
-  visible: (i = 1) => ({
+  visible: {
     opacity: 1,
     y: 0,
     transition: {
-      delay: i * 0.1,
       duration: 0.4,
-      ease: [0.25, 1, 0.5, 1],
+      ease: "easeOut" as const,
     },
-  }),
+  },
 };
 
 const containerStagger = {
@@ -189,7 +188,7 @@ const UploadBlogsPage = () => {
               title="Refresh blogs"
             >
               {isRefreshing ? (
-                <LoadingSpinner size="medium" text="Refreshing..." />
+                <LoadingSpinner size="medium" />
               ) : (
                 <RefreshCw size={18} className="text-gray-300" />
               )}
