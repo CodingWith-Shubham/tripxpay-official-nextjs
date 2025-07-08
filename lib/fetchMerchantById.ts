@@ -22,16 +22,10 @@ export const fetchMerchantById = async (merchantId: string) => {
 
 export const getRecommendedMerchants = async (limit = 5) => {
   try {
-    const merchantsRef = ref(database, "merchants");
-    const snapshot = await get(merchantsRef);
-    if (snapshot.exists()) {
-      const merchants: any[] = [];
-      snapshot.forEach((childSnapshot) => {
-        merchants.push({
-          id: childSnapshot.key,
-          ...childSnapshot.val(),
-        });
-      });
+    const res = await fetch(`api/merchantrecommendation?limit=${limit}`);
+    const { merchants } = await res.json(); // Await the JSON parsing
+
+    if (merchants && Array.isArray(merchants)) {
       // Return random subset of merchants
       return merchants.sort(() => 0.5 - Math.random()).slice(0, limit);
     }
