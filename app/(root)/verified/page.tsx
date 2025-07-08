@@ -43,25 +43,25 @@ import Image from "next/image";
 const Verified = () => {
   const router = useRouter();
   const { currentUser, logout } = useAuth();
-  const [userData, setUserData] = useState([]);
-  const [merchantData, setMerchantData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [expandedSections, setExpandedSections] = useState({});
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [scale, setScale] = useState(1);
-  const [recommendedMerchants, setRecommendedMerchants] = useState([]);
-  const [showRecommendations, setShowRecommendations] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const carouselRef = useRef(null);
-  const intervalRef = useRef(null);
-  const [hasUserBackendProfile, setHasUserBackendProfile] = useState(false);
-  const addressRef = useRef(null);
-  const [isAddressOverflowing, setIsAddressOverflowing] = useState(false);
-  const [transactions, setTransactions] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [userData, setUserData] = useState<any[]>([]);
+  const [merchantData, setMerchantData] = useState<any | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [scale, setScale] = useState<number>(1);
+  const [recommendedMerchants, setRecommendedMerchants] = useState<any[]>([]);
+  const [showRecommendations, setShowRecommendations] = useState<boolean>(false);
+  const [isHovered, setIsHovered] = useState<boolean>(false);
+  const [activeIndex, setActiveIndex] = useState<number>(0);
+  const carouselRef = useRef<HTMLDivElement | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [hasUserBackendProfile, setHasUserBackendProfile] = useState<boolean>(false);
+  const addressRef = useRef<HTMLDivElement | null>(null);
+  const [isAddressOverflowing, setIsAddressOverflowing] = useState<boolean>(false);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const transactionsPerPage = 5;
   const userId = currentUser?.uid;
   const [merchantLoading, setMerchantLoading] = useState(false);
@@ -116,7 +116,7 @@ const Verified = () => {
   }, [currentUser]);
 
   useEffect(() => {
-    const handleEscape = (e) => {
+    const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         handleCloseImage();
       }
@@ -128,7 +128,7 @@ const Verified = () => {
 
   useEffect(() => {
     if (selectedImage) {
-      const handleWheelEvent = (e) => {
+      const handleWheelEvent = (e: WheelEvent) => {
         if (e.ctrlKey) {
           e.preventDefault();
           const delta = e.deltaY;
@@ -143,14 +143,16 @@ const Verified = () => {
       window.addEventListener("wheel", handleWheelEvent, { passive: false });
       return () => window.removeEventListener("wheel", handleWheelEvent);
     }
+    return undefined;
   }, [selectedImage]);
 
   useEffect(() => {
     if (addressRef.current) {
       const checkOverflow = () => {
-        if (addressRef.current) {
+        const addressElem = addressRef.current as unknown as HTMLElement;
+        if (addressElem) {
           setIsAddressOverflowing(
-            addressRef.current.scrollWidth > addressRef.current.clientWidth
+            addressElem.scrollWidth > addressElem.clientWidth
           );
         }
       };
@@ -158,6 +160,7 @@ const Verified = () => {
       window.addEventListener("resize", checkOverflow);
       return () => window.removeEventListener("resize", checkOverflow);
     }
+    return undefined;
   }, [recommendedMerchants, activeIndex]);
 
   useEffect(() => {
@@ -170,12 +173,16 @@ const Verified = () => {
         let parsedTransactions = Array.isArray(json.transactions) ? json.transactions : [];
         // Sort by timestamp in descending order
         parsedTransactions.sort(
-          (a, b) =>
+          (a: { timestamp: string }, b: { timestamp: string }) =>
             new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         );
         setTransactions(parsedTransactions);
-      } catch (error) {
-        console.error("Error fetching transactions:", error);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error("Error fetching transactions:", error);
+        } else {
+          console.error("Error fetching transactions: Unknown error");
+        }
         setTransactions([]);
       }
     };
@@ -183,7 +190,7 @@ const Verified = () => {
     fetchTransactions();
   }, [userId]);
 
-  const getVerificationStatus = (user) => {
+  const getVerificationStatus = (user: any) => {
     if (!user) return "unknown";
     if (user.status === "pending" && user.isVerified === false)
       return "pending";
@@ -194,7 +201,7 @@ const Verified = () => {
     return "unknown";
   };
 
-  const getStatusIcon = (status) => {
+  const getStatusIcon = (status: string) => {
     switch (status) {
       case "verified":
         return <Check className="w-6 h-6 text-green-500" />;
@@ -207,7 +214,7 @@ const Verified = () => {
     }
   };
 
-  const getStatusText = (status) => {
+  const getStatusText = (status: string) => {
     switch (status) {
       case "verified":
         return "Your verification has been approved!";
@@ -220,7 +227,7 @@ const Verified = () => {
     }
   };
 
-  const formatDate = (timestamp) => {
+  const formatDate = (timestamp: string | number | Date | undefined) => {
     if (!timestamp) return "N/A";
     const date = new Date(timestamp);
     return date.toLocaleDateString("en-US", {
@@ -230,27 +237,31 @@ const Verified = () => {
     });
   };
 
-  const toggleSection = (section) => {
+  const toggleSection = (section: string) => {
     setExpandedSections((prev) => ({
       ...prev,
       [section]: !prev[section],
     }));
   };
 
-  const userProfile = userData[0];
+  const userProfile = userData[0] as any;
   const currentStatus = userProfile
     ? getVerificationStatus(userProfile)
     : "unknown";
 
   useEffect(() => {
-    if (userProfile?.merchantRel) {
+    if ((userProfile as any)?.merchantRel) {
       const fetchMerchant = async () => {
         setMerchantLoading(true);
         try {
-          const merchant = await fetchMerchantById(userProfile.merchantRel);
+          const merchant = await fetchMerchantById((userProfile as any).merchantRel);
           setMerchantData(merchant);
-        } catch (error) {
-          console.error("Error fetching merchant data:", error);
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            console.error("Error fetching merchant data:", error);
+          } else {
+            console.error("Error fetching merchant data: Unknown error");
+          }
         } finally {
           setMerchantLoading(false);
         }
@@ -260,15 +271,22 @@ const Verified = () => {
   }, [userProfile]);
 
   useEffect(() => {
-    if (!userProfile?.merchantRel && hasUserBackendProfile) {
+    if (!(userProfile as any)?.merchantRel && hasUserBackendProfile) {
       const fetchRecommendations = async () => {
-        const response = await fetch(`/api/merchantrecommendation?limit=${5}`, {
-          method: "POST",
-        });
-        const { merchants } = await response.json();
-        // console.log("Fetched merchants:", merchants);
-        setRecommendedMerchants(Array.isArray(merchants) ? merchants : []);
-        setShowRecommendations(true);
+        try {
+          const response = await fetch(`/api/merchantrecommendation?limit=${5}`, {
+            method: "POST",
+          });
+          const { merchants } = await response.json();
+          setRecommendedMerchants(Array.isArray(merchants) ? merchants : []);
+          setShowRecommendations(true);
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            console.error("Error fetching merchant recommendations:", error);
+          } else {
+            console.error("Error fetching merchant recommendations: Unknown error");
+          }
+        }
       };
       fetchRecommendations();
     }
@@ -297,7 +315,7 @@ const Verified = () => {
         router.push("/");
       }, 1500);
     } catch (error) {
-      console.error("Logout failed:", error.message);
+      // console.error("Logout failed:", error.message);
       router.push("/");
     } finally {
       setIsDeleting(false);
@@ -329,9 +347,13 @@ const Verified = () => {
           "No meaningful user data found in database. User needs to re-initiate verification."
         );
       }
-    } catch (error) {
-      console.error("Error fetching user details:", error);
-      setError("Failed to fetch user details: " + error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Error fetching user details:", error);
+        setError("Failed to fetch user details: " + error.message);
+      } else {
+        setError("Failed to fetch user details: Unknown error");
+      }
       setUserData([]);
       setHasUserBackendProfile(false);
     } finally {
@@ -357,7 +379,7 @@ const Verified = () => {
     router.push("/verificationdashboard");
   };
 
-  const handleImageClick = (imageUrl) => {
+  const handleImageClick = (imageUrl: string) => {
     setSelectedImage(imageUrl);
     setScale(1);
   };
@@ -375,7 +397,7 @@ const Verified = () => {
     setScale((prev) => Math.max(prev - 0.25, 0.5));
   };
 
-  const handleWheel = (e) => {
+  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
     e.preventDefault();
     const delta = e.deltaY;
     if (delta < 0) {
@@ -385,7 +407,7 @@ const Verified = () => {
     }
   };
 
-  const handleConnectionRequest = async (merchantId) => {
+  const handleConnectionRequest = async (merchantId: string) => {
     try {
       const responseconnection = sendConnectionRequest(
         merchantId,
@@ -412,9 +434,14 @@ const Verified = () => {
       } else {
         toast.error("Failed to send request", { position: "top-right" });
       }
-    } catch (error) {
-      console.error("Connection request error:", error);
-      toast.error("Error sending request", { position: "top-right" });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Connection request error:", error);
+        toast.error("Error sending request: " + error.message, { position: "top-right" });
+      } else {
+        console.error("Connection request error: Unknown error");
+        toast.error("Error sending request", { position: "top-right" });
+      }
     } finally {
       setLoading(false);
     }
@@ -512,8 +539,9 @@ const Verified = () => {
                     alt={merchantData.companyName || "Merchant"}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = "/logo.svg";
+                      const target = e.target as HTMLImageElement;
+                      target.onerror = null;
+                      target.src = "/logo.svg";
                     }}
                   />
                 </motion.div>
@@ -573,7 +601,7 @@ const Verified = () => {
                   <div className="relative h-84 sm:h-68 md:h-68 lg:h-60 w-full">
                     {recommendedMerchants.map((merchant, index) => (
                       <motion.div
-                        key={merchant.id}
+                        key={merchant.id || `merchant-${index}`}
                         className={`absolute inset-0 w-full h-full p-1 sm:p-2 ${
                           index === activeIndex ? "z-10" : "z-0"
                         }`}
@@ -660,7 +688,7 @@ const Verified = () => {
                   <div className="flex justify-center mt-4 sm:mt-4 space-x-2 sm:space-x-2">
                     {recommendedMerchants.map((merchant, index) => (
                       <button
-                        key={merchant.id}
+                        key={merchant.id || `indicator-${index}`}
                         onClick={() => {
                           setActiveIndex(index);
                           stopCarousel();
@@ -702,7 +730,7 @@ const Verified = () => {
                       alt={userProfile.displayName || "User"}
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        const target = e.target;
+                        const target = e.target as HTMLImageElement;
                         target.onerror = null;
                         target.src = "/logo.svg";
                       }}
@@ -992,7 +1020,7 @@ const Verified = () => {
                       ) : (
                         currentTransactions.map((transaction, index) => (
                           <motion.div
-                            key={transaction.id || index}
+                            key={transaction.id || `transaction-${index}`}
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.3, delay: index * 0.1 }}
