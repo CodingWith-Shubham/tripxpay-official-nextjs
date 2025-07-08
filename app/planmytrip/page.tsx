@@ -129,8 +129,15 @@ const PlanMyTrip = () => {
         console.log("Current user:", user);
         console.log("Calling getTravelRecommendations...");
 
-        // const recs = await getTravelRecommendations(formData);
-        const recs = "";
+        const { parsedResponse } = await fetch("/api/gettravelrecommendation", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ formData }),
+        }).then((res) => res.json());
+
+        const recs = parsedResponse;
         console.log("Received recommendations:", recs);
 
         if (!recs) {
