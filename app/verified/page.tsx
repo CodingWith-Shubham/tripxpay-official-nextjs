@@ -213,9 +213,6 @@ const Verified: React.FC = () => {
       console.log((error as Error).message);
     }
   };
-  useEffect(() => {
-    fetchTransaction();
-  }, [userId]);
 
   const getVerificationStatus = (
     user: UserData
@@ -470,6 +467,9 @@ const Verified: React.FC = () => {
       setLoading(false);
     }
   };
+  useEffect(() => {
+    fetchTransaction();
+  }, [userId, userProfile]);
 
   if (loading) {
     return <VerifiedPageSkeletonScreen />;
