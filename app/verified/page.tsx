@@ -203,37 +203,18 @@ const Verified: React.FC = () => {
     }
   }, [recommendedMerchants, activeIndex]);
 
+  const fetchTransaction = async () => {
+    try {
+      const { data } = await fetch(`/api/transaction?uid=${userId}`, {
+        method: "POST",
+      }).then((res) => res.json());
+      setTransactions(data);
+    } catch (error) {
+      console.log((error as Error).message);
+    }
+  };
   useEffect(() => {
-    if (!userId) return;
-
-    const transactionsRef = ref(database, `users/${userId}/transactions`);
-
-    const unsubscribe = onValue(transactionsRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const parsedTransactions: Transaction[] = Object.entries(data).map(
-          ([key, value]: [string, any]) => ({
-            id: key,
-            ...value,
-          })
-        );
-
-        // Sort by date (assuming `date` is in a format like "2025-06-12")
-        parsedTransactions.sort(
-          (a, b) =>
-            new Date(b.date || b.timestamp).getTime() -
-            new Date(a.date || a.timestamp).getTime()
-        );
-
-        setTransactions(
-          Array.isArray(parsedTransactions) ? parsedTransactions : []
-        );
-      } else {
-        setTransactions([]);
-      }
-    });
-
-    return () => unsubscribe(); // cleanup listener
+    fetchTransaction();
   }, [userId]);
 
   const getVerificationStatus = (

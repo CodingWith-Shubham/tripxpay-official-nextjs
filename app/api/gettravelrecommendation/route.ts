@@ -236,7 +236,6 @@ const parseGeminiResponse = (response: any) => {
 export async function POST(req: NextRequest) {
   try {
     const { formData } = await req.json();
-  
 
     const prompt = createRecommendationPrompt(formData);
 
@@ -255,7 +254,6 @@ export async function POST(req: NextRequest) {
       },
     };
 
-
     const response = await fetch(
       `${GEMINI_API_URL}?key=${process.env.NEXT_PUBLIC_REACT_APP_GEMINI_API_KEY}`,
       {
@@ -266,7 +264,6 @@ export async function POST(req: NextRequest) {
         body: JSON.stringify(requestBody),
       }
     );
-
 
     let responseData;
     try {
