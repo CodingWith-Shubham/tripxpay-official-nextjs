@@ -236,13 +236,9 @@ const parseGeminiResponse = (response: any) => {
 export async function POST(req: NextRequest) {
   try {
     const { formData } = await req.json();
-    console.log(
-      "Starting getTravelRecommendations with preferences:",
-      formData
-    );
+  
 
     const prompt = createRecommendationPrompt(formData);
-    console.log("Generated prompt:", prompt);
 
     const requestBody = {
       contents: [
@@ -259,10 +255,6 @@ export async function POST(req: NextRequest) {
       },
     };
 
-    console.log(
-      "Sending request to Gemini API with body:",
-      JSON.stringify(requestBody, null, 2)
-    );
 
     const response = await fetch(
       `${GEMINI_API_URL}?key=${process.env.NEXT_PUBLIC_REACT_APP_GEMINI_API_KEY}`,
@@ -275,19 +267,16 @@ export async function POST(req: NextRequest) {
       }
     );
 
-    console.log("Received response status:", response.status);
 
     let responseData;
     try {
       responseData = await response.json();
-      console.log("Raw API response:", JSON.stringify(responseData, null, 2));
     } catch (jsonError) {
       console.error("Failed to parse JSON response:", jsonError);
       throw new Error("Invalid JSON response from Gemini API");
     }
 
     if (!response.ok) {
-      console.error("Gemini API Error:", responseData);
       throw new Error(
         `API request failed with status ${response.status}: ${
           responseData.error?.message || responseData.message || "Unknown error"
@@ -296,7 +285,6 @@ export async function POST(req: NextRequest) {
     }
 
     const parsedResponse = parseGeminiResponse(responseData);
-    console.log("Parsed response:", parsedResponse);
     return NextResponse.json({ parsedResponse }, { status: 200 });
   } catch (error) {
     console.log((error as Error).message);
