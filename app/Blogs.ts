@@ -51,45 +51,11 @@ export const retryOperation = async (operation: () => Promise<any>, maxRetries =
             return await operation();
         } catch (error) {
             lastError = error;
-            console.warn(`Operation failed, attempt ${i + 1} of ${maxRetries}:`, error);
+            // console.warn(`Operation failed, attempt ${i + 1} of ${maxRetries}:`, error);
             await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
         }
     }
     throw lastError;
-};
-
-// uploads a new blog
-export const uploadBlog = async (formData: FormData): Promise<ApiResponse> => {
-    try {
-        const blogsRef = ref(database, "blogs");
-        const newBlogRef = push(blogsRef); // This creates a new unique key
-
-        const blogData: BlogData = {
-            author: formData.author,
-            category: formData.category,
-            description: formData.description,
-            title: formData.title,
-            creationDate: new Date().toISOString(),
-            // Adds a timestamp here
-            timestamp: Date.now()
-        };
-
-        await set(newBlogRef, blogData);
-
-        return {
-            status: "SUCCESS",
-            data: {
-                id: newBlogRef.key!,
-                ...blogData
-            }
-        };
-    } catch (error: any) {
-        console.error("Error uploading blog:", error);
-        return {
-            status: "ERROR",
-            message: error.message || "Failed to upload blog"
-        };
-    }
 };
 
 //get total count of blogs (for pagination)
@@ -123,61 +89,16 @@ export const getBlogCount = async (category: string | null = null): Promise<numb
 // Fetch all blogs 
 export const getAllBlogs = async (options: BlogOptions = {}): Promise<BlogResponse> => {
     try {
-        const {
-            page = 1,
-            limit: pageLimit = 9,
-            category = null
-        } = options;
-
-        const dbRef = ref(database);
-        const snapshot = await get(child(dbRef, "blogs"));
-
-        if (!snapshot.exists()) {
-            console.log("No blogs found.");
-            return {
-                blogs: [],
-                total: 0,
-                currentPage: page,
-                totalPages: 0,
-                hasNextPage: false,
-                hasPrevPage: false,
-                hasMore: false
-            };
+        const { page, limit, category } = options;
+        const res = await fetch(`/api/getallblogs?page=${page}&limit=${limit}&category=${category}`);
+        if (!res.ok) {
+            throw new Error(`Failed to fetch blogs: ${res.status} ${res.statusText}`);
         }
-
-        const data = snapshot.val();
-        let blogs: Blog[] = Object.entries(data).map(([id, blog]: [string, any]) => ({
-            id,
-            ...blog
-        }));
-
-        blogs.sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime());
-
-        if (category && category !== "all") {
-            blogs = blogs.filter(blog => blog.category === category);
-        }
-
-        const total = blogs.length;
-        const totalPages = Math.ceil(total / pageLimit);
-        const startIndex = (page - 1) * pageLimit;
-        const endIndex = startIndex + pageLimit;
-
-        // results
-        const paginatedBlogs = blogs.slice(startIndex, endIndex);
-
-        return {
-            blogs: paginatedBlogs,
-            total,
-            currentPage: page,
-            totalPages,
-            hasNextPage: page < totalPages,
-            hasPrevPage: page > 1,
-            hasMore: page < totalPages // For compatibility with your component
-        };
-
-    } catch (error) {
-        console.error("Error fetching blogs:", error);
-        throw new Error("Failed to fetch blogs");
+        const data = await res.json();
+        return data;
+    } catch (err: any) {
+        console.error("Error fetching blogs:", err);
+        throw new Error(err.message || "Failed to fetch blogs");
     }
 };
 
