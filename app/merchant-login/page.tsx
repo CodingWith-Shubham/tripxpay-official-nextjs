@@ -62,9 +62,11 @@ const MerchantLoginPage = () => {
       const isExist = data?.success;
 
       if (isExist) {
+        setError("");
         await serMerchant();
         router.replace("/merchantdashboard");
       } else {
+        setError("");
         await serMerchant();
         router.replace("/merchantverificationdashboard");
       }
