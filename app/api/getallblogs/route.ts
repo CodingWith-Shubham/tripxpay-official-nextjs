@@ -1,74 +1,73 @@
 import { database } from "@/lib/firebase";
-import { child, get, ref } from "firebase/database";
+import {
+  get,
+  limitToFirst,
+  orderByChild,
+  query,
+  ref,
+  startAfter,
+} from "firebase/database";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const page = req.nextUrl.searchParams.get("page");
-    const pagelimit = req.nextUrl.searchParams.get("limit");
-    const category = req.nextUrl.searchParams.get("category");
-    if (!page || !pagelimit) {
-      return NextResponse.json({ message: "Bad request" }, { status: 400 });
+    // Parse both page number and page size
+    const page = Number(req.nextUrl.searchParams.get("page")) || 1;
+    const pageSize = Number(req.nextUrl.searchParams.get("pageSize")) || 10; // Default to 10 items
+    const lastkey = req.nextUrl.searchParams.get("lastkey");
+
+    if (!page || page < 1) {
+      return NextResponse.json(
+        { message: "Invalid page number" },
+        { status: 400 }
+      );
     }
 
-    const pageNum = parseInt(page);
-    const pageLimit = parseInt(pagelimit);
+    const blogref = ref(database, "blogs");
+    let blogs: any[] = [];
+    let snapshot;
 
-    const dbRef = ref(database);
-    const snapshot = await get(child(dbRef, "blogs"));
+    // Pagination query
+    if (lastkey && lastkey !== "null") {
+      const paginationQuery = query(
+        blogref,
+        orderByChild("creationDate"),
+        startAfter(Number(lastkey)),
+        limitToFirst(pageSize) // Use pageSize here
+      );
+      snapshot = await get(paginationQuery);
+    }
+    // Initial load
+    else {
+      const intialloadquery = query(
+        blogref,
+        orderByChild("creationDate"),
+        limitToFirst(pageSize) // Use pageSize here
+      );
+      snapshot = await get(intialloadquery);
+    }
 
-    if (!snapshot.exists()) {
-      console.log("No blogs found.");
-      return NextResponse.json({
-        blogs: [],
-        total: 0,
-        currentPage: pageNum,
-        totalPages: 0,
-        hasNextPage: false,
-        hasPrevPage: false,
-        hasMore: false,
+    snapshot.forEach((childsnapshot: any) => {
+      blogs.push({
+        id: childsnapshot.key,
+        ...childsnapshot.val(),
       });
-    }
+    });
 
-    const data = snapshot.val();
-    let blogs = Object.entries(data).map(([id, blog]) => ({
-      id,
-      ...(blog as any),
-    }));
-
-    // Sort by creationDate (latest first)
-    blogs.sort(
-      (a, b) =>
-        new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()
-    );
-
-    // Filter by category if specified
-    if (category && category !== "all") {
-      blogs = blogs.filter((blog) => blog.category === category);
-    }
-
-    // Calculate pagination
-    const total = blogs.length;
-    const totalPages = Math.ceil(total / pageLimit);
-    const startIndex = (pageNum - 1) * pageLimit;
-    const endIndex = startIndex + pageLimit;
-
-    // Get paginated results
-    const paginatedBlogs = blogs.slice(startIndex, endIndex);
+    const nextLastKey =
+      blogs.length > 0 ? blogs[blogs.length - 1].creationDate : null;
 
     return NextResponse.json(
       {
-        blogs: paginatedBlogs,
-        total,
-        currentPage: pageNum,
-        totalPages,
-        hasNextPage: pageNum < totalPages,
-        hasPrevPage: pageNum > 1,
-        hasMore: pageNum < totalPages, // For compatibility with your component
+        blogs,
+        nextLastKey,
+        page,
+        pageSize,
       },
       { status: 200 }
     );
   } catch (error) {
+    console.error("Pagination error:", error);
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }
