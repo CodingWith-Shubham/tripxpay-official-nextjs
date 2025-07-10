@@ -3,9 +3,8 @@ import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
 import Blog from "@/components/Blog";
-import { database } from "@/lib/firebase";
 
 interface BlogPost {
   id: string;
@@ -28,10 +27,14 @@ const UploadBlogsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
-  // Cursor-based pagination states
+  // Pagination states
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
-  const [lastKey, setLastKey] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [pageSize] = useState<number>(9); // Items per page
+  const [lastKeys, setLastKeys] = useState<{ [key: number]: string | null }>(
+    {}
+  );
 
   const categories: Category[] = [
     { id: "all", name: "All" },
@@ -41,22 +44,13 @@ const UploadBlogsPage = () => {
     { id: "New Features", name: "New Features" },
   ];
 
-  const fetchBlogs = async (reset = false) => {
+  const fetchBlogs = async (page: number) => {
     try {
-      if (reset) {
-        setIsRefreshing(true);
-        setBlogs([]);
-        setLastKey(null);
-        setHasMore(true);
-      }
-
-      if (!hasMore && !reset) return;
-
       setLoading(true);
 
-      const url = `/api/getallblogs?pageSize=9${
-        lastKey && !reset ? `&lastkey=${lastKey}` : ""
-      }${activeCategory !== "all" ? `&category=${activeCategory}` : ""}`;
+      const url = `/api/getallblogs?page=${page}&pageSize=${pageSize}${
+        activeCategory !== "all" ? `&category=${activeCategory}` : ""
+      }${lastKeys[page - 1] ? `&lastkey=${lastKeys[page - 1]}` : ""}`;
 
       const res = await fetch(url, { method: "POST" });
 
@@ -66,14 +60,14 @@ const UploadBlogsPage = () => {
 
       const data = await res.json();
 
-      if (reset) {
-        setBlogs(data.blogs);
-      } else {
-        setBlogs((prev) => [...prev, ...data.blogs]);
+      setBlogs(data.blogs);
+      setTotalPages(Math.ceil(data.totalCount / pageSize));
+
+      // Store the last key for next page
+      if (data.nextLastKey) {
+        setLastKeys((prev) => ({ ...prev, [page]: data.nextLastKey }));
       }
 
-      setLastKey(data.nextLastKey);
-      setHasMore(data.blogs.length === 9);
       setError(null);
     } catch (err) {
       setError((err as Error).message || "Failed to load blogs");
@@ -84,21 +78,57 @@ const UploadBlogsPage = () => {
   };
 
   useEffect(() => {
-    fetchBlogs(true);
+    setCurrentPage(1);
+    setLastKeys({});
+    fetchBlogs(1);
   }, [activeCategory]);
 
   const handleRefresh = () => {
-    fetchBlogs(true);
+    setIsRefreshing(true);
+    setCurrentPage(1);
+    setLastKeys({});
+    fetchBlogs(1);
+  };
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      fetchBlogs(page);
+    }
   };
 
   const handleCategoryChange = (categoryId: string) => {
     setActiveCategory(categoryId);
   };
 
-  const handleLoadMore = () => {
-    if (hasMore && !loading) {
-      fetchBlogs();
+  const renderPaginationNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <button
+          key={i}
+          onClick={() => handlePageChange(i)}
+          className={`w-10 h-10 rounded-lg transition-colors ${
+            currentPage === i
+              ? "bg-teal-500 text-white"
+              : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+          }`}
+        >
+          {i}
+        </button>
+      );
+    }
+
+    return pages;
   };
 
   return (
@@ -177,18 +207,36 @@ const UploadBlogsPage = () => {
                 ))}
               </div>
 
-              {hasMore && (
-                <div className="text-center mt-12">
+              {totalPages > 1 && (
+                <div className="flex justify-center items-center mt-12 space-x-4">
                   <button
-                    onClick={handleLoadMore}
-                    disabled={loading}
-                    className={`px-6 py-3 rounded-lg font-medium ${
-                      loading
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
+                      currentPage === 1
                         ? "bg-gray-800 text-gray-500 cursor-not-allowed"
-                        : "bg-teal-500 text-white hover:bg-teal-600"
+                        : "bg-gray-800 text-gray-300 hover:bg-gray-700"
                     }`}
                   >
-                    {loading ? "Loading..." : "Load More"}
+                    <ChevronLeft size={16} className="mr-1" />
+                    Previous
+                  </button>
+
+                  <div className="flex items-center space-x-2">
+                    {renderPaginationNumbers()}
+                  </div>
+
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
+                      currentPage === totalPages
+                        ? "bg-gray-800 text-gray-500 cursor-not-allowed"
+                        : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                    }`}
+                  >
+                    Next
+                    <ChevronRight size={16} className="ml-1" />
                   </button>
                 </div>
               )}

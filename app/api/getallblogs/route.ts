@@ -1,5 +1,6 @@
 import { database } from "@/lib/firebase";
 import {
+  equalTo,
   get,
   limitToFirst,
   orderByChild,
@@ -9,43 +10,44 @@ import {
 } from "firebase/database";
 import { NextRequest, NextResponse } from "next/server";
 
+// Updated API endpoint
 export async function POST(req: NextRequest) {
   try {
-    // Parse both page number and page size
     const page = Number(req.nextUrl.searchParams.get("page")) || 1;
-    const pageSize = Number(req.nextUrl.searchParams.get("pageSize")) || 10; // Default to 10 items
+    const pageSize = Number(req.nextUrl.searchParams.get("pageSize")) || 9;
     const lastkey = req.nextUrl.searchParams.get("lastkey");
-
-    if (!page || page < 1) {
-      return NextResponse.json(
-        { message: "Invalid page number" },
-        { status: 400 }
-      );
-    }
+    const category = req.nextUrl.searchParams.get("category");
 
     const blogref = ref(database, "blogs");
-    let blogs: any[] = [];
-    let snapshot;
+    let queryRef;
 
-    // Pagination query
-    if (lastkey && lastkey !== "null") {
-      const paginationQuery = query(
+    // Build the query based on parameters
+    if (category && category !== "all") {
+      queryRef = query(
         blogref,
-        orderByChild("creationDate"),
-        startAfter(lastkey),
-        limitToFirst(pageSize) // Use pageSize here
+        orderByChild("category"),
+        equalTo(category),
+        limitToFirst(pageSize)
       );
-      snapshot = await get(paginationQuery);
+    } else {
+      if (lastkey) {
+        queryRef = query(
+          blogref,
+          orderByChild("creationDate"),
+          startAfter(lastkey),
+          limitToFirst(pageSize)
+        );
+      } else {
+        queryRef = query(
+          blogref,
+          orderByChild("creationDate"),
+          limitToFirst(pageSize)
+        );
+      }
     }
-    // Initial load
-    else {
-      const intialloadquery = query(
-        blogref,
-        orderByChild("creationDate"),
-        limitToFirst(pageSize) // Use pageSize here
-      );
-      snapshot = await get(intialloadquery);
-    }
+
+    const snapshot = await get(queryRef);
+    const blogs: any[] = [];
 
     snapshot.forEach((childsnapshot: any) => {
       blogs.push({
@@ -54,23 +56,38 @@ export async function POST(req: NextRequest) {
       });
     });
 
-    const nextLastKey =
-      blogs.length > 0 ? blogs[blogs.length - 1].creationDate : null;
+    // Get total count for pagination (you'll need to implement this)
+    const totalCount = await getTotalBlogCount(category);
 
     return NextResponse.json(
       {
         blogs,
-        nextLastKey,
-        page,
-        pageSize,
+        totalCount,
+        nextLastKey:
+          blogs.length > 0 ? blogs[blogs.length - 1].creationDate : null,
       },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Pagination error:", error);
+    console.error(error);
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }
     );
   }
+}
+
+// Helper function to get total count
+async function getTotalBlogCount(category?: string | null) {
+  const blogref = ref(database, "blogs");
+  let queryRef;
+
+  if (category && category !== "all") {
+    queryRef = query(blogref, orderByChild("category"), equalTo(category));
+  } else {
+    queryRef = blogref;
+  }
+
+  const snapshot = await get(queryRef);
+  return snapshot.size;
 }
