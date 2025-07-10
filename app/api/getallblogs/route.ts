@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
       const paginationQuery = query(
         blogref,
         orderByChild("creationDate"),
-        startAfter(Number(lastkey)),
+        startAfter(lastkey),
         limitToFirst(pageSize) // Use pageSize here
       );
       snapshot = await get(paginationQuery);

@@ -1,19 +1,10 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
-import { getAllBlogs } from "../Blogs";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
-import { RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import Blog from "@/components/Blog";
-import {
-  query,
-  orderByChild,
-  limitToFirst,
-  startAfter,
-} from "firebase/database";
-import { ref, get } from "firebase/database";
-import { NextRequest, NextResponse } from "next/server";
 import { database } from "@/lib/firebase";
 
 interface BlogPost {
@@ -33,18 +24,14 @@ interface Category {
 
 const UploadBlogsPage = () => {
   const [activeCategory, setActiveCategory] = useState<string>("all");
-  const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
-  // Pagination states
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [totalPosts, setTotalPosts] = useState<number>(0);
-  const [hasNextPage, setHasNextPage] = useState<boolean>(false);
-  const [loadingMore, setLoadingMore] = useState<boolean>(false);
-
-  const POSTS_PER_PAGE = 9; // Adjust based on your grid (3x3)
+  // Cursor-based pagination states
+  const [blogs, setBlogs] = useState<BlogPost[]>([]);
+  const [lastKey, setLastKey] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState<boolean>(true);
 
   const categories: Category[] = [
     { id: "all", name: "All" },
@@ -54,70 +41,70 @@ const UploadBlogsPage = () => {
     { id: "New Features", name: "New Features" },
   ];
 
-  const [blogs, setBlogs] = useState([]);
-  const [lastCreatedAt, setLastCreatedAt] = useState(null);
-  const [hasMore, setHasMore] = useState(true);
+  const fetchBlogs = async (reset = false) => {
+    try {
+      if (reset) {
+        setIsRefreshing(true);
+        setBlogs([]);
+        setLastKey(null);
+        setHasMore(true);
+      }
 
-  const fetchBlogs = async () => {
-    if (loading) return; // Prevent multiple calls
-    setLoading(true);
-    const res = await fetch(
-      `/api/getallblogs?limit=10${
-        lastCreatedAt ? `&lastCreatedAt=${lastCreatedAt}` : ""
-      }`,
-      { method: "POST" }
-    );
-    if (!res.ok) {
+      if (!hasMore && !reset) return;
+
+      setLoading(true);
+
+      const url = `/api/getallblogs?pageSize=9${
+        lastKey && !reset ? `&lastkey=${lastKey}` : ""
+      }${activeCategory !== "all" ? `&category=${activeCategory}` : ""}`;
+
+      const res = await fetch(url, { method: "POST" });
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch blogs");
+      }
+
+      const data = await res.json();
+
+      if (reset) {
+        setBlogs(data.blogs);
+      } else {
+        setBlogs((prev) => [...prev, ...data.blogs]);
+      }
+
+      setLastKey(data.nextLastKey);
+      setHasMore(data.blogs.length === 9);
+      setError(null);
+    } catch (err) {
+      setError((err as Error).message || "Failed to load blogs");
+    } finally {
       setLoading(false);
-      return;
+      setIsRefreshing(false);
     }
-    const data = await res.json();
-    if (!Array.isArray(data.blogs)) {
-      setLoading(false);
-      return;
-    }
-    setBlogs((prev) => [...prev, ...data.blogs]);
-    setLastCreatedAt(data.lastCreatedAt);
-    setHasMore(data.hasMore);
-    setLoading(false);
   };
 
   useEffect(() => {
-    // Reset to page 1 when category changes
-    setCurrentPage(1);
-    fetchBlogs();
-  }, [activeCategory, fetchBlogs]);
+    fetchBlogs(true);
+  }, [activeCategory]);
 
   const handleRefresh = () => {
-    setIsRefreshing(true);
-    setCurrentPage(1);
-    fetchBlogs();
-  };
-
-  const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= Math.ceil(totalPosts / POSTS_PER_PAGE)) {
-      fetchBlogs(newPage, activeCategory);
-    }
-  };
-
-  const handleLoadMore = () => {
-    if (hasNextPage && !loadingMore) {
-      fetchBlogs(currentPage + 1, activeCategory, true);
-    }
+    fetchBlogs(true);
   };
 
   const handleCategoryChange = (categoryId: string) => {
     setActiveCategory(categoryId);
-    setError(null); // Clear any existing errors
   };
 
-  const totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE);
+  const handleLoadMore = () => {
+    if (hasMore && !loading) {
+      fetchBlogs();
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col">
       <Navbar />
 
-      {/*page header*/}
       <PageHeader
         title="TripxPay Announcements"
         description="Stay informed about the latest updates, features, and events."
@@ -126,7 +113,6 @@ const UploadBlogsPage = () => {
       <div className="flex-grow py-12 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
           <div className="flex justify-between items-center mb-8">
-            {/*list of categories*/}
             <div className="overflow-x-auto">
               <div className="flex space-x-4 min-w-max">
                 {categories.map((category) => (
@@ -145,7 +131,6 @@ const UploadBlogsPage = () => {
               </div>
             </div>
 
-            {/*refresh button*/}
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
@@ -163,8 +148,7 @@ const UploadBlogsPage = () => {
             </button>
           </div>
 
-          {/*showing blogs*/}
-          {loading ? (
+          {loading && blogs.length === 0 ? (
             <div className="text-center py-12">
               <div className="inline-block w-8 h-8 border-4 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
               <p className="mt-4 text-gray-400">Loading blogs...</p>
@@ -179,7 +163,7 @@ const UploadBlogsPage = () => {
                 Try Again
               </button>
             </div>
-          ) : posts.length === 0 ? (
+          ) : blogs.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-400">
                 No announcements found in this category.
@@ -188,68 +172,23 @@ const UploadBlogsPage = () => {
           ) : (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                {posts.map((post) => (
-                  <Blog key={post.id} post={post} onDelete={handleRefresh} />
+                {blogs.map((post) => (
+                  <Blog key={post.id} post={post} />
                 ))}
               </div>
 
-              {/* Pagination Controls */}
-              {totalPages > 1 && (
-                <div className="flex justify-center items-center mt-12 space-x-4">
+              {hasMore && (
+                <div className="text-center mt-12">
                   <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
-                      currentPage === 1
+                    onClick={handleLoadMore}
+                    disabled={loading}
+                    className={`px-6 py-3 rounded-lg font-medium ${
+                      loading
                         ? "bg-gray-800 text-gray-500 cursor-not-allowed"
-                        : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                        : "bg-teal-500 text-white hover:bg-teal-600"
                     }`}
                   >
-                    <ChevronLeft size={16} className="mr-1" />
-                    Previous
-                  </button>
-
-                  <div className="flex items-center space-x-2">
-                    {/* Page numbers */}
-                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      let pageNum: number;
-                      if (totalPages <= 5) {
-                        pageNum = i + 1;
-                      } else if (currentPage <= 3) {
-                        pageNum = i + 1;
-                      } else if (currentPage >= totalPages - 2) {
-                        pageNum = totalPages - 4 + i;
-                      } else {
-                        pageNum = currentPage - 2 + i;
-                      }
-
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => handlePageChange(pageNum)}
-                          className={`w-10 h-10 rounded-lg transition-colors ${
-                            currentPage === pageNum
-                              ? "bg-teal-500 text-white"
-                              : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                          }`}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
-                      currentPage === totalPages
-                        ? "bg-gray-800 text-gray-500 cursor-not-allowed"
-                        : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                    }`}
-                  >
-                    Next
-                    <ChevronRight size={16} className="ml-1" />
+                    {loading ? "Loading..." : "Load More"}
                   </button>
                 </div>
               )}
