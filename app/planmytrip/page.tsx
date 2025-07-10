@@ -17,6 +17,8 @@ import {
   Sparkles,
   AlertCircle,
   Loader2,
+  Users,
+  Globe,
 } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import Navbar from "@/components/Navbar";
@@ -30,6 +32,8 @@ interface FormData {
   climatePreference: string;
   travelStyle: string;
   interests: string[];
+  travelersCount: string;
+  destinationCountry: string;
 }
 
 interface TravelRecommendation {
@@ -57,12 +61,12 @@ const PlanMyTrip = () => {
     climatePreference: "",
     travelStyle: "",
     interests: [],
+    travelersCount: "1",
+    destinationCountry: "",
   });
 
   const [isPending, startTransition] = useTransition();
-  const [recommendations, setRecommendations] = useState<
-    TravelRecommendation[] | ApiResponse | null
-  >(null);
+  const [recommendations, setRecommendations] = useState<TravelRecommendation[] | ApiResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleChange = (
@@ -129,15 +133,20 @@ const PlanMyTrip = () => {
         console.log("Current user:", user);
         console.log("Calling getTravelRecommendations...");
 
-        const { parsedResponse } = await fetch("/api/gettravelrecommendation", {
+        const response = await fetch("/api/gettravelrecommendation", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ formData }),
-        }).then((res) => res.json());
+        });
 
-        const recs = parsedResponse;
+        if (!response.ok) {
+          throw new Error("Failed to fetch recommendations");
+        }
+
+        const data = await response.json();
+        const recs = data.parsedResponse;
         console.log("Received recommendations:", recs);
 
         if (!recs) {
@@ -174,6 +183,51 @@ const PlanMyTrip = () => {
     "Local Experiences",
   ] as const;
 
+  const countries = [
+    "India",
+    "Thailand",
+    "Japan",
+    "Italy",
+    "France",
+    "Spain",
+    "USA",
+    "Canada",
+    "Australia",
+    "New Zealand",
+    "Switzerland",
+    "Germany",
+    "Greece",
+    "Portugal",
+    "Vietnam",
+    "Indonesia",
+    "Malaysia",
+    "Singapore",
+    "Dubai",
+    "South Africa",
+    "Maldives",
+    "Sri Lanka",
+    "Nepal",
+    "Bhutan",
+    "Myanmar",
+    "Cambodia",
+    "United Kingdom",
+    "Ireland",
+    "Norway",
+    "Sweden",
+    "Finland",
+    "Iceland",
+    "Brazil",
+    "Argentina",
+    "Chile",
+    "Peru",
+    "Mexico",
+    "Costa Rica",
+    "Egypt",
+    "Morocco",
+    "Turkey",
+    "Any Country",
+  ];
+
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col relative overflow-hidden">
       {/* Background glow effects - same as career page */}
@@ -190,10 +244,7 @@ const PlanMyTrip = () => {
             Plan Your Trip
           </h1>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Tell us your preferences and
-          </p>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            we'll create personalized travel recommendations just for you
+            Tell us your preferences and we'll create personalized travel recommendations just for you
           </p>
         </div>
 
@@ -337,6 +388,56 @@ const PlanMyTrip = () => {
                       <option value="business">Business</option>
                       <option value="family">Family</option>
                       <option value="romantic">Romantic</option>
+                    </select>
+                  </div>
+
+                  {/* Number of Travelers */}
+                  <div className="form-group">
+                    <label
+                      htmlFor="travelersCount"
+                      className="block text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2"
+                    >
+                      <Users className="w-4 h-4 text-teal-400" />
+                      Number of Travelers
+                    </label>
+                    <select
+                      id="travelersCount"
+                      name="travelersCount"
+                      value={formData.travelersCount}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-4 bg-gray-800/80 border border-gray-700/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-300 text-white hover:bg-gray-800/90 hover:border-teal-500/50"
+                    >
+                      <option value="1">1 traveler</option>
+                      <option value="2">2 travelers</option>
+                      <option value="3-5">3-5 travelers</option>
+                      <option value="6-10">6-10 travelers</option>
+                      <option value="10+">10+ travelers</option>
+                    </select>
+                  </div>
+
+                  {/* Destination Country */}
+                  <div className="form-group">
+                    <label
+                      htmlFor="destinationCountry"
+                      className="block text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2"
+                    >
+                      <Globe className="w-4 h-4 text-teal-400" />
+                      Destination Country
+                    </label>
+                    <select
+                      id="destinationCountry"
+                      name="destinationCountry"
+                      value={formData.destinationCountry}
+                      onChange={handleChange}
+                      className="w-full px-4 py-4 bg-gray-800/80 border border-gray-700/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-300 text-white hover:bg-gray-800/90 hover:border-teal-500/50"
+                    >
+                      <option value="">Any Country (We'll suggest)</option>
+                      {countries.map((country) => (
+                        <option key={country} value={country}>
+                          {country}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>

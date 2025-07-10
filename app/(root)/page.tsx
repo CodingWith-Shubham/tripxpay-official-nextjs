@@ -1,6 +1,6 @@
 "use client";
 import Hero from "@/components/Hero";
-import TrustedSection from "@/components/TestimonialsSection";
+import TrustedSection from "@/components/TrustedSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import CTASection from "@/components/CTASection";
 import { useRouter } from "next/navigation";

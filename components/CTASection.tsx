@@ -78,10 +78,11 @@ const CTASection = () => {
             </p>
             <Link
               href={isLoggedIn ? "/verified" : "/signup"}
-              className="bg-yellow-500 hover:bg-yellow-600 text-black font-medium py-2 px-6 rounded-full"
+              className="inline-block bg-yellow-500 hover:bg-yellow-600 text-black font-medium py-2 px-4 sm:px-6 rounded-full whitespace-nowrap"
             >
               START YOUR JOURNEY →
             </Link>
+
           </motion.div>
         </motion.div>
       </div>

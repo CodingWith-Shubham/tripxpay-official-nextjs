@@ -4,9 +4,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/Auth";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
+import Logo from "@/components/Logo"
 import { getUserInfo } from "@/action/tokeninfo";
 import { toast } from "sonner";
+import Image from "next/image";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -118,17 +119,25 @@ const Navbar = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="bg-transparent text-white w-full relative z-50"
+        className="bg-transparent text-white w-full z-50 backdrop-blur-md"
         role="navigation"
         aria-label="Main navigation"
       >
         <div className="w-full py-3 sm:py-4 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 flex justify-between items-center">
           <div className="flex-shrink-0">
-            <Link href="/" className="flex items-center">
-              <Image alt="tripx pay" src="/logo.svg" width={40} height={40} />
-            </Link>
-          </div>
-
+    <Link href="/" className="flex items-center">
+      <Image 
+        alt="tripx pay" 
+        src="/logo.svg" 
+        width={36} 
+        height={35}
+        className="w-9 h-8" 
+      />
+      <span className="ml-1.5 font-bold text-xl md:text-2xl font-space-grotesk">
+        TripxPay
+      </span>
+    </Link>
+  </div>
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center flex-grow">
             <div className="flex items-center justify-center space-x-4 xl:space-x-6 2xl:space-x-8 flex-grow">
