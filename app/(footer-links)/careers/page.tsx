@@ -282,18 +282,6 @@ const CareersPage = () => {
                   ))}
                 </div>
               </div>
-
-              <div className="mt-8 text-center">
-                <p className="text-gray-400 mb-4 transition-colors duration-300 hover:text-gray-300">
-                  Don't see a position that matches your skills?
-                </p>
-                <a
-                  href="/upload-resume"
-                  className="inline-block px-6 py-3 bg-teal-500 rounded-lg text-white font-medium transition-all duration-300 hover:bg-teal-600 hover:shadow-lg hover:shadow-teal-500/25 hover:scale-105 transform"
-                >
-                  Send Us Your Resume
-                </a>
-              </div>
             </div>
           </div>
         </div>
