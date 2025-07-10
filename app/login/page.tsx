@@ -213,7 +213,8 @@ const LoginPageContent = () => {
         await setSessionCookie(user);
 
         // Handle merchant relationship if exists
-        if (merchantRelParam) {
+        const merchantrel = localStorage.getItem("merchantRel");
+        if (merchantRelParam || merchantrel) {
           await handleMerchantRelationship(user.user.uid);
         }
 
