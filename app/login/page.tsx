@@ -197,6 +197,14 @@ const LoginPageContent = () => {
 
         if (!response.ok) {
           const errorData = await response.json();
+          if (
+            errorData.code === "auth/invalid-credential" ||
+            errorData.message?.toLowerCase().includes("invalid-credential")
+          ) {
+            setError("No account found. Please sign up first.");
+            setTimeout(() => setError(""), 10000); // Clear after 10 seconds
+            return;
+          }
           throw new Error(errorData.message || "Login failed");
         }
 
@@ -281,7 +289,10 @@ const LoginPageContent = () => {
           phoneNumber = "+91" + phoneNumber;
         } else if (phoneNumber.length === 11 && phoneNumber.startsWith("0")) {
           phoneNumber = "+91" + phoneNumber.slice(1);
-        } else if (!phoneNumber.startsWith("+91")) {
+        } else if (
+          !phoneNumber.startsWith("91") ||
+          (!phoneNumber.startsWith("+91") && phoneNumber.length > 10)
+        ) {
           throw new Error(
             "Invalid phone number format. Please enter a valid Indian mobile number."
           );
