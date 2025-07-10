@@ -912,7 +912,6 @@ export default function VerificationDashboard() {
   const currentUser = authcontext?.currentUser;
 
   const [overalllSteps, setOverAllSteps] = useState(0);
-  console.log("steps: ", overalllSteps);
 
   const [loading, setLoading] = useState(false);
 
