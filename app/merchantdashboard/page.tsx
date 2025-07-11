@@ -13,6 +13,7 @@ import {
   Clock,
   ChevronLeft,
   ChevronRight,
+  Loader,
 } from "lucide-react";
 import { useAuth } from "@/contexts/Auth";
 import { toast } from "sonner";
@@ -70,6 +71,7 @@ const MerchantDashboard = () => {
   >([]);
   console.log(connectionRequests);
   const [requestsLoading, setRequestsLoading] = useState<boolean>(true);
+  const [actionLoading, setActionLoading] = useState(false);
 
   // Pagination state
   const [page, setPage] = useState<number>(1);
@@ -82,6 +84,11 @@ const MerchantDashboard = () => {
   const [invitesPerPage] = useState<number>(5);
   const [lastInviteKey, setLastInviteKey] = useState<number | null>(null);
   const [hasMoreInvites, setHasMoreInvites] = useState<boolean>(true);
+
+  const [loadingRequest, setLoadingRequest] = useState<{
+    id: string;
+    type: "approve" | "reject";
+  } | null>(null);
 
   const fetchMerchant = async (): Promise<void> => {
     setLoading(true);
@@ -255,6 +262,7 @@ const MerchantDashboard = () => {
   };
 
   const handleApproveRequest = async (requestId: string): Promise<void> => {
+    setLoadingRequest({ id: requestId, type: "approve" });
     try {
       const { message } = await fetch(
         `/api/approverequest?uid=${requestId}&merchantid=${currentUser?.uid}`,
@@ -265,18 +273,21 @@ const MerchantDashboard = () => {
         position: "top-right",
         style: { backgroundColor: "#172533", border: "#FBAE04", color: "#fff" },
       });
-      fetchConnectionRequests(true); // <-- Reset and fetch latest data
-      fetchMerchantRelUser(true); // <-- Also reset customers if needed
+      await fetchConnectionRequests(true); // <-- Reset and fetch latest data
+      await fetchMerchantRelUser(true); // <-- Also reset customers if needed
     } catch (error) {
       console.error("Error approving request:", error);
       toast.error("Failed to approve request", {
         position: "top-right",
         style: { backgroundColor: "#172533", border: "#FBAE04", color: "#fff" },
       });
+    } finally {
+      setLoadingRequest(null);
     }
   };
 
   const handleRejectRequest = async (requestId: string): Promise<void> => {
+    setLoadingRequest({ id: requestId, type: "reject" });
     try {
       const { message } = await fetch(
         `/api/rejectrequest?uid=${requestId}&merchantid=${currentUser?.uid}`,
@@ -289,13 +300,15 @@ const MerchantDashboard = () => {
       });
 
       toast.success("Request rejected", { position: "top-right" });
-      fetchConnectionRequests(true); // <-- Reset and fetch latest data
+      await fetchConnectionRequests(true); // <-- Reset and fetch latest data
     } catch (error) {
       console.error("Error rejecting request:", error);
       toast.error("Failed to reject request", {
         position: "top-right",
         style: { backgroundColor: "#172533", border: "#FBAE04", color: "#fff" },
       });
+    } finally {
+      setLoadingRequest(null);
     }
   };
 
@@ -662,15 +675,35 @@ const MerchantDashboard = () => {
                             <div className="flex gap-2">
                               <button
                                 onClick={() => handleApproveRequest(request.id)}
+                                disabled={
+                                  !!loadingRequest &&
+                                  loadingRequest.id === request.id
+                                }
                                 className="px-3 py-1 bg-green-500/10 hover:bg-green-500/20 text-green-400 rounded-lg border border-green-500/20 transition-colors"
                               >
-                                Approve
+                                {loadingRequest &&
+                                loadingRequest.id === request.id &&
+                                loadingRequest.type === "approve" ? (
+                                  <Loader className="animate-spin h-4 w-4" />
+                                ) : (
+                                  "Approve"
+                                )}
                               </button>
                               <button
                                 onClick={() => handleRejectRequest(request.id)}
+                                disabled={
+                                  !!loadingRequest &&
+                                  loadingRequest.id === request.id
+                                }
                                 className="px-3 py-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg border border-red-500/20 transition-colors"
                               >
-                                Reject
+                                {loadingRequest &&
+                                loadingRequest.id === request.id &&
+                                loadingRequest.type === "reject" ? (
+                                  <Loader className="animate-spin h-4 w-4" />
+                                ) : (
+                                  "Reject"
+                                )}
                               </button>
                             </div>
                           </div>
