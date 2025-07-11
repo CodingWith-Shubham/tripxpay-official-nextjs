@@ -208,68 +208,34 @@ const MerchantDashboard = () => {
       });
     }
   };
-
   const fetchConnectionRequests = async (
     reset: boolean = false
   ): Promise<void> => {
     setRequestsLoading(true);
     try {
       if (currentUser?.uid) {
-        let requestsQuery;
+        const response = await fetch("/api/getmerchantconnection", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            merchantid: currentUser.uid,
+            pageSize: invitesPerPage,
+            lastkey: reset ? null : lastInviteKey,
+          }),
+        });
+
+        const { data, lastKey, hasMore } = await response.json();
 
         if (reset) {
-          requestsQuery = query(
-            ref(database, `merchantInvites/${currentUser?.uid}`),
-            limitToFirst(invitesPerPage)
-          );
-          setInvitesPage(1);
-          setLastInviteKey(null);
-          setHasMoreInvites(true);
-        } else if (lastInviteKey) {
-          requestsQuery = query(
-            ref(database, `merchantInvites/${currentUser?.uid}`),
-            orderByChild("timestamp"),
-            startAfter(lastInviteKey),
-            limitToFirst(invitesPerPage)
-          );
+          setConnectionRequests(data);
         } else {
-          requestsQuery = query(
-            ref(database, `merchantInvites/${currentUser?.uid}`),
-            limitToFirst(invitesPerPage)
-          );
+          setConnectionRequests((prev) => [...prev, ...data]);
         }
 
-        const snapshot = await get(requestsQuery);
-
-        if (snapshot.exists()) {
-          const requests: ConnectionRequest[] = [];
-          let lastKey: number | null = null;
-
-          snapshot.forEach((childSnapshot) => {
-            requests.push({
-              id: childSnapshot.key,
-              ...childSnapshot.val(),
-            });
-            lastKey = childSnapshot.val().timestamp;
-          });
-
-          if (reset) {
-            setConnectionRequests(requests);
-          } else {
-            setConnectionRequests((prev) => [...prev, ...requests]);
-          }
-
-          setLastInviteKey(lastKey);
-
-          if (requests.length < invitesPerPage) {
-            setHasMoreInvites(false);
-          }
-        } else {
-          if (reset) {
-            setConnectionRequests([]);
-          }
-          setHasMoreInvites(false);
-        }
+        setLastInviteKey(lastKey);
+        setHasMoreInvites(hasMore);
       }
     } catch (error) {
       console.error("Error fetching connection requests:", error);
