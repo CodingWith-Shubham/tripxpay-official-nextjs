@@ -221,11 +221,15 @@ const MerchantDashboard = () => {
         });
 
         const { data, lastKey, hasMore } = await response.json();
-
+        const normalizedData = data.map((req: any) => ({
+          ...req,
+          id: req.userId, // for key and actions
+          userData: req.userdata, // for display
+        }));
         if (reset) {
-          setConnectionRequests(data);
+          setConnectionRequests(normalizedData);
         } else {
-          setConnectionRequests((prev) => [...prev, ...data]);
+          setConnectionRequests((prev) => [...prev, ...normalizedData]);
         }
 
         setLastInviteKey(lastKey);
@@ -645,7 +649,7 @@ const MerchantDashboard = () => {
                       .filter((request) => request.status === "pending")
                       .map((request) => (
                         <div
-                          key={request?.userId}
+                          key={request.id}
                           className="p-4 bg-gray-800/60 rounded-xl border border-gray-700"
                         >
                           <div className="flex justify-between items-start">
