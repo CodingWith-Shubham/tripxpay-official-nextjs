@@ -57,6 +57,7 @@ interface UserData {
 }
 
 interface MerchantData {
+  merchantId: string;
   id: string;
   companyName: string;
   displayName: string;
@@ -659,7 +660,9 @@ const Verified: React.FC = () => {
                         </div>
 
                         <button
-                          onClick={() => handleConnectionRequest(merchant.id)}
+                          onClick={() =>
+                            handleConnectionRequest(merchant?.merchantId)
+                          }
                           disabled={loading}
                           className="w-full px-3 sm:px-4 py-0.5 bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 rounded-lg border border-teal-500/20 transition-colors text-xs sm:text-sm md:text-base font-medium"
                         >
