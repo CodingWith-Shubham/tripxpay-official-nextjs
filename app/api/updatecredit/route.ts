@@ -2,7 +2,7 @@ import { database } from "@/lib/firebase";
 import { ref, update } from "firebase/database";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest) {
+export async function PUT(req: NextRequest) {
   try {
     const amount = req.nextUrl.searchParams.get("amount");
     const userId = req.nextUrl.searchParams.get("userid");

@@ -117,7 +117,7 @@ const PaymentBtn: React.FC<PaymentBtnProps> = ({
 
             await fetch(
               `/api/updatecredit?amount=${newAmount}&userid=${userData.id}`,
-              { method: "POST" }
+              { method: "PUT" }
             );
             const orderInfo = {
               ...transactionInfo,

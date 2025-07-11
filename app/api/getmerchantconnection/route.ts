@@ -12,7 +12,6 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
   try {
     const { merchantid, pageSize, lastkey } = await req.json();
-    console.log({ merchantid, pageSize, lastkey });
 
     if (!merchantid || !pageSize) {
       return NextResponse.json({ message: "Bad request" }, { status: 400 });
