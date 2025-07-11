@@ -118,67 +118,28 @@ const MerchantDashboard = () => {
     setCustomersLoading(true);
     try {
       if (currentUser?.uid) {
-        let usersQuery;
+        const response = await fetch("/api/getmerchantconsumer", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            merchantid: currentUser.uid,
+            pageSize: itemsPerPage,
+            lastkey: reset ? null : lastItemKey,
+          }),
+        });
+
+        const { data, lastKey, hasMore } = await response.json();
 
         if (reset) {
-          usersQuery = query(
-            ref(database, "users"),
-            orderByChild("merchantRel"),
-            equalTo(currentUser?.uid),
-            limitToFirst(itemsPerPage)
-          );
-          setPage(1);
-          setLastItemKey(null);
-          setHasMore(true);
-        } else if (lastItemKey) {
-          usersQuery = query(
-            ref(database, "users"),
-            orderByChild("merchantRel"),
-            equalTo(currentUser?.uid),
-            orderByChild("submittedAt"),
-            startAfter(lastItemKey),
-            limitToFirst(itemsPerPage)
-          );
+          setCustomers(data);
         } else {
-          usersQuery = query(
-            ref(database, "users"),
-            orderByChild("merchantRel"),
-            equalTo(currentUser?.uid),
-            limitToFirst(itemsPerPage)
-          );
+          setCustomers((prev) => [...prev, ...data]);
         }
 
-        const snapshot = await get(usersQuery);
-
-        if (snapshot.exists()) {
-          const users: Customer[] = [];
-          let lastKey: number | null = null;
-
-          snapshot.forEach((childSnapshot: any) => {
-            users.push({
-              userId: childSnapshot.key,
-              userData: childSnapshot.val(),
-            });
-            lastKey = childSnapshot.val().submittedAt;
-          });
-
-          if (reset) {
-            setCustomers(users);
-          } else {
-            setCustomers((prev) => [...prev, ...users]);
-          }
-
-          setLastItemKey(lastKey);
-
-          if (users.length < itemsPerPage) {
-            setHasMore(false);
-          }
-        } else {
-          if (reset) {
-            setCustomers([]);
-          }
-          setHasMore(false);
-        }
+        setLastItemKey(lastKey);
+        setHasMore(hasMore);
       }
     } catch (error) {
       console.error("Error fetching merchant related users:", error);
