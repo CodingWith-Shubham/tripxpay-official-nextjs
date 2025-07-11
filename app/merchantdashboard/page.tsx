@@ -657,7 +657,7 @@ const MerchantDashboard = () => {
                           <div className="flex justify-between items-start">
                             <div>
                               <h4 className="font-medium text-white">
-                                {request.userData.displayName}
+                                {request.userData?.displayName}
                               </h4>
                               <p className="text-sm text-gray-400">
                                 {request.userData.email}
@@ -745,8 +745,8 @@ const MerchantDashboard = () => {
                   <MerchantCard
                     data={{
                       ...merchantData,
-                      companyName: merchantData.companyName || "Company Name",
-                      displayName: merchantData.displayName || "Display Name",
+                      companyName: merchantData?.companyName || "Company Name",
+                      displayName: merchantData?.displayName || "Display Name",
                     }}
                     photoUrl={merchantData?.photoUrl || "/logo.svg"}
                     key={merchantData?.uid}
