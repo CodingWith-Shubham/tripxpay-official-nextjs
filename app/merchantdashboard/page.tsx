@@ -22,19 +22,11 @@ import { database } from "@/lib/firebase";
 import { MerchantCard } from "@/components/MerchantCard";
 import TypewriterEffect from "@/components/TypewriterEffect";
 import Link from "next/link";
-import {
-  equalTo,
-  get,
-  limitToFirst,
-  orderByChild,
-  query,
-  ref,
-  startAfter,
-  update,
-} from "firebase/database";
+import { ref, update } from "firebase/database";
 
 // Type definitions
 type UserData = {
+  userId: string;
   uid: string;
   displayName?: string;
   email?: string;
@@ -62,6 +54,7 @@ type Customer = {
 };
 
 type ConnectionRequest = {
+  userId: string;
   id: string;
   status: string;
   timestamp?: number;
@@ -77,6 +70,7 @@ const MerchantDashboard = () => {
   const [connectionRequests, setConnectionRequests] = useState<
     ConnectionRequest[]
   >([]);
+  console.log(connectionRequests);
   const [requestsLoading, setRequestsLoading] = useState<boolean>(true);
 
   // Pagination state
@@ -534,7 +528,7 @@ const MerchantDashboard = () => {
                                 {customer.userData.displayName || "N/A"}
                               </h4>
                               <p className="text-sm text-gray-400">
-                                {customer.userData.email || "N/A"}
+                                {customer.userData?.email || "N/A"}
                               </p>
                               <p className="text-xs text-gray-500">
                                 UID: {customer.userId}
@@ -651,7 +645,7 @@ const MerchantDashboard = () => {
                       .filter((request) => request.status === "pending")
                       .map((request) => (
                         <div
-                          key={request.id}
+                          key={request?.userId}
                           className="p-4 bg-gray-800/60 rounded-xl border border-gray-700"
                         >
                           <div className="flex justify-between items-start">
@@ -660,10 +654,10 @@ const MerchantDashboard = () => {
                                 {request.userData?.displayName}
                               </h4>
                               <p className="text-sm text-gray-400">
-                                {request.userData.email}
+                                {request.userData?.email}
                               </p>
                               <p className="text-xs text-gray-500">
-                                {request.userData.phoneNumber}
+                                {request.userData?.phoneNumber}
                               </p>
                             </div>
                             <div className="flex gap-2">

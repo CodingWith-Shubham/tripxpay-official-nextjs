@@ -12,41 +12,53 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
   try {
     const { merchantid, pageSize, lastkey } = await req.json();
+    console.log({ merchantid, pageSize, lastkey });
 
     if (!merchantid || !pageSize) {
       return NextResponse.json({ message: "Bad request" }, { status: 400 });
     }
 
     const invitesRef = ref(database, `merchantInvites/${merchantid}`);
-    let queryConstraints = [limitToFirst(pageSize)];
-
-    // Add startAfter if lastkey is provided
-    if (lastkey && lastkey !== "null") {
-      queryConstraints.push(orderByChild("timestamp"), startAfter(lastkey));
-    }
-
-    const invitesQuery = query(invitesRef, ...queryConstraints);
-    const snapshot = await get(invitesQuery);
-
-    const requests: any[] = [];
-    let lastKey = null;
-
-    if (snapshot.exists()) {
-      snapshot.forEach((childSnapshot) => {
-        const requestData = childSnapshot.val();
-        requests.push({
-          id: childSnapshot.key,
-          ...requestData,
-        });
-        lastKey = requestData.timestamp;
+    if ((!lastkey && lastkey !== "null") || null) {
+      const requestQuery = query(
+        invitesRef,
+        orderByChild("timestamp"),
+        limitToFirst(pageSize)
+      );
+      const requests: any = [];
+      let lastKey = null;
+      const snapshot = await get(requestQuery);
+      snapshot.forEach((childsnapshot) => {
+        const data = childsnapshot.val();
+        requests.push(data);
+        lastKey = data.timestamp;
+      });
+      return NextResponse.json({
+        data: requests,
+        lastkey,
+        hasMore: requests.length === pageSize,
+      });
+    } else {
+      const requestQuery = query(
+        invitesRef,
+        orderByChild("timestamp"),
+        startAfter(lastkey),
+        limitToFirst(pageSize)
+      );
+      const requests: any = [];
+      let lastKey = null;
+      const snapshot = await get(requestQuery);
+      snapshot.forEach((childsnapshot) => {
+        const data = childsnapshot.val();
+        requests.push(data);
+        lastKey = data.timestamp;
+      });
+      return NextResponse.json({
+        data: requests,
+        lastkey,
+        hasMore: requests.length === pageSize,
       });
     }
-
-    return NextResponse.json({
-      data: requests,
-      lastKey,
-      hasMore: requests.length === pageSize,
-    });
   } catch (error) {
     console.error("Error fetching connection requests:", error);
     return NextResponse.json(
