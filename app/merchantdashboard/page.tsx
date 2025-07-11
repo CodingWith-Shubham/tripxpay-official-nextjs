@@ -278,15 +278,18 @@ const MerchantDashboard = () => {
 
   const handleRejectRequest = async (requestId: string): Promise<void> => {
     try {
-      await update(
-        ref(database, `merchantInvites/${currentUser?.uid}/${requestId}`),
-        {
-          status: "rejected",
-        }
-      );
+      const { message } = await fetch(
+        `/api/rejectrequest?uid=${requestId}&merchantid=${currentUser?.uid}`,
+        { method: "DELETE" }
+      ).then((res) => res.json());
+
+      toast(message, {
+        position: "top-right",
+        style: { backgroundColor: "#172533", border: "#FBAE04", color: "#fff" },
+      });
 
       toast.success("Request rejected", { position: "top-right" });
-      fetchConnectionRequests();
+      fetchConnectionRequests(true); // <-- Reset and fetch latest data
     } catch (error) {
       console.error("Error rejecting request:", error);
       toast.error("Failed to reject request", {

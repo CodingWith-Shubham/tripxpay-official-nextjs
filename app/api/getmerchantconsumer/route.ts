@@ -1,6 +1,5 @@
 import { database } from "@/lib/firebase";
 import {
-  equalTo,
   get,
   limitToFirst,
   orderByChild,
@@ -20,35 +19,38 @@ export async function POST(req: NextRequest) {
 
     const usersRef = ref(database, "users");
     let queryConstraints = [
-      orderByChild("merchantRel"),
-      equalTo(merchantid),
-      limitToFirst(pageSize),
+      orderByChild("submittedAt"),
+      limitToFirst(pageSize + 10), // fetch a few extra in case some are filtered out
     ];
 
-    // Add startAfter if lastkey is provided
     if (lastkey && lastkey !== "null") {
       queryConstraints.push(startAfter(lastkey));
     }
 
-    const merchantQuery = query(usersRef, ...queryConstraints);
-    const snapshot = await get(merchantQuery);
+    const usersQuery = query(usersRef, ...queryConstraints);
+    const snapshot = await get(usersQuery);
 
     const consumers: any[] = [];
     let lastKey = null;
 
     snapshot.forEach((childSnapshot) => {
       const userData = childSnapshot.val();
-      consumers.push({
-        userId: childSnapshot.key,
-        userData: userData,
-      });
-      lastKey = userData.submittedAt;
+      if (userData.merchantRel === merchantid) {
+        consumers.push({
+          userId: childSnapshot.key,
+          userData: userData,
+        });
+        lastKey = userData.submittedAt;
+      }
     });
 
+    // Only return up to pageSize
+    const pagedConsumers = consumers.slice(0, pageSize);
+
     return NextResponse.json({
-      data: consumers,
+      data: pagedConsumers,
       lastKey,
-      hasMore: consumers.length === pageSize,
+      hasMore: pagedConsumers.length === pageSize,
     });
   } catch (error) {
     console.error("Error fetching merchant customers:", error);
