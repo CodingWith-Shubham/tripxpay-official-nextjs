@@ -1,5 +1,5 @@
 import { database } from "@/lib/firebase";
-import { ref, set } from "firebase/database";
+import { ref, serverTimestamp, set } from "firebase/database";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(red: NextRequest) {
@@ -14,7 +14,7 @@ export async function POST(red: NextRequest) {
       userId,
       userdata,
       status: "pending",
-      timestamp: Date.now(),
+      timestamp: serverTimestamp(),
     });
     return NextResponse.json(
       {
