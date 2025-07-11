@@ -265,8 +265,8 @@ const MerchantDashboard = () => {
         position: "top-right",
         style: { backgroundColor: "#172533", border: "#FBAE04", color: "#fff" },
       });
-      fetchConnectionRequests();
-      fetchMerchantRelUser();
+      fetchConnectionRequests(true); // <-- Reset and fetch latest data
+      fetchMerchantRelUser(true); // <-- Also reset customers if needed
     } catch (error) {
       console.error("Error approving request:", error);
       toast.error("Failed to approve request", {
