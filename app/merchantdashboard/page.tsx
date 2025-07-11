@@ -360,7 +360,7 @@ const MerchantDashboard = () => {
                     />
                   </h1>
                   <p className="text-gray-400">
-                    Manage your merchant account and customer relationships
+                    Manage your merchant account and consuemrs relationships
                   </p>
                 </div>
                 <motion.div
@@ -437,7 +437,7 @@ const MerchantDashboard = () => {
                           Company: {merchantData?.companyName}
                         </span>
                       </div>
-                      <span className="text-gray-400 text-sm">
+                      <span className="text-gray-400 text-sm whitespace-nowrap ">
                         ID: {merchantId}
                       </span>
                     </div>
@@ -454,7 +454,7 @@ const MerchantDashboard = () => {
               >
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-bold text-white">
-                    Registered Customers
+                    Registered Consumers
                   </h3>
                   <div className="flex items-center gap-4">
                     <span className="text-sm text-gray-400">
