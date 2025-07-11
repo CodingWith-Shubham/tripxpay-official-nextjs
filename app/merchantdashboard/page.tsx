@@ -8,7 +8,6 @@ import { motion } from "framer-motion";
 import {
   User,
   CreditCard,
-  Upload,
   Check,
   X,
   Clock,
@@ -22,7 +21,6 @@ import { database } from "@/lib/firebase";
 import { MerchantCard } from "@/components/MerchantCard";
 import TypewriterEffect from "@/components/TypewriterEffect";
 import Link from "next/link";
-import { ref, update } from "firebase/database";
 
 // Type definitions
 type UserData = {
@@ -258,18 +256,12 @@ const MerchantDashboard = () => {
 
   const handleApproveRequest = async (requestId: string): Promise<void> => {
     try {
-      await update(ref(database, `users/${requestId}`), {
-        merchantRel: currentUser?.uid,
-      });
+      const { message } = await fetch(
+        `/api/approverequest?uid=${requestId}&merchantid=${currentUser?.uid}`,
+        { method: "PUT" }
+      ).then((res) => res.json());
 
-      await update(
-        ref(database, `merchantInvites/${currentUser?.uid}/${requestId}`),
-        {
-          status: "approved",
-        }
-      );
-
-      toast.success("Request approved!", {
+      toast(message, {
         position: "top-right",
         style: { backgroundColor: "#172533", border: "#FBAE04", color: "#fff" },
       });
