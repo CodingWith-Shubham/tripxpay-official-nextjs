@@ -317,7 +317,7 @@ const Verified: React.FC = () => {
       if (currentUser?.uid) {
         const response = await fetch(
           `/api/deleteuserinfo?uid=${currentUser.uid}`,
-          { method: "POST" }
+          { method: "DELETE" }
         );
 
         const result = await response.json();

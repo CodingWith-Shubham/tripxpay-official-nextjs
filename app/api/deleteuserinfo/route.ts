@@ -2,7 +2,7 @@ import { database } from "@/lib/firebase";
 import { get, ref, remove } from "firebase/database";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest) {
+export async function DELETE(req: NextRequest) {
   try {
     const uid = req.nextUrl.searchParams.get("uid");
     if (!uid) {

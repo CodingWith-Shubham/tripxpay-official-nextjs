@@ -10,7 +10,6 @@ import {
 } from "firebase/database";
 import { NextRequest, NextResponse } from "next/server";
 
-// Updated API endpoint
 export async function POST(req: NextRequest) {
   try {
     const page = Number(req.nextUrl.searchParams.get("page")) || 1;
