@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/Auth";
+import Image from "next/image";
 import {
   Check,
   X,
@@ -478,7 +479,6 @@ const Verified: React.FC = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-900">
-        <Navbar />
         <div className="fixed inset-0 pointer-events-none">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-500/20 rounded-full filter blur-3xl" />
           <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-yellow-500/20 rounded-full filter blur-3xl" />
@@ -661,8 +661,8 @@ const Verified: React.FC = () => {
                         <button
                           onClick={() => handleConnectionRequest(merchant.id)}
                           disabled={loading}
-                          className="w-full px-3 sm:px-4 py-0.5 bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 rounded-lg border border-teal-500/20 transition-colors text-xs sm:text-sm md:text-base font-medium"
-                        >
+                          className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 rounded-lg border border-teal-500/20 transition-colors text-xs sm:text-sm md:text-base font-medium"
+                            >
                           {loading ? "Sending..." : "Request Connection"}
                         </button>
                       </div>
@@ -795,53 +795,54 @@ const Verified: React.FC = () => {
                         transition={{ duration: 0.3 }}
                         className="mt-2 sm:mt-3 space-y-2 sm:space-y-3 md:space-y-4"
                       >
-                        {/* Aadhaar Card */}
                         <motion.div
-                          className="bg-gray-800/50 border border-gray-700 p-2 sm:p-3 md:p-4 rounded-xl"
+                          className="bg-gray-800/50 border border-gray-700 p-3 sm:p-4 rounded-xl"
                           whileHover={{ scale: 1.02 }}
                           transition={{ type: "spring", stiffness: 300 }}
                         >
                           <div className="flex items-center justify-between mb-2 sm:mb-3">
-                            <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
+                            <div className="flex items-center gap-2 sm:gap-3">
                               <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
-                              <span className="text-white text-xs sm:text-sm md:text-base font-medium">
+                              <span className="text-white text-sm sm:text-base font-medium">
                                 Aadhaar Card
                               </span>
                             </div>
                             <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
                           </div>
-                          <div className="mt-1 sm:mt-2 md:mt-3 flex flex-col items-center">
+                          <div className="mt-2 sm:mt-3 flex flex-col items-center">
                             <motion.div
                               whileHover={{ scale: 1.02 }}
                               className="cursor-pointer"
-                              onClick={() =>
-                                handleImageClick(
-                                  userProfile.documents?.aadhaar?.downloadURL ||
-                                    ""
-                                )
-                              }
+                              onClick={() => {
+                                const url =
+                                  userProfile.documents?.aadhaar?.downloadURL;
+                                if (url) {
+                                  handleImageClick(url);
+                                }
+                              }}
                             >
-                              <img
+                              <Image
+                                width={500}
+                                height={500}
                                 src={
                                   userProfile.documents?.aadhaar?.downloadURL
                                 }
                                 alt="Aadhaar Document"
-                                className="w-full max-w-xs h-32 sm:h-40 md:h-48 object-contain rounded-lg border border-gray-600 hover:border-[#00ffb4] transition-colors"
+                                className="w-full max-w-xs sm:max-w-md h-40 sm:h-48 object-contain rounded-lg border border-gray-600 hover:border-[#00ffb4] transition-colors"
                               />
                             </motion.div>
                           </div>
                         </motion.div>
-
                         {/* PAN Card */}
                         <motion.div
-                          className="bg-gray-800/50 border border-gray-700 p-2 sm:p-3 md:p-4 rounded-xl"
+                          className="bg-gray-800/50 border border-gray-700 p-3 sm:p-4 rounded-xl"
                           whileHover={{ scale: 1.02 }}
                           transition={{ type: "spring", stiffness: 300 }}
                         >
                           <div className="flex items-center justify-between mb-2 sm:mb-3">
-                            <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
+                            <div className="flex items-center gap-2 sm:gap-3">
                               <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
-                              <span className="text-white text-xs sm:text-sm md:text-base font-medium">
+                              <span className="text-white text-sm sm:text-base font-medium">
                                 PAN Card
                               </span>
                             </div>
@@ -851,35 +852,38 @@ const Verified: React.FC = () => {
                               <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
                             )}
                           </div>
-                          <div className="mt-1 sm:mt-2 md:mt-3 flex flex-col items-center">
+                          <div className="mt-2 sm:mt-3 flex flex-col items-center">
                             <motion.div
                               whileHover={{ scale: 1.02 }}
                               className="cursor-pointer"
-                              onClick={() =>
-                                handleImageClick(
-                                  userProfile.documents?.pan?.downloadURL || ""
-                                )
-                              }
+                              onClick={() => {
+                                const url =
+                                  userProfile.documents?.pan?.downloadURL;
+                                if (url) {
+                                  handleImageClick(url);
+                                }
+                              }}
                             >
-                              <img
+                              <Image
+                                width={500}
+                                height={500}
                                 src={userProfile.documents?.pan?.downloadURL}
                                 alt="PAN Document"
-                                className="w-full max-w-xs h-32 sm:h-40 md:h-48 object-contain rounded-lg border border-gray-600 hover:border-[#00ffb4] transition-colors"
+                                className="w-full max-w-xs sm:max-w-md h-40 sm:h-48 object-contain rounded-lg border border-gray-600 hover:border-[#00ffb4] transition-colors"
                               />
                             </motion.div>
                           </div>
                         </motion.div>
-
                         {/* Face Verification */}
                         <motion.div
-                          className="bg-gray-800/50 border border-gray-700 p-2 sm:p-3 md:p-4 rounded-xl"
+                          className="bg-gray-800/50 border border-gray-700 p-3 sm:p-4 rounded-xl"
                           whileHover={{ scale: 1.02 }}
                           transition={{ type: "spring", stiffness: 300 }}
                         >
                           <div className="flex items-center justify-between mb-2 sm:mb-3">
-                            <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
+                            <div className="flex items-center gap-2 sm:gap-3">
                               <Camera className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
-                              <span className="text-white text-xs sm:text-sm md:text-base font-medium">
+                              <span className="text-white text-sm sm:text-base font-medium">
                                 Face Verification
                               </span>
                             </div>
@@ -889,20 +893,23 @@ const Verified: React.FC = () => {
                               <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
                             )}
                           </div>
-                          <div className="mt-1 sm:mt-2 md:mt-3 flex flex-col items-center">
+                          <div className="mt-2 sm:mt-3 flex flex-col items-center">
                             <motion.div
                               whileHover={{ scale: 1.02 }}
                               className="cursor-pointer"
-                              onClick={() =>
-                                handleImageClick(
-                                  userProfile.faceAuth?.downloadURL || ""
-                                )
-                              }
+                              onClick={() => {
+                                const url = userProfile.faceAuth?.downloadURL;
+                                if (url) {
+                                  handleImageClick(url);
+                                }
+                              }}
                             >
-                              <img
+                              <Image
+                                width={500}
+                                height={500}
                                 src={userProfile.faceAuth?.downloadURL}
                                 alt="Face Verification"
-                                className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 object-cover rounded-full border border-gray-600 hover:border-[#00ffb4] transition-colors"
+                                className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-full border border-gray-600 hover:border-[#00ffb4] transition-colors"
                               />
                             </motion.div>
                           </div>

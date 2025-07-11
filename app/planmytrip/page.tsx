@@ -471,11 +471,11 @@ const PlanMyTrip = () => {
                 </div>
 
                 {/* Submit Button - Centered */}
-                <div className="flex justify-center">
+                <div className="flex justify-center px-4">
                   <button
                     type="submit"
                     disabled={isPending}
-                    className="bg-teal-500 text-white font-semibold py-4 px-8 rounded-lg hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-teal-500/25 flex items-center justify-center gap-2 min-w-[300px]"
+                    className="w-full sm:w-auto bg-teal-500 text-white font-semibold py-3 sm:py-4 px-6 sm:px-8 rounded-lg hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-teal-500/25 flex items-center justify-center gap-2"
                   >
                     {isPending ? (
                       <>
