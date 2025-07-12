@@ -26,13 +26,13 @@ const Hero = () => {
         <div className="flex flex-col sm:flex-row justify-center gap-4 ">
           <Link
             href={isLoggedIn ? "/verified" : "/signup"}
-            className="font-inter font-medium md:font-semibold text-sm md:text-base bg-yellow-500 hover:bg-yellow-600 text-black py-2 px-6 mt-3 md:mt-0 rounded-full"
+            className="font-inter font-medium md:font-semibold text-sm md:text-base bg-yellow-500 hover:bg-yellow-600 text-black py-2 px-6 rounded-full"
           >
             GET STARTED
           </Link>
           <Link
             href="/about"
-            className="font-inter font-medium md:font-semibold text-sm md:text-base border border-gray-700 hover:border-gray-500 text-white py-2 md:mt-0 px-6 rounded-full mt-3"
+            className="font-inter font-medium md:font-semibold text-sm md:text-base border border-gray-700 hover:border-gray-500 text-white py-2 px-6 rounded-full"
           >
             KNOW ABOUT US
           </Link>
