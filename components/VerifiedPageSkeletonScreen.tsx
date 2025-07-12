@@ -258,7 +258,6 @@ const VerifiedPageSkeletonScreen: React.FC = () => {
           </div>
         </main>
       </div>
-      <Footer />
     </>
   );
 };
