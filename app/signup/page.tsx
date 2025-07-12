@@ -382,6 +382,11 @@ const SignupPage = () => {
     }
   };
 
+  useEffect(() => {
+    if (merchantRelParam) {
+      localStorage.setItem("merchantRel", merchantRelParam);
+    }
+  }, []);
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col">
       <Navbar />

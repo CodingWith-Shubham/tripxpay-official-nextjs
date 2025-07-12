@@ -37,16 +37,16 @@ const Blog: React.FC<BlogProps> = ({ post, onDelete }) => {
             const created = new Date(post.creationDate);
             const diffInMinutes = Math.floor((now.getTime() - created.getTime()) / 60000);
 
-            if (diffInMinutes < 60) {
-                setReadtime(`${diffInMinutes} min ago`);
-            } else if (diffInMinutes < 1440) {
-                const hours = Math.floor(diffInMinutes / 60);
-                setReadtime(`${hours} hour${hours > 1 ? 's' : ''} ago`);
-            } else {
-                const days = Math.floor(diffInMinutes / 1440);
-                setReadtime(`${days} day${days > 1 ? 's' : ''} ago`);
-            }
-        };
+      if (diffInMinutes < 60) {
+        setReadtime(`${diffInMinutes} min ago`);
+      } else if (diffInMinutes < 1440) {
+        const hours = Math.floor(diffInMinutes / 60);
+        setReadtime(`${hours} hour${hours > 1 ? "s" : ""} ago`);
+      } else {
+        const days = Math.floor(diffInMinutes / 1440);
+        setReadtime(`${days} day${days > 1 ? "s" : ""} ago`);
+      }
+    };
 
         trimReadtime();
     }, [post.creationDate]);

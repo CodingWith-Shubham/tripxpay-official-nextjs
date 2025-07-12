@@ -153,12 +153,12 @@ const VerifiedPageSkeletonScreen: React.FC = () => {
                 }}
               />
             </div>
-          </div>
-        </div>
+          </div>        </div>
       </main>
       
       <Footer />
     </div>
+
   );
 };
 

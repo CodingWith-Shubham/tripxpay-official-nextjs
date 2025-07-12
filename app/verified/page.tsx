@@ -16,7 +16,6 @@ import {
   CreditCard,
   ZoomIn,
   ZoomOut,
-  Calendar,
   ArrowUpRight,
   ArrowDownRight,
   Wallet,
@@ -28,8 +27,6 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import VerifiedPageSkeletonScreen from "@/components/VerifiedPageSkeletonScreen";
 import PaymentBtn from "@/components/PaymentBtn";
-import { ref, onValue } from "firebase/database";
-import { database } from "@/lib/firebase";
 import Footer from "@/components/Footer";
 import TypewriterEffect from "@/components/TypewriterEffect";
 
@@ -58,6 +55,7 @@ interface UserData {
 }
 
 interface MerchantData {
+  merchantId: string;
   id: string;
   companyName: string;
   displayName: string;
@@ -318,7 +316,7 @@ const Verified: React.FC = () => {
       if (currentUser?.uid) {
         const response = await fetch(
           `/api/deleteuserinfo?uid=${currentUser.uid}`,
-          { method: "POST" }
+          { method: "DELETE" }
         );
 
         const result = await response.json();

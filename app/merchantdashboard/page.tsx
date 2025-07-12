@@ -8,12 +8,12 @@ import { motion } from "framer-motion";
 import {
   User,
   CreditCard,
-  Upload,
   Check,
   X,
   Clock,
   ChevronLeft,
   ChevronRight,
+  Loader,
 } from "lucide-react";
 import { useAuth } from "@/contexts/Auth";
 import { toast } from "sonner";
@@ -22,19 +22,10 @@ import { database } from "@/lib/firebase";
 import { MerchantCard } from "@/components/MerchantCard";
 import TypewriterEffect from "@/components/TypewriterEffect";
 import Link from "next/link";
-import {
-  equalTo,
-  get,
-  limitToFirst,
-  orderByChild,
-  query,
-  ref,
-  startAfter,
-  update,
-} from "firebase/database";
 
 // Type definitions
 type UserData = {
+  userId: string;
   uid: string;
   displayName?: string;
   email?: string;
@@ -62,6 +53,7 @@ type Customer = {
 };
 
 type ConnectionRequest = {
+  userId: string;
   id: string;
   status: string;
   timestamp?: number;
@@ -77,7 +69,9 @@ const MerchantDashboard = () => {
   const [connectionRequests, setConnectionRequests] = useState<
     ConnectionRequest[]
   >([]);
+  console.log(connectionRequests);
   const [requestsLoading, setRequestsLoading] = useState<boolean>(true);
+  const [actionLoading, setActionLoading] = useState(false);
 
   // Pagination state
   const [page, setPage] = useState<number>(1);
@@ -90,6 +84,11 @@ const MerchantDashboard = () => {
   const [invitesPerPage] = useState<number>(5);
   const [lastInviteKey, setLastInviteKey] = useState<number | null>(null);
   const [hasMoreInvites, setHasMoreInvites] = useState<boolean>(true);
+
+  const [loadingRequest, setLoadingRequest] = useState<{
+    id: string;
+    type: "approve" | "reject";
+  } | null>(null);
 
   const fetchMerchant = async (): Promise<void> => {
     setLoading(true);
@@ -118,67 +117,28 @@ const MerchantDashboard = () => {
     setCustomersLoading(true);
     try {
       if (currentUser?.uid) {
-        let usersQuery;
+        const response = await fetch("/api/getmerchantconsumer", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            merchantid: currentUser.uid,
+            pageSize: itemsPerPage,
+            lastkey: reset ? null : lastItemKey,
+          }),
+        });
+
+        const { data, lastKey, hasMore } = await response.json();
 
         if (reset) {
-          usersQuery = query(
-            ref(database, "users"),
-            orderByChild("merchantRel"),
-            equalTo(currentUser?.uid),
-            limitToFirst(itemsPerPage)
-          );
-          setPage(1);
-          setLastItemKey(null);
-          setHasMore(true);
-        } else if (lastItemKey) {
-          usersQuery = query(
-            ref(database, "users"),
-            orderByChild("merchantRel"),
-            equalTo(currentUser?.uid),
-            orderByChild("submittedAt"),
-            startAfter(lastItemKey),
-            limitToFirst(itemsPerPage)
-          );
+          setCustomers(data);
         } else {
-          usersQuery = query(
-            ref(database, "users"),
-            orderByChild("merchantRel"),
-            equalTo(currentUser?.uid),
-            limitToFirst(itemsPerPage)
-          );
+          setCustomers((prev) => [...prev, ...data]);
         }
 
-        const snapshot = await get(usersQuery);
-
-        if (snapshot.exists()) {
-          const users: Customer[] = [];
-          let lastKey: number | null = null;
-
-          snapshot.forEach((childSnapshot: any) => {
-            users.push({
-              userId: childSnapshot.key,
-              userData: childSnapshot.val(),
-            });
-            lastKey = childSnapshot.val().submittedAt;
-          });
-
-          if (reset) {
-            setCustomers(users);
-          } else {
-            setCustomers((prev) => [...prev, ...users]);
-          }
-
-          setLastItemKey(lastKey);
-
-          if (users.length < itemsPerPage) {
-            setHasMore(false);
-          }
-        } else {
-          if (reset) {
-            setCustomers([]);
-          }
-          setHasMore(false);
-        }
+        setLastItemKey(lastKey);
+        setHasMore(hasMore);
       }
     } catch (error) {
       console.error("Error fetching merchant related users:", error);
@@ -247,68 +207,38 @@ const MerchantDashboard = () => {
       });
     }
   };
-
   const fetchConnectionRequests = async (
     reset: boolean = false
   ): Promise<void> => {
     setRequestsLoading(true);
     try {
       if (currentUser?.uid) {
-        let requestsQuery;
+        const response = await fetch("/api/getmerchantconnection", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            merchantid: currentUser.uid,
+            pageSize: invitesPerPage,
+            lastkey: reset ? null : lastInviteKey,
+          }),
+        });
 
+        const { data, lastKey, hasMore } = await response.json();
+        const normalizedData = data.map((req: any) => ({
+          ...req,
+          id: req.userId, // for key and actions
+          userData: req.userdata, // for display
+        }));
         if (reset) {
-          requestsQuery = query(
-            ref(database, `merchantInvites/${currentUser?.uid}`),
-            limitToFirst(invitesPerPage)
-          );
-          setInvitesPage(1);
-          setLastInviteKey(null);
-          setHasMoreInvites(true);
-        } else if (lastInviteKey) {
-          requestsQuery = query(
-            ref(database, `merchantInvites/${currentUser?.uid}`),
-            orderByChild("timestamp"),
-            startAfter(lastInviteKey),
-            limitToFirst(invitesPerPage)
-          );
+          setConnectionRequests(normalizedData);
         } else {
-          requestsQuery = query(
-            ref(database, `merchantInvites/${currentUser?.uid}`),
-            limitToFirst(invitesPerPage)
-          );
+          setConnectionRequests((prev) => [...prev, ...normalizedData]);
         }
 
-        const snapshot = await get(requestsQuery);
-
-        if (snapshot.exists()) {
-          const requests: ConnectionRequest[] = [];
-          let lastKey: number | null = null;
-
-          snapshot.forEach((childSnapshot) => {
-            requests.push({
-              id: childSnapshot.key,
-              ...childSnapshot.val(),
-            });
-            lastKey = childSnapshot.val().timestamp;
-          });
-
-          if (reset) {
-            setConnectionRequests(requests);
-          } else {
-            setConnectionRequests((prev) => [...prev, ...requests]);
-          }
-
-          setLastInviteKey(lastKey);
-
-          if (requests.length < invitesPerPage) {
-            setHasMoreInvites(false);
-          }
-        } else {
-          if (reset) {
-            setConnectionRequests([]);
-          }
-          setHasMoreInvites(false);
-        }
+        setLastInviteKey(lastKey);
+        setHasMoreInvites(hasMore);
       }
     } catch (error) {
       console.error("Error fetching connection requests:", error);
@@ -332,50 +262,53 @@ const MerchantDashboard = () => {
   };
 
   const handleApproveRequest = async (requestId: string): Promise<void> => {
+    setLoadingRequest({ id: requestId, type: "approve" });
     try {
-      await update(ref(database, `users/${requestId}`), {
-        merchantRel: currentUser?.uid,
-      });
+      const { message } = await fetch(
+        `/api/approverequest?uid=${requestId}&merchantid=${currentUser?.uid}`,
+        { method: "PUT" }
+      ).then((res) => res.json());
 
-      await update(
-        ref(database, `merchantInvites/${currentUser?.uid}/${requestId}`),
-        {
-          status: "approved",
-        }
-      );
-
-      toast.success("Request approved!", {
+      toast(message, {
         position: "top-right",
         style: { backgroundColor: "#172533", border: "#FBAE04", color: "#fff" },
       });
-      fetchConnectionRequests();
-      fetchMerchantRelUser();
+      await fetchConnectionRequests(true); // <-- Reset and fetch latest data
+      await fetchMerchantRelUser(true); // <-- Also reset customers if needed
     } catch (error) {
       console.error("Error approving request:", error);
       toast.error("Failed to approve request", {
         position: "top-right",
         style: { backgroundColor: "#172533", border: "#FBAE04", color: "#fff" },
       });
+    } finally {
+      setLoadingRequest(null);
     }
   };
 
   const handleRejectRequest = async (requestId: string): Promise<void> => {
+    setLoadingRequest({ id: requestId, type: "reject" });
     try {
-      await update(
-        ref(database, `merchantInvites/${currentUser?.uid}/${requestId}`),
-        {
-          status: "rejected",
-        }
-      );
+      const { message } = await fetch(
+        `/api/rejectrequest?uid=${requestId}&merchantid=${currentUser?.uid}`,
+        { method: "DELETE" }
+      ).then((res) => res.json());
+
+      toast(message, {
+        position: "top-right",
+        style: { backgroundColor: "#172533", border: "#FBAE04", color: "#fff" },
+      });
 
       toast.success("Request rejected", { position: "top-right" });
-      fetchConnectionRequests();
+      await fetchConnectionRequests(true); // <-- Reset and fetch latest data
     } catch (error) {
       console.error("Error rejecting request:", error);
       toast.error("Failed to reject request", {
         position: "top-right",
         style: { backgroundColor: "#172533", border: "#FBAE04", color: "#fff" },
       });
+    } finally {
+      setLoadingRequest(null);
     }
   };
 
@@ -427,7 +360,7 @@ const MerchantDashboard = () => {
                     />
                   </h1>
                   <p className="text-gray-400">
-                    Manage your merchant account and customer relationships
+                    Manage your merchant account and consuemrs relationships
                   </p>
                 </div>
                 <motion.div
@@ -504,7 +437,7 @@ const MerchantDashboard = () => {
                           Company: {merchantData?.companyName}
                         </span>
                       </div>
-                      <span className="text-gray-400 text-sm">
+                      <span className="text-gray-400 text-sm whitespace-nowrap ">
                         ID: {merchantId}
                       </span>
                     </div>
@@ -521,7 +454,7 @@ const MerchantDashboard = () => {
               >
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-bold text-white">
-                    Registered Customers
+                    Registered Consumers
                   </h3>
                   <div className="flex items-center gap-4">
                     <span className="text-sm text-gray-400">
@@ -607,7 +540,7 @@ const MerchantDashboard = () => {
                                 {customer.userData.displayName || "N/A"}
                               </h4>
                               <p className="text-sm text-gray-400">
-                                {customer.userData.email || "N/A"}
+                                {customer.userData?.email || "N/A"}
                               </p>
                               <p className="text-xs text-gray-500">
                                 UID: {customer.userId}
@@ -730,27 +663,47 @@ const MerchantDashboard = () => {
                           <div className="flex justify-between items-start">
                             <div>
                               <h4 className="font-medium text-white">
-                                {request.userData.displayName}
+                                {request.userData?.displayName}
                               </h4>
                               <p className="text-sm text-gray-400">
-                                {request.userData.email}
+                                {request.userData?.email}
                               </p>
                               <p className="text-xs text-gray-500">
-                                {request.userData.phoneNumber}
+                                {request.userData?.phoneNumber}
                               </p>
                             </div>
                             <div className="flex gap-2">
                               <button
                                 onClick={() => handleApproveRequest(request.id)}
+                                disabled={
+                                  !!loadingRequest &&
+                                  loadingRequest.id === request.id
+                                }
                                 className="px-3 py-1 bg-green-500/10 hover:bg-green-500/20 text-green-400 rounded-lg border border-green-500/20 transition-colors"
                               >
-                                Approve
+                                {loadingRequest &&
+                                loadingRequest.id === request.id &&
+                                loadingRequest.type === "approve" ? (
+                                  <Loader className="animate-spin h-4 w-4" />
+                                ) : (
+                                  "Approve"
+                                )}
                               </button>
                               <button
                                 onClick={() => handleRejectRequest(request.id)}
+                                disabled={
+                                  !!loadingRequest &&
+                                  loadingRequest.id === request.id
+                                }
                                 className="px-3 py-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg border border-red-500/20 transition-colors"
                               >
-                                Reject
+                                {loadingRequest &&
+                                loadingRequest.id === request.id &&
+                                loadingRequest.type === "reject" ? (
+                                  <Loader className="animate-spin h-4 w-4" />
+                                ) : (
+                                  "Reject"
+                                )}
                               </button>
                             </div>
                           </div>
@@ -818,8 +771,8 @@ const MerchantDashboard = () => {
                   <MerchantCard
                     data={{
                       ...merchantData,
-                      companyName: merchantData.companyName || "Company Name",
-                      displayName: merchantData.displayName || "Display Name",
+                      companyName: merchantData?.companyName || "Company Name",
+                      displayName: merchantData?.displayName || "Display Name",
                     }}
                     photoUrl={merchantData?.photoUrl || "/logo.svg"}
                     key={merchantData?.uid}
