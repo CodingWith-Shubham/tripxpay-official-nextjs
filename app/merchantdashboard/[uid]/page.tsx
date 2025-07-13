@@ -176,6 +176,7 @@ const MerchantUser = () => {
   const { uid } = useParams();
   const router = useRouter();
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  console.log(userInfo);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(
@@ -320,7 +321,7 @@ const MerchantUser = () => {
           <div className="text-center mb-10 border-b border-[#1C2634] pb-8">
             <div className="relative w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-[#00FFB4] shadow-lg mb-4">
               <img
-                src={userInfo.photoUrl || "/logo.svg"}
+                src={userInfo?.faceAuth?.downloadURL || "/logo.svg"}
                 alt="Profile"
                 className="w-full h-full object-cover"
                 onError={(e) => {
