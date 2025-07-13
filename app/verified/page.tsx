@@ -835,9 +835,7 @@ const Verified: React.FC = () => {
                               <Image
                                 width={500}
                                 height={500}
-                                src={
-                                  userProfile.documents?.aadhaar?.downloadURL
-                                }
+                                src={userProfile.documents?.aadhaar?.downloadURL ? userProfile.documents.aadhaar.downloadURL : "/logo.svg"}
                                 alt="Aadhaar Document"
                                 className="w-full max-w-xs sm:max-w-md h-40 sm:h-48 object-contain rounded-lg border border-gray-600 hover:border-[#00ffb4] transition-colors"
                               />
@@ -869,7 +867,7 @@ const Verified: React.FC = () => {
                               className="cursor-pointer"
                               onClick={() => {
                                 const url =
-                                  userProfile.documents?.pan?.downloadURL;
+                                  userProfile.documents?.pan?.downloadURL || "/logo.svg";
                                 if (url) {
                                   handleImageClick(url);
                                 }
@@ -878,7 +876,7 @@ const Verified: React.FC = () => {
                               <Image
                                 width={500}
                                 height={500}
-                                src={userProfile.documents?.pan?.downloadURL}
+                                src={userProfile.documents?.pan?.downloadURL ? userProfile.documents.pan.downloadURL : "/logo.svg"}
                                 alt="PAN Document"
                                 className="w-full max-w-xs sm:max-w-md h-40 sm:h-48 object-contain rounded-lg border border-gray-600 hover:border-[#00ffb4] transition-colors"
                               />
@@ -918,7 +916,7 @@ const Verified: React.FC = () => {
                               <Image
                                 width={500}
                                 height={500}
-                                src={userProfile.faceAuth?.downloadURL}
+                                src={userProfile.faceAuth?.downloadURL ? userProfile.faceAuth.downloadURL : "/logo.svg"}
                                 alt="Face Verification"
                                 className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-full border border-gray-600 hover:border-[#00ffb4] transition-colors"
                               />
