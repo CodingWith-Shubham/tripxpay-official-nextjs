@@ -1,77 +1,92 @@
 import { database } from "@/lib/firebase";
-import { child, get, ref } from "firebase/database";
+import {
+  equalTo,
+  get,
+  limitToFirst,
+  orderByChild,
+  query,
+  ref,
+  startAfter,
+} from "firebase/database";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const page = req.nextUrl.searchParams.get("page");
-    const pagelimit = req.nextUrl.searchParams.get("limit");
+    const page = Number(req.nextUrl.searchParams.get("page")) || 1;
+    const pageSize = Number(req.nextUrl.searchParams.get("pageSize")) || 9;
+    const lastkey = req.nextUrl.searchParams.get("lastkey");
     const category = req.nextUrl.searchParams.get("category");
-    if (!page || !pagelimit) {
-      return NextResponse.json({ message: "Bad request" }, { status: 400 });
-    }
 
-    const pageNum = parseInt(page);
-    const pageLimit = parseInt(pagelimit);
+    const blogref = ref(database, "blogs");
+    let queryRef;
 
-    const dbRef = ref(database);
-    const snapshot = await get(child(dbRef, "blogs"));
-
-    if (!snapshot.exists()) {
-      console.log("No blogs found.");
-      return NextResponse.json({
-        blogs: [],
-        total: 0,
-        currentPage: pageNum,
-        totalPages: 0,
-        hasNextPage: false,
-        hasPrevPage: false,
-        hasMore: false,
-      });
-    }
-
-    const data = snapshot.val();
-    let blogs = Object.entries(data).map(([id, blog]) => ({
-      id,
-      ...(blog as any),
-    }));
-
-    // Sort by creationDate (latest first)
-    blogs.sort(
-      (a, b) =>
-        new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()
-    );
-
-    // Filter by category if specified
+    // Build the query based on parameters
     if (category && category !== "all") {
-      blogs = blogs.filter((blog) => blog.category === category);
+      queryRef = query(
+        blogref,
+        orderByChild("category"),
+        equalTo(category),
+        limitToFirst(pageSize)
+      );
+    } else {
+      if (lastkey) {
+        queryRef = query(
+          blogref,
+          orderByChild("creationDate"),
+          startAfter(lastkey),
+          limitToFirst(pageSize)
+        );
+      } else {
+        queryRef = query(
+          blogref,
+          orderByChild("creationDate"),
+          limitToFirst(pageSize)
+        );
+      }
     }
 
-    // Calculate pagination
-    const total = blogs.length;
-    const totalPages = Math.ceil(total / pageLimit);
-    const startIndex = (pageNum - 1) * pageLimit;
-    const endIndex = startIndex + pageLimit;
+    const snapshot = await get(queryRef);
+    const blogs: any[] = [];
 
-    // Get paginated results
-    const paginatedBlogs = blogs.slice(startIndex, endIndex);
+    snapshot.forEach((childsnapshot: any) => {
+      blogs.push({
+        id: childsnapshot.key,
+        ...childsnapshot.val(),
+      });
+    });
+
+    // Get total count for pagination (you'll need to implement this)
+    const totalCount = await getTotalBlogCount(category);
 
     return NextResponse.json(
       {
-        blogs: paginatedBlogs,
-        total,
-        currentPage: pageNum,
-        totalPages,
-        hasNextPage: pageNum < totalPages,
-        hasPrevPage: pageNum > 1,
-        hasMore: pageNum < totalPages, // For compatibility with your component
+        blogs,
+        totalCount,
+        nextLastKey:
+          blogs.length > 0 ? blogs[blogs.length - 1].creationDate : null,
       },
       { status: 200 }
     );
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }
     );
   }
+}
+
+// Helper function to get total count
+async function getTotalBlogCount(category?: string | null) {
+  const blogref = ref(database, "blogs");
+  let queryRef;
+
+  if (category && category !== "all") {
+    queryRef = query(blogref, orderByChild("category"), equalTo(category));
+  } else {
+    queryRef = blogref;
+  }
+
+  const snapshot = await get(queryRef);
+  return snapshot.size;
 }

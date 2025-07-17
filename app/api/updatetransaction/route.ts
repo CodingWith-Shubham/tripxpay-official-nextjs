@@ -1,5 +1,5 @@
 import { database } from "@/lib/firebase";
-import { push, ref, set } from "firebase/database";
+import { push, ref, serverTimestamp, set } from "firebase/database";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     if (!userid || !orderinfo) {
       return NextResponse.json({ message: "bad request" }, { status: 400 });
     }
-    const timestamp = new Date().toISOString();
+    const timestamp = serverTimestamp();
     const transactionWithTimestamp = {
       ...orderinfo,
       timestamp,

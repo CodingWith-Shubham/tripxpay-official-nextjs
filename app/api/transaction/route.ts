@@ -22,6 +22,12 @@ export async function POST(req: NextRequest) {
     const transactionsRef = ref(database, `users/${uid}/transactions`);
 
     const snapshot = await get(transactionsRef);
+    if (!snapshot.exists()) {
+      return NextResponse.json(
+        { message: "Transaction not made by user." },
+        { status: 200 }
+      );
+    }
     const data = snapshot.val();
 
     const parsedTransactions: Transaction[] = Object.entries(data).map(

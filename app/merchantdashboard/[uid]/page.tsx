@@ -22,12 +22,8 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/Navbar"; // Assuming you have a Navbar component
 import Footer from "@/components/Footer"; // Assuming you have a Footer component
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-
-interface Pageparams {
-  params: Promise<{ uid: string }>;
-}
 
 // Add this interface at the top of the file
 interface UserInfo {
@@ -176,10 +172,11 @@ const LoadingSpinner = ({
   );
 };
 
-const MerchantUser = async ({ params }: Pageparams) => {
-  const { uid } = await params;
+const MerchantUser = () => {
+  const { uid } = useParams();
   const router = useRouter();
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  console.log(userInfo);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(
@@ -324,7 +321,7 @@ const MerchantUser = async ({ params }: Pageparams) => {
           <div className="text-center mb-10 border-b border-[#1C2634] pb-8">
             <div className="relative w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-[#00FFB4] shadow-lg mb-4">
               <img
-                src={userInfo.photoUrl || "/logo.svg"}
+                src={userInfo?.faceAuth?.downloadURL || "/logo.svg"}
                 alt="Profile"
                 className="w-full h-full object-cover"
                 onError={(e) => {
