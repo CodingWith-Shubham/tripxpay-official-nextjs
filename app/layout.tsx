@@ -27,6 +27,8 @@ export const metadata: Metadata = {
   description:
     "TripX Pay is India's first B2B 'Travel Now, Pay Later' solution. Empower your travel agency with flexible payment options, seamless bookings, and financial freedom for your clients.",
   keywords: [
+    "tipxpay",
+    "tipxpay.in",
     "tripx pay",
     "travel now pay later",
     "b2b travel payments",
@@ -110,7 +112,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "TripX Pay - Travel Now, Pay Later | B2B Travel Fintech Solution",
+    title: "TripX Pay - Travel Now, Pay Later",
     description:
       "India's first B2B 'Travel Now, Pay Later' solution for seamless travel bookings and flexible payments.",
     images: [
