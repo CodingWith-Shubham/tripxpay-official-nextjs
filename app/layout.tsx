@@ -97,7 +97,7 @@ export const metadata: Metadata = {
     siteName: 'TripX Pay',
     images: [
       {
-        url: 'https://media.licdn.com/dms/image/v2/D4D22AQHyv7TZeMqHCw/feedshare-shrink_800/B4DZcCz5SmHEAg-/0/1748098848525?e=1753920000&v=beta&t=25-RRsFiBa9VKYRoAvpoge-n2c8YZwDPvNBCfcOCr8w', // You need to create this
+        url: 'https://media.licdn.com/dms/image/v2/D4D22AQHyv7TZeMqHCw/feedshare-shrink_800/B4DZcCz5SmHEAg-/0/1748098848525?e=1753920000&v=beta&t=25-RRsFiBa9VKYRoAvpoge-n2c8YZwDPvNBCfcOCr8w',
         width: 1200,
         height: 630,
         alt: 'TripX Pay - Travel Now, Pay Later',
@@ -109,8 +109,8 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'TripX Pay - Travel Now, Pay Later | B2B Travel Fintech Solution',
     description: 'India\'s first B2B \'Travel Now, Pay Later\' solution for seamless travel bookings and flexible payments.',
-    images: ['https://media.licdn.com/dms/image/v2/D4D22AQHyv7TZeMqHCw/feedshare-shrink_800/B4DZcCz5SmHEAg-/0/1748098848525?e=1753920000&v=beta&t=25-RRsFiBa9VKYRoAvpoge-n2c8YZwDPvNBCfcOCr8w'], // You need to create this
-    creator: '@tripxpay', // Add your Twitter handle
+    images: ['https://media.licdn.com/dms/image/v2/D4D22AQHyv7TZeMqHCw/feedshare-shrink_800/B4DZcCz5SmHEAg-/0/1748098848525?e=1753920000&v=beta&t=25-RRsFiBa9VKYRoAvpoge-n2c8YZwDPvNBCfcOCr8w'],
+    creator: '@tripxpay',
   },
   verification: {
     google: 'WMI1nilSZQof83ds5QfachzCEgEMi4_WH9Sjx_ZrPmI',
@@ -148,7 +148,7 @@ export default function RootLayout({
               "url": "https://tripxpay.in",
               "logo": "https://tripxpay.in/logo.svg",
               "description": "India's first B2B 'Travel Now, Pay Later' solution for seamless travel bookings and flexible payments.",
-              "foundingDate": "2024", // Update with actual founding date
+              "foundingDate": "2024",
               "industry": "Travel Technology",
               "location": {
                 "@type": "Place",
@@ -192,19 +192,26 @@ export default function RootLayout({
         />
         <Script src="https://checkout.razorpay.com/v1/checkout.js" />
         
-        {/* Google Analytics - Add your tracking ID */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'GA_MEASUREMENT_ID');
-          `}
-        </Script>
+        {/* Google Analytics */}
+        {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}`}
+              strategy="afterInteractive"
+            />
+            <Script id="google-analytics" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}', {
+                  page_title: document.title,
+                  page_location: window.location.href,
+                });
+              `}
+            </Script>
+          </>
+        )}
       </body>
     </html>
   );
