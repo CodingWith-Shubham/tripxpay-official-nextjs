@@ -4,6 +4,8 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/Auth";
 import Script from "next/script";
+import Head from "next/head";
+import Link from "next/link";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -134,10 +136,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${spaceGrotesk.variable} ${inter.variable}`}>
-      <head>
-        <link rel="icon" href="/favicon.ico" type="image/x-icon" />
-        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
-        <link rel="icon" href="/logo.svg" type="image/svg+xml" />
+      <Head>
+        <title>TripX Pay | Travel Now, Pay Later</title>
+        <Link rel="icon" href="/favicon.ico" type="image/x-icon" />
+        <Link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <Link rel="icon" href="/logo.svg" type="image/svg+xml" />
         {/* You can keep the manifest and meta tags if you want */}
         <meta name="theme-color" content="#ffffff" />
         {/* Structured Data for Organization */}
@@ -184,7 +187,7 @@ export default function RootLayout({
             }),
           }}
         />
-      </head>
+      </Head>
       <body className={`${spaceGrotesk.variable} ${inter.variable}`}>
         <AuthProvider>{children}</AuthProvider>
         <Toaster
