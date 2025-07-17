@@ -139,7 +139,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${spaceGrotesk.variable} ${inter.variable}`}>
       <Head>
-        <title>TripX Pay | Travel Now, Pay Later</title>
+        <title>
+          TripX Pay - Travel Now, Pay Later | B2B Travel Fintech Solution
+        </title>
         <Link rel="icon" href="/favicon.ico" type="image/x-icon" />
         <Link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
         <Link rel="icon" href="/logo.svg" type="image/svg+xml" />
