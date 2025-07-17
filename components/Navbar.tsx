@@ -169,24 +169,23 @@ const Navbar = () => {
             <div className="flex items-center space-x-2 xl:space-x-3 ml-auto">
               {!currentUser ? (
                 <>
-                  <div>
+                  <div className="flex items-center gap-4">
+                    {/* SIGNUP Button */}
                     <Link
                       href="/signup"
-                      className="font-inter font-semibold text-sm xl:text-base text-gray-200 border border-gray-700 rounded-full px-3 xl:px-5 py-1.5 xl:py-2 transition-all duration-300 relative group overflow-hidden hover:text-white hover:border-teal-400 whitespace-nowrap"
+                      className="font-inter font-semibold text-sm xl:text-base text-gray-200 border border-gray-700 rounded-full px-5 py-2 xl:px-6 xl:py-2.5 transition-all duration-300 relative group overflow-hidden hover:text-white hover:border-teal-400 whitespace-nowrap w-32 text-center"
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-teal-500/10 to-teal-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       <span className="relative z-10">SIGNUP</span>
                     </Link>
-                  </div>
-                  <div>
+
+                    {/* LOGIN Button */}
                     <Link
                       href="/login"
-                      className="inline-block font-inter font-semibold text-sm xl:text-base text-white bg-teal-500 rounded-full px-3 xl:px-5 py-1.5 xl:py-2 transition-all duration-300 relative overflow-hidden group hover:bg-teal-400 hover:shadow-lg hover:shadow-teal-500/25 whitespace-nowrap hover:scale-105 active:scale-95"
+                      className="font-inter font-semibold text-sm xl:text-base text-white bg-teal-500 rounded-full px-5 py-2 xl:px-6 xl:py-2.5 transition-all duration-300 relative overflow-hidden group hover:bg-teal-400 hover:shadow-lg hover:shadow-teal-500/25 whitespace-nowrap w-32 text-center hover:scale-105 active:scale-95"
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-teal-400 to-teal-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      <span className="relative z-10 transition-transform duration-300">
-                        LOGIN
-                      </span>
+                      <span className="relative z-10 transition-transform duration-300">LOGIN</span>
                     </Link>
                   </div>
                 </>

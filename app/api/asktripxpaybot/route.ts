@@ -6,11 +6,16 @@ const GEMINI_API_URL =
 
 export async function POST(req: NextRequest) {
   try {
-    const searchParams = req.nextUrl.searchParams;
-    const message = searchParams.get("message");
-    if (!message) {
-      return NextResponse.json({ message: "Bad request" }, { status: 400 });
+    const body = await req.json();
+    const message = body.message;
+
+    if (!message || typeof message !== "string") {
+      return NextResponse.json(
+        { text: "Please provide a valid message" },
+        { status: 400 }
+      );
     }
+
     const prompt = `You are TripX Pay Bot, a helpful travel and payment assistant. Answer any question in a concise way. Always maintain a friendly, professional tone and relate your answers to travel or payments when relevant.
 
 User Question: ${message}
@@ -44,36 +49,38 @@ Respond as TripX Pay Bot:`;
 
     if (!response.ok) {
       const errorData = await response.json();
+      console.error("Gemini API error:", errorData);
       return NextResponse.json(
-        { errorData, message: "internal server issue" },
+        { 
+          text: "I'm having technical difficulties. Please try again later.",
+          error: errorData 
+        },
         { status: 500 }
       );
     }
 
     const data = await response.json();
 
-    // here extract the response text
-    if (
-      data.candidates &&
-      data.candidates[0] &&
-      data.candidates[0].content &&
-      data.candidates[0].content.parts
-    ) {
-      return NextResponse.json(
-        {
-          text: data.candidates[0].content.parts[0].text,
-        },
-        { status: 200 }
-      );
+    // Extract response text with robust error handling
+    let responseText = "I couldn't understand that. Could you please rephrase?";
+    
+    if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+      responseText = data.candidates[0].content.parts[0].text;
     } else {
-      return NextResponse.json(
-        { message: "error to the get the data from the api" },
-        { status: 500 }
-      );
+      console.warn("Unexpected Gemini response structure:", data);
     }
-  } catch (error) {
+
     return NextResponse.json(
-      { message: "Internal Server issue" },
+      { text: responseText },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Server error:", error);
+    return NextResponse.json(
+      { 
+        text: "An unexpected error occurred. Our team has been notified.",
+        error: error instanceof Error ? error.message : "Unknown error"
+      },
       { status: 500 }
     );
   }
