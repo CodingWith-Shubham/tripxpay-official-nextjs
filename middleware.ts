@@ -28,10 +28,6 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  if (pathname === "/contact") {
-    const url = new URL("/help-center", request.url);
-    return NextResponse.rewrite(url);
-  }
   return NextResponse.next();
 }
 

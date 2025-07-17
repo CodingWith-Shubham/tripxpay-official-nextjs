@@ -184,10 +184,10 @@ const ContactPage = () => {
                         Call Us
                       </h3>
                       <p className="text-gray-400 transition-colors duration-300 group-hover:text-gray-300">
-                        +1 (800) 555-1234
+                        +91 8700241156
                       </p>
                       <p className="text-gray-400 transition-colors duration-300 group-hover:text-gray-300">
-                        Mon-Fri, 9am-6pm EST
+                        Mon-Fri, 9am-10pm IST
                       </p>
                     </div>
                   </div>
@@ -220,10 +220,10 @@ const ContactPage = () => {
                         Visit Us
                       </h3>
                       <p className="text-gray-400 transition-colors duration-300 group-hover:text-gray-300">
-                        123 Payment Street
+                        Gurugram 
                       </p>
                       <p className="text-gray-400 transition-colors duration-300 group-hover:text-gray-300">
-                        New York, NY 10001
+                      Haryana
                       </p>
                     </div>
                   </div>
