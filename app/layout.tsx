@@ -4,6 +4,8 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/Auth";
 import Script from "next/script";
+import Head from "next/head";
+import Link from "next/link";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -20,11 +22,13 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: {
     default: "TripX Pay - Travel Now, Pay Later | B2B Travel Fintech Solution",
-    template: "%s | TripX Pay"
+    template: "%s | TripX Pay",
   },
   description:
     "TripX Pay is India's first B2B 'Travel Now, Pay Later' solution. Empower your travel agency with flexible payment options, seamless bookings, and financial freedom for your clients.",
   keywords: [
+    "tipxpay",
+    "tipxpay.in",
     "tripx pay",
     "travel now pay later",
     "b2b travel payments",
@@ -64,9 +68,9 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://tripxpay.in'),
+  metadataBase: new URL("https://tripxpay.in"),
   alternates: {
-    canonical: 'https://tripxpay.in',
+    canonical: "https://tripxpay.in",
   },
   robots: {
     index: true,
@@ -74,9 +78,9 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
     },
   },
   icons: {
@@ -89,37 +93,41 @@ export const metadata: Metadata = {
   },
   manifest: "/manifest.json",
   openGraph: {
-    type: 'website',
-    locale: 'en_IN',
-    url: 'https://tripxpay.in',
-    title: 'TripX Pay - Travel Now, Pay Later | B2B Travel Fintech Solution',
-    description: 'India\'s first B2B \'Travel Now, Pay Later\' solution for seamless travel bookings and flexible payments.',
-    siteName: 'TripX Pay',
+    type: "website",
+    locale: "en_IN",
+    url: "https://tripxpay.in",
+    title: "TripX Pay - Travel Now, Pay Later | B2B Travel Fintech Solution",
+    description:
+      "India's first B2B 'Travel Now, Pay Later' solution for seamless travel bookings and flexible payments.",
+    siteName: "TripX Pay",
     images: [
       {
-        url: 'https://media.licdn.com/dms/image/v2/D4D22AQHyv7TZeMqHCw/feedshare-shrink_800/B4DZcCz5SmHEAg-/0/1748098848525?e=1753920000&v=beta&t=25-RRsFiBa9VKYRoAvpoge-n2c8YZwDPvNBCfcOCr8w',
+        url: "https://media.licdn.com/dms/image/v2/D4D22AQHyv7TZeMqHCw/feedshare-shrink_800/B4DZcCz5SmHEAg-/0/1748098848525?e=1753920000&v=beta&t=25-RRsFiBa9VKYRoAvpoge-n2c8YZwDPvNBCfcOCr8w",
         width: 1200,
         height: 630,
-        alt: 'TripX Pay - Travel Now, Pay Later',
-        type: 'image/png',
+        alt: "TripX Pay - Travel Now, Pay Later",
+        type: "image/png",
       },
     ],
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'TripX Pay - Travel Now, Pay Later | B2B Travel Fintech Solution',
-    description: 'India\'s first B2B \'Travel Now, Pay Later\' solution for seamless travel bookings and flexible payments.',
-    images: ['https://media.licdn.com/dms/image/v2/D4D22AQHyv7TZeMqHCw/feedshare-shrink_800/B4DZcCz5SmHEAg-/0/1748098848525?e=1753920000&v=beta&t=25-RRsFiBa9VKYRoAvpoge-n2c8YZwDPvNBCfcOCr8w'],
-    creator: '@tripxpay',
+    card: "summary_large_image",
+    title: "TripX Pay - Travel Now, Pay Later",
+    description:
+      "India's first B2B 'Travel Now, Pay Later' solution for seamless travel bookings and flexible payments.",
+    images: [
+      "https://media.licdn.com/dms/image/v2/D4D22AQHyv7TZeMqHCw/feedshare-shrink_800/B4DZcCz5SmHEAg-/0/1748098848525?e=1753920000&v=beta&t=25-RRsFiBa9VKYRoAvpoge-n2c8YZwDPvNBCfcOCr8w",
+    ],
+    creator: "@tripxpay",
   },
   verification: {
-    google: 'WMI1nilSZQof83ds5QfachzCEgEMi4_WH9Sjx_ZrPmI',
+    google: "WMI1nilSZQof83ds5QfachzCEgEMi4_WH9Sjx_ZrPmI",
   },
-  category: 'travel',
-  classification: 'Business',
+  category: "travel",
+  classification: "Business",
   other: {
-    'apple-mobile-web-app-capable': 'yes',
-    'apple-mobile-web-app-status-bar-style': 'black-translucent',
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "black-translucent",
   },
 };
 
@@ -130,13 +138,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${spaceGrotesk.variable} ${inter.variable}`}>
-      <head>
-        {/* Additional meta tags that can't be set via metadata */}
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#0066ff" />
-        <meta name="msapplication-TileColor" content="#0066ff" />
-        <meta name="msapplication-config" content="/browserconfig.xml" />
-        
+      <Head>
+        <title>
+          TripX Pay - Travel Now, Pay Later | B2B Travel Fintech Solution
+        </title>
+        <Link rel="icon" href="/favicon.ico" type="image/x-icon" />
+        <Link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <Link rel="icon" href="/logo.svg" type="image/svg+xml" />
+        {/* You can keep the manifest and meta tags if you want */}
+        <meta name="theme-color" content="#ffffff" />
         {/* Structured Data for Organization */}
         <script
           type="application/ld+json"
@@ -144,24 +154,24 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Organization",
-              "name": "TripX Pay",
-              "url": "https://tripxpay.in",
-              "logo": "https://tripxpay.in/logo.svg",
-              "description": "India's first B2B 'Travel Now, Pay Later' solution for seamless travel bookings and flexible payments.",
-              "foundingDate": "2024",
-              "industry": "Travel Technology",
-              "location": {
+              name: "TripX Pay",
+              url: "https://tripxpay.in",
+              logo: "https://tripxpay.in/logo.svg",
+              description:
+                "India's first B2B 'Travel Now, Pay Later' solution for seamless travel bookings and flexible payments.",
+              foundingDate: "2024",
+              industry: "Travel Technology",
+              location: {
                 "@type": "Place",
-                "addressCountry": "IN"
+                addressCountry: "IN",
               },
-              "sameAs": [
+              sameAs: [
                 "https://www.linkedin.com/company/tripxpay",
-                "https://twitter.com/tripxpay"
-              ]
-            })
+                "https://twitter.com/tripxpay",
+              ],
+            }),
           }}
         />
-        
         {/* Structured Data for Website */}
         <script
           type="application/ld+json"
@@ -169,18 +179,19 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "WebSite",
-              "name": "TripX Pay",
-              "url": "https://tripxpay.in",
-              "description": "India's first B2B 'Travel Now, Pay Later' solution for seamless travel bookings and flexible payments.",
-              "potentialAction": {
+              name: "TripX Pay",
+              url: "https://tripxpay.in",
+              description:
+                "India's first B2B 'Travel Now, Pay Later' solution for seamless travel bookings and flexible payments.",
+              potentialAction: {
                 "@type": "SearchAction",
-                "target": "https://tripxpay.in/search?q={search_term_string}",
-                "query-input": "required name=search_term_string"
-              }
-            })
+                target: "https://tripxpay.in/search?q={search_term_string}",
+                "query-input": "required name=search_term_string",
+              },
+            }),
           }}
         />
-      </head>
+      </Head>
       <body className={`${spaceGrotesk.variable} ${inter.variable}`}>
         <AuthProvider>{children}</AuthProvider>
         <Toaster
@@ -191,7 +202,7 @@ export default function RootLayout({
           }}
         />
         <Script src="https://checkout.razorpay.com/v1/checkout.js" />
-        
+
         {/* Google Analytics */}
         {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
           <>
