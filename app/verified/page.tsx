@@ -1027,7 +1027,7 @@ const Verified: React.FC = () => {
                               )}
                             </div>
                             <div className="max-w-[150px] md:max-w-none">
-                              <p className="text-white font-medium text-sm md:text-base truncate md:whitespace-normal">
+                              <p className="text-white font-medium text-sm md:text-base whitespace-normal break-words">
                                 {transaction.description || `Amount Paid`}
                               </p>
                               <p className="text-gray-400 text-xs md:text-sm">
@@ -1046,9 +1046,7 @@ const Verified: React.FC = () => {
                               {transaction.type === "credit_push" ? "+" : "-"}₹
                               {transaction.paidAmount ||
                                 transaction.creditedAmount ||
-                                (transaction.amount
-                                  ? transaction.amount / 100
-                                  : 0)}
+                                (transaction.amount ? transaction.amount / 100 : 0)}
                             </p>
                           </div>
                         </motion.div>
