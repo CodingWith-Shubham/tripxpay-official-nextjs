@@ -1,7 +1,6 @@
 "use client";
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import PageHeader from "@/components/PageHeader";
 
 interface Article {
   title: string;
@@ -35,13 +34,7 @@ function renderIcon(iconName: string) {
   switch (iconName) {
     case "BookOpen":
       return (
-        <svg
-          className="w-5 h-5 sm:w-6 sm:h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+        <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -52,13 +45,7 @@ function renderIcon(iconName: string) {
       );
     case "User":
       return (
-        <svg
-          className="w-5 h-5 sm:w-6 sm:h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+        <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -69,13 +56,7 @@ function renderIcon(iconName: string) {
       );
     case "CreditCard":
       return (
-        <svg
-          className="w-5 h-5 sm:w-6 sm:h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+        <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -86,13 +67,7 @@ function renderIcon(iconName: string) {
       );
     case "Code":
       return (
-        <svg
-          className="w-5 h-5 sm:w-6 sm:h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+        <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -103,13 +78,7 @@ function renderIcon(iconName: string) {
       );
     case "Shield":
       return (
-        <svg
-          className="w-5 h-5 sm:w-6 sm:h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+        <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -120,13 +89,7 @@ function renderIcon(iconName: string) {
       );
     case "DollarSign":
       return (
-        <svg
-          className="w-5 h-5 sm:w-6 sm:h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+        <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -189,7 +152,6 @@ export default function HelpCenterSearch({ categories, popularArticles }: HelpCe
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
             >
               <path
                 strokeLinecap="round"
@@ -259,11 +221,7 @@ export default function HelpCenterSearch({ categories, popularArticles }: HelpCe
         <div>
           <div className="flex items-center mb-6 sm:mb-8">
             <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 p-2 sm:p-3 rounded-lg mr-3 sm:mr-4 border border-blue-500/30 flex-shrink-0">
-              <svg
-                className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
               </svg>
             </div>
@@ -287,7 +245,6 @@ export default function HelpCenterSearch({ categories, popularArticles }: HelpCe
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
                           strokeLinecap="round"
@@ -324,11 +281,7 @@ export default function HelpCenterSearch({ categories, popularArticles }: HelpCe
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Support Section - moved here from page.tsx */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 mt-12">
-        <div></div>
+        {/* Support Section */}
         <div>
           <div className="flex items-center mb-4 sm:mb-6 md:mb-8">
             <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 p-2 sm:p-3 rounded-lg mr-3 sm:mr-4 border border-blue-500/30 flex-shrink-0">
@@ -350,15 +303,12 @@ export default function HelpCenterSearch({ categories, popularArticles }: HelpCe
               Need More Help?
             </h2>
           </div>
-
           <div className="bg-gray-900/60 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 border border-gray-800/50 transition-all duration-300 hover:border-teal-500/30 hover:shadow-xl hover:shadow-teal-500/10 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-teal-500/5 opacity-0 hover:opacity-100 transition-opacity duration-500 rounded-xl sm:rounded-2xl" />
             <div className="relative z-10">
               <p className="text-gray-300 mb-4 sm:mb-6 md:mb-8 text-sm sm:text-base md:text-lg leading-relaxed">
-                Can't find what you're looking for? Our support team is
-                here to help you with any questions or issues.
+                Can't find what you're looking for? Our support team is here to help you with any questions or issues.
               </p>
-
               <div className="space-y-3 sm:space-y-4">
                 {/* Live Chat */}
                 <button
@@ -382,7 +332,7 @@ export default function HelpCenterSearch({ categories, popularArticles }: HelpCe
                     </svg>
                   </div>
                   <div className="relative z-10 flex-1 min-w-0">
-                    <h3 className="text-semibold text-sm sm:text-base md:text-lg mb-1 group-hover:text-teal-400">
+                    <h3 className="font-semibold text-sm sm:text-base md:text-lg mb-1 group-hover:text-teal-400">
                       Live Chat
                     </h3>
                     <p className="text-xs sm:text-sm text-gray-400 group-hover:text-gray-300">
@@ -403,7 +353,6 @@ export default function HelpCenterSearch({ categories, popularArticles }: HelpCe
                     />
                   </svg>
                 </button>
-
                 {/* Email */}
                 <a
                   href="https://mail.google.com/mail/?view=cm&fs=1&to=tripxpay@gmail.com&su=Support%20Request%20-%20TripXPay%20Help&body=Hello%20TripXPay%20Support%20Team,%0A%0AI%20need%20assistance%20with%20the%20following:%0A%0A[Please%20describe%20your%20issue%20here]"
@@ -427,9 +376,8 @@ export default function HelpCenterSearch({ categories, popularArticles }: HelpCe
                       />
                     </svg>
                   </div>
-
                   <div className="relative z-10 flex-1 min-w-0 ">
-                    <h3 className="text-semibold text-sm sm:text-base md:text-lg mb-1 group-hover:text-teal-400">
+                    <h3 className="font-semibold text-sm sm:text-base md:text-lg mb-1 group-hover:text-teal-400">
                       Email via Gmail
                     </h3>
                     <p className="text-xs sm:text-sm text-gray-400 group-hover:text-gray-300 break-all">
@@ -450,7 +398,6 @@ export default function HelpCenterSearch({ categories, popularArticles }: HelpCe
                     />
                   </svg>
                 </a>
-
                 {/* Phone */}
                 <a
                   href="tel:+919315224277"
@@ -473,7 +420,7 @@ export default function HelpCenterSearch({ categories, popularArticles }: HelpCe
                     </svg>
                   </div>
                   <div className="relative z-10 flex-1 min-w-0">
-                    <h3 className="text-semibold text-sm sm:text-base md:text-lg mb-1 group-hover:text-teal-400">
+                    <h3 className="font-semibold text-sm sm:text-base md:text-lg mb-1 group-hover:text-teal-400">
                       Call Support
                     </h3>
                     <p className="text-xs sm:text-sm text-gray-400 group-hover:text-gray-300">
