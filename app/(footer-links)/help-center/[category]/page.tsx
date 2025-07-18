@@ -41,68 +41,68 @@ export async function generateStaticParams() {
   return categories.map((category) => ({ category }));
 }
 
-export async function generateMetadata({ params }: { params: { category: string } }) {
-  // Duplicate articlesData and normalization logic for metadata
-  const articlesData: ArticlesData = {
-    "getting-started": {
-      title: "Getting Started",
-      description:
-        "Learn the basics of TripxPay and how to set up your account.",
-      icon: "BookOpen",
-      articles: [], // No need to include articles for metadata
-    },
-    "account-management": {
-      title: "Account Management",
-      description: "Manage your account settings, team members, and permissions.",
-      icon: "User",
-      articles: [],
-    },
-    "payments-and-processing": {
-      title: "Payments & Processing",
-      description: "Learn about payment methods, processing times, and fees.",
-      icon: "CreditCard",
-      articles: [],
-    },
-    integration: {
-      title: "Integration",
-      description: "Integrate TripxPay with your website or booking system.",
-      icon: "Code",
-      articles: [],
-    },
-    security: {
-      title: "Security",
-      description: "Understand our security measures and best practices.",
-      icon: "Shield",
-      articles: [],
-    },
-    "billing-and-subscriptions": {
-      title: "Billing & Subscriptions",
-      description: "Manage your billing information and subscription plan.",
-      icon: "DollarSign",
-      articles: [],
-    },
-    "popular-articles": {
-      title: "Popular Articles",
-      description: "Most viewed and helpful articles from our help center.",
-      icon: "TrendingUp",
-      articles: [],
-    },
-  };
-  const normalizedCategory = params.category
-    .replace("payments-processing", "payments-and-processing")
-    .replace("billing-subscriptions", "billing-and-subscriptions");
-  const currentCategory = articlesData[normalizedCategory];
-  if (!currentCategory) {
-    return {
-      title: "Help Center - Not Found",
-      description: "This help center category does not exist.",
-    };
-  }
-  return {
-    title: `${currentCategory.title} | Help Center | TripxPay`,
-    description: currentCategory.description,
-  };
-}
+// export async function generateMetadata({ params }: { params: { category: string } }) {
+//   // Duplicate articlesData and normalization logic for metadata
+//   const articlesData: ArticlesData = {
+//     "getting-started": {
+//       title: "Getting Started",
+//       description:
+//         "Learn the basics of TripxPay and how to set up your account.",
+//       icon: "BookOpen",
+//       articles: [], // No need to include articles for metadata
+//     },
+//     "account-management": {
+//       title: "Account Management",
+//       description: "Manage your account settings, team members, and permissions.",
+//       icon: "User",
+//       articles: [],
+//     },
+//     "payments-and-processing": {
+//       title: "Payments & Processing",
+//       description: "Learn about payment methods, processing times, and fees.",
+//       icon: "CreditCard",
+//       articles: [],
+//     },
+//     integration: {
+//       title: "Integration",
+//       description: "Integrate TripxPay with your website or booking system.",
+//       icon: "Code",
+//       articles: [],
+//     },
+//     security: {
+//       title: "Security",
+//       description: "Understand our security measures and best practices.",
+//       icon: "Shield",
+//       articles: [],
+//     },
+//     "billing-and-subscriptions": {
+//       title: "Billing & Subscriptions",
+//       description: "Manage your billing information and subscription plan.",
+//       icon: "DollarSign",
+//       articles: [],
+//     },
+//     "popular-articles": {
+//       title: "Popular Articles",
+//       description: "Most viewed and helpful articles from our help center.",
+//       icon: "TrendingUp",
+//       articles: [],
+//     },
+//   };
+//   const normalizedCategory = params.category
+//     .replace("payments-processing", "payments-and-processing")
+//     .replace("billing-subscriptions", "billing-and-subscriptions");
+//   const currentCategory = articlesData[normalizedCategory];
+//   if (!currentCategory) {
+//     return {
+//       title: "Help Center - Not Found",
+//       description: "This help center category does not exist.",
+//     };
+//   }
+//   return {
+//     title: `${currentCategory.title} | Help Center | TripxPay`,
+//     description: currentCategory.description,
+//   };
+// }
 
 export default function ViewArticlesPage({
   params,
