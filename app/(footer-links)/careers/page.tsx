@@ -1,4 +1,3 @@
-import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 
 const CareersPage = () => {
