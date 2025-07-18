@@ -1,9 +1,7 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { use } from "react";
+import ArticlesFilter from "./ArticlesFilter";
+import { notFound } from "next/navigation";
 
 interface Article {
   id: number;
@@ -26,15 +24,91 @@ interface ArticlesData {
   [key: string]: CategoryData;
 }
 
+export async function generateStaticParams() {
+  // List all valid category slugs (including alternate slugs if needed)
+  const categories = [
+    "getting-started",
+    "account-management",
+    "payments-and-processing",
+    "integration",
+    "security",
+    "billing-and-subscriptions",
+    "popular-articles",
+    // Add any alternate slugs if you support them, e.g.:
+    "payments-processing",
+    "billing-subscriptions",
+  ];
+  return categories.map((category) => ({ category }));
+}
+
+export async function generateMetadata({ params }: { params: { category: string } }) {
+  // Duplicate articlesData and normalization logic for metadata
+  const articlesData: ArticlesData = {
+    "getting-started": {
+      title: "Getting Started",
+      description:
+        "Learn the basics of TripxPay and how to set up your account.",
+      icon: "BookOpen",
+      articles: [], // No need to include articles for metadata
+    },
+    "account-management": {
+      title: "Account Management",
+      description: "Manage your account settings, team members, and permissions.",
+      icon: "User",
+      articles: [],
+    },
+    "payments-and-processing": {
+      title: "Payments & Processing",
+      description: "Learn about payment methods, processing times, and fees.",
+      icon: "CreditCard",
+      articles: [],
+    },
+    integration: {
+      title: "Integration",
+      description: "Integrate TripxPay with your website or booking system.",
+      icon: "Code",
+      articles: [],
+    },
+    security: {
+      title: "Security",
+      description: "Understand our security measures and best practices.",
+      icon: "Shield",
+      articles: [],
+    },
+    "billing-and-subscriptions": {
+      title: "Billing & Subscriptions",
+      description: "Manage your billing information and subscription plan.",
+      icon: "DollarSign",
+      articles: [],
+    },
+    "popular-articles": {
+      title: "Popular Articles",
+      description: "Most viewed and helpful articles from our help center.",
+      icon: "TrendingUp",
+      articles: [],
+    },
+  };
+  const normalizedCategory = params.category
+    .replace("payments-processing", "payments-and-processing")
+    .replace("billing-subscriptions", "billing-and-subscriptions");
+  const currentCategory = articlesData[normalizedCategory];
+  if (!currentCategory) {
+    return {
+      title: "Help Center - Not Found",
+      description: "This help center category does not exist.",
+    };
+  }
+  return {
+    title: `${currentCategory.title} | Help Center | TripxPay`,
+    description: currentCategory.description,
+  };
+}
+
 export default function ViewArticlesPage({
   params,
 }: {
   params: Promise<{ category: string }>;
 }) {
-  const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedTag, setSelectedTag] = useState("all");
-
   const unwrappedParams = use(params);
   const category = unwrappedParams.category;
   const articlesData: ArticlesData = {
@@ -710,181 +784,74 @@ export default function ViewArticlesPage({
 
   const currentCategory = articlesData[normalizedCategory];
 
-  useEffect(() => {
-    if (!currentCategory) {
-      router.push("/help-center");
-    }
-  }, [currentCategory, router, normalizedCategory]);
+  if (!currentCategory) {
+    return notFound();
+  }
 
+  const articles = currentCategory.articles;
+  const allTags = [
+    "all",
+    ...new Set(articles.flatMap((article) => article.tags)),
+  ];
+  const categoryInfo = {
+    title: currentCategory.title,
+    description: currentCategory.description,
+    icon: currentCategory.icon,
+  };
+
+  // Helper to render the icon (same as before)
   const renderIcon = (iconName: string) => {
     switch (iconName) {
       case "BookOpen":
         return (
-          <svg
-            className="w-5 h-5 sm:w-6 sm:h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-            />
+          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
           </svg>
         );
       case "User":
         return (
-          <svg
-            className="w-5 h-5 sm:w-6 sm:h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-            />
+          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
         );
       case "CreditCard":
         return (
-          <svg
-            className="w-5 h-5 sm:w-6 sm:h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-            />
+          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
           </svg>
         );
       case "Code":
         return (
-          <svg
-            className="w-5 h-5 sm:w-6 sm:h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-            />
+          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
           </svg>
         );
       case "Shield":
         return (
-          <svg
-            className="w-5 h-5 sm:w-6 sm:h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-            />
+          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
           </svg>
         );
       case "DollarSign":
         return (
-          <svg
-            className="w-5 h-5 sm:w-6 sm:h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
+          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         );
       case "TrendingUp":
         return (
-          <svg
-            className="w-5 h-5 sm:w-6 sm:h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-            />
+          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
           </svg>
         );
       default:
         return (
-          <svg
-            className="w-5 h-5 sm:w-6 sm:h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-            />
+          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
         );
     }
   };
-
-  const allTags = [
-    "all",
-    ...new Set(
-      currentCategory?.articles.flatMap((article) => article.tags) || []
-    ),
-  ];
-
-  const filteredArticles =
-    currentCategory?.articles.filter((article) => {
-      const matchesSearch =
-        article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        article.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesTag =
-        selectedTag === "all" || article.tags.includes(selectedTag);
-      return matchesSearch && matchesTag;
-    }) || [];
-
-  const featuredArticles = filteredArticles.filter(
-    (article) => article.featured
-  );
-  const regularArticles = filteredArticles.filter(
-    (article) => !article.featured
-  );
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
-  if (!currentCategory) {
-    return null;
-  }
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col relative overflow-hidden">
@@ -943,254 +910,13 @@ export default function ViewArticlesPage({
           </div>
         </div>
 
-        {/* Search and Filter Controls */}
-        <div className="py-3 sm:py-6 px-3 sm:px-6 lg:px-12">
-          <div className="max-w-6xl mx-auto">
-            <div className="flex flex-col gap-3 mb-4 sm:mb-8">
-              {/* Search input */}
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search articles..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full px-3 py-2.5 sm:px-4 sm:py-3 pl-9 sm:pl-12 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm sm:text-base"
-                />
-                <svg
-                  className="absolute left-3 top-2.5 sm:left-4 sm:top-3.5 w-4 h-4 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-              </div>
-
-              {/* Filter dropdown */}
-              <div className="relative">
-                <select
-                  value={selectedTag}
-                  onChange={(e) => setSelectedTag(e.target.value)}
-                  className="w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 appearance-none pr-8 sm:pr-10 text-sm sm:text-base"
-                >
-                  {allTags.map((tag) => (
-                    <option key={tag} value={tag}>
-                      {tag === "all"
-                        ? "All Tags"
-                        : tag
-                            .replace("-", " ")
-                            .replace(/\b\w/g, (l) => l.toUpperCase())}
-                    </option>
-                  ))}
-                </select>
-                <svg
-                  className="absolute right-3 top-3 sm:top-4 w-4 h-4 text-gray-400 pointer-events-none"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </div>
-            </div>
-
-            {/* Results Count */}
-            <div className="mb-4 sm:mb-6">
-              <p className="text-gray-400 text-sm leading-relaxed">
-                Showing {filteredArticles.length} article
-                {filteredArticles.length !== 1 ? "s" : ""}
-                {searchQuery && (
-                  <span className="block sm:inline sm:ml-1 mt-1 sm:mt-0">
-                    for "
-                    <span className="text-teal-400 break-all">
-                      {searchQuery}
-                    </span>
-                    "
-                  </span>
-                )}
-                {selectedTag !== "all" && (
-                  <span className="block sm:inline sm:ml-1 mt-1 sm:mt-0">
-                    tagged with "
-                    <span className="text-teal-400">
-                      {selectedTag.replace("-", " ")}
-                    </span>
-                    "
-                  </span>
-                )}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Articles Content */}
-        <div className="flex-grow py-3 sm:py-6 px-3 sm:px-6 lg:px-12 pb-6 sm:pb-12">
-          <div className="max-w-6xl mx-auto">
-            {filteredArticles.length === 0 ? (
-              <div className="text-center py-8 sm:py-12">
-                <svg
-                  className="w-12 h-12 sm:w-16 sm:h-16 text-gray-600 mx-auto mb-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-                <h3 className="text-lg font-semibold mb-2">
-                  No articles found
-                </h3>
-                <p className="text-gray-400 mb-4 text-sm px-4">
-                  Try adjusting your search terms or filters
-                </p>
-                <button
-                  onClick={() => {
-                    setSearchQuery("");
-                    setSelectedTag("all");
-                  }}
-                  className="px-4 py-2 bg-teal-500 hover:bg-teal-600 rounded-lg transition-colors duration-300 text-sm"
-                >
-                  Clear Filters
-                </button>
-              </div>
-            ) : (
-              <>
-                {/* Featured Articles */}
-                {featuredArticles.length > 0 && (
-                  <div className="mb-6 sm:mb-12">
-                    <h2 className="text-lg sm:text-2xl font-bold mb-3 sm:mb-6 flex items-center">
-                      <svg
-                        className="w-4 h-4 sm:w-6 sm:h-6 text-yellow-500 mr-2 flex-shrink-0"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                      </svg>
-                      Featured Articles
-                    </h2>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6 mb-4 sm:mb-8">
-                      {featuredArticles.map((article) => (
-                        <Link
-                          key={article.id}
-                          href={`/help-center/${normalizedCategory}/${article.id}`}
-                          className="bg-gradient-to-br from-gray-900/90 to-gray-800/90 backdrop-blur-sm rounded-lg p-3 sm:p-6 border border-yellow-500/20 transform transition-all duration-300 hover:translate-y-[-1px] sm:hover:translate-y-[-4px] hover:border-yellow-500/40 hover:shadow-2xl hover:shadow-yellow-500/10 group cursor-pointer"
-                        >
-                          <div className="flex flex-col xs:flex-row xs:items-start justify-between mb-2 sm:mb-4 gap-2">
-                            <div className="flex items-center space-x-2 flex-wrap">
-                              <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs font-medium rounded-full">
-                                Featured
-                              </span>
-                              <span className="text-gray-400 text-xs">
-                                {article.readTime}
-                              </span>
-                            </div>
-                          </div>
-                          <h3 className="text-base sm:text-xl font-bold mb-2 transition-colors duration-300 group-hover:text-yellow-400 line-clamp-2 break-words leading-tight">
-                            {article.title}
-                          </h3>
-                          <p className="text-gray-300 mb-3 line-clamp-3 transition-colors duration-300 group-hover:text-white text-sm sm:text-base leading-relaxed">
-                            {article.excerpt}
-                          </p>
-                          <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2 sm:gap-3">
-                            <div className="flex flex-wrap gap-1 sm:gap-2">
-                              {article.tags.slice(0, 2).map((tag) => (
-                                <span
-                                  key={tag}
-                                  className="px-2 py-1 bg-gray-700/50 text-gray-300 text-xs rounded-full transition-colors duration-300 group-hover:bg-teal-500/20 group-hover:text-teal-400"
-                                >
-                                  {tag.replace("-", " ")}
-                                </span>
-                              ))}
-                            </div>
-                            <span className="text-gray-500 text-xs">
-                              {formatDate(article.publishedAt)}
-                            </span>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Regular Articles */}
-                {regularArticles.length > 0 && (
-                  <div>
-                    <h2 className="text-lg sm:text-2xl font-bold mb-3 sm:mb-6">
-                      All Articles
-                    </h2>
-                    <div className="space-y-3 sm:space-y-6">
-                      {regularArticles.map((article) => (
-                        <Link
-                          key={article.id}
-                          href={`/help-center/${normalizedCategory}/${article.id}`}
-                          className="block bg-gray-900/80 backdrop-blur-sm rounded-lg p-3 sm:p-6 border border-gray-800/50 transform transition-all duration-300 hover:translate-y-[-1px] hover:bg-gray-900/90 hover:border-teal-500/30 hover:shadow-xl hover:shadow-teal-500/5 group cursor-pointer"
-                        >
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 sm:mb-4 gap-2">
-                            <div className="flex items-center space-x-2 flex-wrap">
-                              <span className="text-gray-400 text-xs">
-                                {article.readTime}
-                              </span>
-                              <span className="text-gray-500 text-xs">
-                                {formatDate(article.publishedAt)}
-                              </span>
-                            </div>
-                            <div className="flex flex-wrap gap-1 sm:gap-2">
-                              {article.tags.map((tag) => (
-                                <span
-                                  key={tag}
-                                  className="px-2 py-1 bg-gray-700/50 text-gray-300 text-xs rounded-full transition-colors duration-300 group-hover:bg-teal-500/20 group-hover:text-teal-400"
-                                >
-                                  {tag.replace("-", " ")}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                          <h3 className="text-base sm:text-xl font-bold mb-2 transition-colors duration-300 group-hover:text-teal-400 break-words leading-tight">
-                            {article.title}
-                          </h3>
-                          <p className="text-gray-300 transition-colors duration-300 group-hover:text-white text-sm sm:text-base leading-relaxed mb-3">
-                            {article.excerpt}
-                          </p>
-                          <div className="flex items-center text-teal-500 group-hover:text-teal-400 transition-colors duration-300">
-                            <span className="text-xs sm:text-sm font-medium">
-                              Read article
-                            </span>
-                            <svg
-                              className="w-3 h-3 ml-2 transform transition-transform duration-300 group-hover:translate-x-1 flex-shrink-0"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M9 5l7 7-7 7"
-                              />
-                            </svg>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </div>
+        {/* Articles Filter and List (Client Component) */}
+        <ArticlesFilter
+          articles={articles}
+          allTags={allTags}
+          normalizedCategory={normalizedCategory}
+          categoryInfo={categoryInfo}
+        />
       </div>
     </div>
   );
