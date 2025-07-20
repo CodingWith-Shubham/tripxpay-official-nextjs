@@ -1,3 +1,15 @@
+export const metadata = {
+  title: "Privacy Policy | TripxPay",
+  description: "Read the privacy policy for TripxPay. Learn how we handle your data and protect your privacy.",
+  keywords: "privacy policy, TripxPay, data protection, user privacy",
+  openGraph: {
+    title: "Privacy Policy | TripxPay",
+    description: "Read the privacy policy for TripxPay. Learn how we handle your data and protect your privacy.",
+    url: "https://yourdomain.com/privacy-policy",
+    type: "website",
+  },
+};
+
 import PageHeader from "@/components/PageHeader";
 
 const PrivacyPolicyPage = () => {
