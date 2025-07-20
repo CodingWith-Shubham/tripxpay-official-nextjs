@@ -1,3 +1,15 @@
+export const metadata = {
+  title: "Terms & Conditions | TripxPay",
+  description: "Read the terms and conditions for TripxPay. Understand the rules and guidelines for using our services.",
+  keywords: "terms and conditions, TripxPay, user agreement, service rules",
+  openGraph: {
+    title: "Terms & Conditions | TripxPay",
+    description: "Read the terms and conditions for TripxPay. Understand the rules and guidelines for using our services.",
+    url: "https://yourdomain.com/terms-conditions",
+    type: "website",
+  },
+};
+
 import PageHeader from "@/components/PageHeader";
 
 const TermsConditionsPage = () => {
