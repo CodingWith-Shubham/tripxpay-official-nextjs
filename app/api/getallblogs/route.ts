@@ -55,7 +55,10 @@ export async function POST(req: NextRequest) {
       });
     });
 
-    // Get total count for pagination (you'll need to implement this)
+    // Reverse the blogs array for newest-first
+    blogs.reverse();
+
+    // Get total count for pagination
     const totalCount = await getTotalBlogCount(category);
 
     return NextResponse.json(
@@ -88,5 +91,5 @@ async function getTotalBlogCount(category?: string | null) {
   }
 
   const snapshot = await get(queryRef);
-  return snapshot.size;
+  return snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
 }
