@@ -5,7 +5,7 @@ import UploadBlogsClient from "./UploadBlogsClient";
 
 async function getInitialBlogs() {
   const res = await fetch(
-    `http://localhost:3000/api/getallblogs?page=1&pageSize=9`,
+    `https://tripxpay.in/api/getallblogs?page=1&pageSize=9`,
     { method: "POST", next: { revalidate: 60 } } // ISR: revalidate every 60s
   );
 
