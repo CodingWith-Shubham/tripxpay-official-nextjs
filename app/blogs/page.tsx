@@ -2,6 +2,24 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import UploadBlogsClient from "./UploadBlogsClient";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "TripxPay Announcements | Latest Updates & Features",
+  description: "Stay informed about the latest TripxPay updates, features, and events. Read our announcements and never miss important news.",
+  openGraph: {
+    title: "TripxPay Announcements | Latest Updates & Features",
+    description: "Stay informed about the latest TripxPay updates, features, and events. Read our announcements and never miss important news.",
+    url: "https://tripxpay.in/blogs",
+    siteName: "TripxPay",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "TripxPay Announcements | Latest Updates & Features",
+    description: "Stay informed about the latest TripxPay updates, features, and events. Read our announcements and never miss important news.",
+  },
+};
 
 async function getInitialBlogs() {
   const res = await fetch(
