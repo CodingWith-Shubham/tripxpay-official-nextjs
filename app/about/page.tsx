@@ -143,12 +143,12 @@ const AboutPage = () => {
               >
                 {[
                   {
-                    name: "Mukul Kaushik",
+                    name: "Mukul",
                     title: "Founder",
                     bio: "Former travel agency owner with 3+ years in the industry.",
                   },
                   {
-                    name: "Shivansh Pandey",
+                    name: "Shubham",
                     title: "Co-Founder",
                     bio: "Fintech expert with experience at leading payment processors.",
                   },
